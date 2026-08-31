@@ -1,8 +1,5 @@
 import { Schema } from "effect"
-
-export const ProviderId = Schema.Literal("chatgpt", "claude", "gemini")
-
-export type ProviderId = typeof ProviderId.Type
+import { ProviderId } from "@domain/provider/provider-id"
 
 export const LayoutPreset = Schema.Literal("1x1", "1x2", "1x3", "2x2")
 
@@ -14,8 +11,6 @@ export const WorkspaceSettings = Schema.Struct({
 })
 
 export type WorkspaceSettings = typeof WorkspaceSettings.Type
-
-export const isProviderId = Schema.is(ProviderId)
 
 export const isLayoutPreset = Schema.is(LayoutPreset)
 

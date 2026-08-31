@@ -1,9 +1,9 @@
 import { Either } from "effect"
 import { describe, expect, it } from "@effect/vitest"
+import { isProviderId } from "../provider/provider-id"
 import {
   decodeWorkspaceSettings,
   defaultWorkspaceSettings,
-  isProviderId,
 } from "./workspace-settings"
 
 describe("workspace settings schema", () => {
