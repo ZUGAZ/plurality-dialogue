@@ -1,7 +1,17 @@
 import { render } from "solid-js/web"
-import { WorkspaceView } from "@ui/workspace/view"
+import { WorkspaceContainer } from "@ui/workspace/container"
+import { workspaceBindings } from "./bind-workspace"
+import "./workspace.css"
 
 const root = document.getElementById("root")
 if (root !== null) {
-  render(() => <WorkspaceView />, root)
+  render(
+    () => (
+      <WorkspaceContainer
+        panels={workspaceBindings.panels}
+        onPanelLoad={workspaceBindings.onPanelLoad}
+      />
+    ),
+    root,
+  )
 }

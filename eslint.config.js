@@ -123,11 +123,29 @@ export default tseslint.config(
             {
               from: {
                 element: { type: "ui" },
+                file: { categories: "view-model" },
+              },
+              allow: {
+                to: { module: { origin: "external", source: "solid-js" } },
+              },
+            },
+            {
+              from: {
+                file: { categories: "view-model" },
+              },
+              disallow: {
+                to: { element: { type: "infrastructure" } },
+              },
+            },
+            {
+              from: {
+                element: { type: "ui" },
                 file: { categories: "test" },
               },
               allow: {
                 to: [
                   { element: { type: "ui" } },
+                  { element: { type: "domain" } },
                   { module: { origin: "external", source: "effect" } },
                   {
                     module: {
@@ -153,6 +171,7 @@ export default tseslint.config(
                       type: ["ui", "infrastructure", "domain"],
                     },
                   },
+                  { module: { origin: "external", source: "effect" } },
                   { module: { origin: "external", source: "solid-js" } },
                   { module: { origin: "external", source: "#imports" } },
                   { module: { origin: "unknown", source: "#imports" } },

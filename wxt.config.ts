@@ -16,7 +16,7 @@ export default defineConfig({
     description:
       "Compare ChatGPT, Claude, and Gemini in one workspace using the chats you already have.",
     permissions: ["storage", "declarativeNetRequestWithHostAccess"],
-    // Host access is for embedding those chats in the workspace tab; header changes are session-scoped and land in a follow-up.
+    // Host access is for embedding those chats in the workspace tab; session rules are applied at runtime and scoped to the workspace tab; there is no static ruleset.
     host_permissions: [...hostPermissionPatterns],
   },
 })
