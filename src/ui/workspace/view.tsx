@@ -3,6 +3,8 @@ import { LayoutPresetsView } from "./layout-presets/view"
 import type { PanelViewState, ProviderOption } from "./panel-grid/model"
 import { PanelGridView } from "./panel-grid/view"
 import { WorkspaceShell } from "./shell/view"
+import { UnifiedInputContainer } from "./unified-input/container"
+import type { UnifiedInputViewProps } from "./unified-input/view"
 import "./view.css"
 
 export type WorkspaceViewProps = {
@@ -15,6 +17,7 @@ export type WorkspaceViewProps = {
   readonly onSelectLayout: (id: LayoutId) => void
   readonly setPanelProvider: (panelId: string, rawId: string) => void
   readonly refreshPanel: (panelId: string) => void
+  readonly unifiedInput: UnifiedInputViewProps
 }
 
 export const WorkspaceView = (props: WorkspaceViewProps) => (
@@ -36,5 +39,6 @@ export const WorkspaceView = (props: WorkspaceViewProps) => (
       setPanelProvider={props.setPanelProvider}
       refreshPanel={props.refreshPanel}
     />
+    <UnifiedInputContainer {...props.unifiedInput} />
   </div>
 )

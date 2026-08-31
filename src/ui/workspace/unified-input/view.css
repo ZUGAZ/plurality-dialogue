@@ -1,0 +1,103 @@
+.unified-input {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  padding: 0.75rem;
+  border-block-start: 1px solid #5c5c5c;
+  background: #fff;
+  color: #111;
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+}
+
+.unified-input *,
+.unified-input *::before,
+.unified-input *::after {
+  box-sizing: border-box;
+}
+
+.unified-input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  gap: 0.75rem;
+}
+
+.unified-input textarea {
+  field-sizing: content;
+  flex: 1 1 auto;
+  width: 100%;
+  min-inline-size: 0;
+  height: auto;
+  min-block-size: 3lh;
+  max-block-size: 8lh;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #5c5c5c;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.4;
+  resize: none;
+  overflow: auto;
+}
+
+.unified-input textarea:focus-visible {
+  outline: 3px solid #0b57d0;
+  outline-offset: 2px;
+}
+
+.unified-input-actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+.unified-input-actions button {
+  min-block-size: 2.5rem;
+  min-inline-size: 2.5rem;
+  padding-inline: 0.85rem;
+  border: 1px solid #5c5c5c;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.unified-input-actions .unified-input-send {
+  border-color: #111;
+  background: #111;
+  color: #fff;
+}
+
+.unified-input-actions button:focus-visible {
+  outline: 3px solid #0b57d0;
+  outline-offset: 2px;
+}
+
+.unified-input-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.unified-input-status {
+  min-block-size: 1.25rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}

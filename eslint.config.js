@@ -159,6 +159,12 @@ export default tseslint.config(
                       source: "vitest",
                     },
                   },
+                  {
+                    module: {
+                      origin: "external",
+                      source: "solid-js",
+                    },
+                  },
                 ],
               },
             },

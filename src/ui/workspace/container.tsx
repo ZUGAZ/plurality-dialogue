@@ -11,5 +11,6 @@ export const WorkspaceContainer = (props: WorkspaceViewProps) => (
     onSelectLayout={props.onSelectLayout}
     setPanelProvider={props.setPanelProvider}
     refreshPanel={props.refreshPanel}
+    unifiedInput={props.unifiedInput}
   />
 )

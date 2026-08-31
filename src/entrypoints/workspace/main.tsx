@@ -18,6 +18,7 @@ if (root !== null) {
           onSelectLayout={workspaceBindings.selectLayout}
           setPanelProvider={workspaceBindings.setPanelProvider}
           refreshPanel={workspaceBindings.refreshPanel}
+          unifiedInput={workspaceBindings.unifiedInput}
         />
       ),
       root,

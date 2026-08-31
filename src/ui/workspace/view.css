@@ -8,3 +8,7 @@
   flex: 1 1 auto;
   min-block-size: 0;
 }
+
+.workspace .unified-input {
+  flex-shrink: 0;
+}
