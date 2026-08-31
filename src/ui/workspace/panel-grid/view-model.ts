@@ -1,5 +1,11 @@
 import { Effect, Option } from "effect"
 import { batch, createSignal } from "solid-js"
+import {
+  cellCount,
+  defaultLayoutId,
+  presetById,
+  type LayoutId,
+} from "@domain/layout/presets"
 import type { Messaging } from "@domain/ports/messaging"
 import type { Storage } from "@domain/ports/storage"
 import type { Tabs } from "@domain/ports/tabs"
@@ -11,13 +17,15 @@ import {
 } from "@domain/provider/registry"
 import { requestFramingRules } from "@domain/workspace/request-framing-rules"
 import type { RunEffect } from "@ui/common/viewmodel/bind-viewmodel"
+import { persistLayoutId } from "@ui/workspace/layout-presets/view-model"
 import {
-  WORKSPACE_DEFAULT_SLOT_COUNT,
   bumpPanelGeneration,
   createDefaultSlots,
   decodeProviderId,
+  layoutTrackCounts,
   reconcileSlotsWithEnabled,
   replacePanelProvider,
+  resizeSlots,
   selectOptions,
   toPanelViewState,
   type PanelSlot,
@@ -26,9 +34,15 @@ import {
 } from "./model"
 
 export type PanelGridViewModel = {
+  readonly layoutId: () => LayoutId
+  readonly layoutColumns: () => number
+  readonly layoutRows: () => number
   readonly panels: () => readonly PanelViewState[]
   readonly options: () => readonly ProviderOption[]
   readonly onPanelLoad: (id: string) => void
+  readonly selectLayout: (
+    id: LayoutId,
+  ) => Effect.Effect<void, never, Storage>
   readonly setPanelProvider: (
     panelId: string,
     rawId: string,
@@ -38,6 +52,7 @@ export type PanelGridViewModel = {
 
 export const createPanelGridViewModel = (
   runEffect: RunEffect<Storage | Tabs | Messaging>,
+  initialLayout: LayoutId = defaultLayoutId,
 ): PanelGridViewModel => {
   const [providers, setProviders] =
     createSignal<readonly Provider[]>(emptyProviders)
@@ -46,8 +61,12 @@ export const createPanelGridViewModel = (
   const [framingFailed, setFramingFailed] = createSignal(false)
   const [loadedPanelIds, setLoadedPanelIds] =
     createSignal<ReadonlySet<string>>(emptyLoadedIds)
+  const [layoutId, setLayoutId] = createSignal<LayoutId>(initialLayout)
   const [slots, setSlots] = createSignal<readonly PanelSlot[]>(
-    createDefaultSlots(providerIds, WORKSPACE_DEFAULT_SLOT_COUNT),
+    createDefaultSlots(
+      providerIds,
+      cellCount(presetById(initialLayout)),
+    ),
   )
 
   const dropLoadedPanelIds = (panelIds: readonly string[]): void => {
@@ -73,7 +92,10 @@ export const createPanelGridViewModel = (
     }
     batch(() => {
       setSlots(next)
-      dropLoadedPanelIds(bumpedPanelIds(previous, next))
+      dropLoadedPanelIds([
+        ...bumpedPanelIds(previous, next),
+        ...removedPanelIds(previous, next),
+      ])
     })
   }
 
@@ -161,7 +183,33 @@ export const createPanelGridViewModel = (
       commitSlots(bumpPanelGeneration(current, panelId))
     })
 
-  return { panels, options, onPanelLoad, setPanelProvider, refreshPanel }
+  const applySelectedLayout = (id: LayoutId): void => {
+    setLayoutId(id)
+    commitSlots(
+      resizeSlots(slots(), enabledIds(), cellCount(presetById(id))),
+    )
+  }
+
+  const selectLayout = (id: LayoutId) =>
+    persistLayoutId(id).pipe(
+      Effect.tap(() => Effect.sync(() => applySelectedLayout(id))),
+      Effect.catchTag("StorageWriteError", () => Effect.void),
+      Effect.catchTag("ParseError", () => Effect.void),
+    )
+
+  const tracks = () => layoutTrackCounts(layoutId())
+
+  return {
+    layoutId,
+    layoutColumns: () => tracks().columns,
+    layoutRows: () => tracks().rows,
+    panels,
+    options,
+    onPanelLoad,
+    selectLayout,
+    setPanelProvider,
+    refreshPanel,
+  }
 }
 
 const emptyProviders: readonly Provider[] = []
@@ -193,3 +241,13 @@ const bumpedPanelIds = (
         slot.reloadGeneration !== previous[index]?.reloadGeneration,
     )
     .map((slot) => slot.id)
+
+const removedPanelIds = (
+  previous: readonly PanelSlot[],
+  next: readonly PanelSlot[],
+): readonly string[] => {
+  const nextIds = new Set(next.map((slot) => slot.id))
+  return previous
+    .filter((slot) => !nextIds.has(slot.id))
+    .map((slot) => slot.id)
+}

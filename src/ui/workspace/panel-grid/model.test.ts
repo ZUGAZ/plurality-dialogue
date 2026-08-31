@@ -9,6 +9,7 @@ import {
   labelForProvider,
   reconcileSlotsWithEnabled,
   replacePanelProvider,
+  resizeSlots,
   selectOptions,
 } from "./model"
 
@@ -131,5 +132,46 @@ describe("panel grid model", () => {
     expect(
       selectOptions(["gemini", "chatgpt"]).map((option) => option.id),
     ).toEqual(["chatgpt", "gemini"])
+  })
+
+  it("resizeSlots grows 1x3 to 2x2 keeping a customized prefix", () => {
+    const slots = replacePanelProvider(
+      createDefaultSlots(providerIds, WORKSPACE_DEFAULT_SLOT_COUNT),
+      "panel-2",
+      "chatgpt",
+    )
+    const next = resizeSlots(slots, providerIds, 4)
+    expect(next.map((slot) => slot.id)).toEqual([
+      "panel-1",
+      "panel-2",
+      "panel-3",
+      "panel-4",
+    ])
+    expect(next.map((slot) => slot.providerId)).toEqual([
+      "chatgpt",
+      "chatgpt",
+      "gemini",
+      "chatgpt",
+    ])
+    expect(next[0]).toBe(slots[0])
+    expect(next[1]).toBe(slots[1])
+    expect(next[2]).toBe(slots[2])
+    expect(next[3]?.reloadGeneration).toBe(0)
+  })
+
+  it("resizeSlots shrinks 2x2 to 1x2 by unmounting the suffix", () => {
+    const slots = createDefaultSlots(providerIds, 4)
+    const next = resizeSlots(slots, providerIds, 2)
+    expect(next.map((slot) => slot.id)).toEqual(["panel-1", "panel-2"])
+    expect(next).toHaveLength(2)
+    expect(next.some((slot) => slot.id === "panel-3")).toBe(false)
+    expect(next.some((slot) => slot.id === "panel-4")).toBe(false)
+    expect(next[0]).toBe(slots[0])
+    expect(next[1]).toBe(slots[1])
+  })
+
+  it("resizeSlots is a no-op when the count already matches", () => {
+    const slots = createDefaultSlots(providerIds, WORKSPACE_DEFAULT_SLOT_COUNT)
+    expect(resizeSlots(slots, providerIds, 3)).toBe(slots)
   })
 })

@@ -1,18 +1,13 @@
 import { Schema } from "effect"
+import { LayoutId } from "@domain/layout/presets"
 import { ProviderId } from "@domain/provider/provider-id"
-
-export const LayoutPreset = Schema.Literal("1x1", "1x2", "1x3", "2x2")
-
-export type LayoutPreset = typeof LayoutPreset.Type
 
 export const WorkspaceSettings = Schema.Struct({
   enabledProviders: Schema.Array(ProviderId),
-  layout: LayoutPreset,
+  layout: LayoutId,
 })
 
 export type WorkspaceSettings = typeof WorkspaceSettings.Type
-
-export const isLayoutPreset = Schema.is(LayoutPreset)
 
 export const isWorkspaceSettings = Schema.is(WorkspaceSettings)
 

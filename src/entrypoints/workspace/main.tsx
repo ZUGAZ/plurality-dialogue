@@ -1,20 +1,26 @@
 import { render } from "solid-js/web"
 import { WorkspaceContainer } from "@ui/workspace/container"
-import { workspaceBindings } from "./bind-workspace"
+import { workspaceBindingsReady } from "./bind-workspace"
 import "./workspace.css"
 
 const root = document.getElementById("root")
 if (root !== null) {
-  render(
-    () => (
-      <WorkspaceContainer
-        panels={workspaceBindings.panels}
-        options={workspaceBindings.options}
-        onPanelLoad={workspaceBindings.onPanelLoad}
-        setPanelProvider={workspaceBindings.setPanelProvider}
-        refreshPanel={workspaceBindings.refreshPanel}
-      />
-    ),
-    root,
-  )
+  void workspaceBindingsReady.then((workspaceBindings) => {
+    render(
+      () => (
+        <WorkspaceContainer
+          panels={workspaceBindings.panels}
+          options={workspaceBindings.options}
+          layoutId={workspaceBindings.layoutId}
+          layoutColumns={workspaceBindings.layoutColumns}
+          layoutRows={workspaceBindings.layoutRows}
+          onPanelLoad={workspaceBindings.onPanelLoad}
+          onSelectLayout={workspaceBindings.selectLayout}
+          setPanelProvider={workspaceBindings.setPanelProvider}
+          refreshPanel={workspaceBindings.refreshPanel}
+        />
+      ),
+      root,
+    )
+  })
 }

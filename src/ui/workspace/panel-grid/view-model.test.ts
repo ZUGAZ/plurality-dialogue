@@ -217,4 +217,53 @@ describe("panel grid view-model", () => {
       }),
     )
   })
+
+  it.layer(readyLayer)("layout reconcile", (it) => {
+    it.effect("1x3 to 2x2 appends the first enabled and keeps a customized prefix", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        })
+        yield* vm.setPanelProvider("panel-2", "chatgpt")
+        yield* vm.selectLayout("2x2")
+        const panels = vm.panels()
+        expect(panels.map((panel) => panel.id)).toEqual([
+          "panel-1",
+          "panel-2",
+          "panel-3",
+          "panel-4",
+        ])
+        expect(panels.map((panel) => panel.providerId)).toEqual([
+          "chatgpt",
+          "chatgpt",
+          "gemini",
+          "chatgpt",
+        ])
+        expect(panels[0]?.reloadGeneration).toBe(0)
+        expect(panels[1]?.reloadGeneration).toBe(1)
+        expect(panels[2]?.reloadGeneration).toBe(0)
+        expect(panels[3]?.reloadGeneration).toBe(0)
+        expect(vm.layoutColumns()).toBe(2)
+        expect(vm.layoutRows()).toBe(2)
+      }),
+    )
+
+    it.effect("2x2 to 1x2 drops the suffix and does not keep hidden cells", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        }, "2x2")
+        expect(vm.panels()).toHaveLength(4)
+        yield* vm.selectLayout("1x2")
+        const panels = vm.panels()
+        expect(panels.map((panel) => panel.id)).toEqual(["panel-1", "panel-2"])
+        expect(panels).toHaveLength(2)
+        expect(panels.some((panel) => panel.id === "panel-3")).toBe(false)
+        expect(panels.some((panel) => panel.id === "panel-4")).toBe(false)
+        expect(vm.layoutId()).toBe("1x2")
+      }),
+    )
+  })
 })

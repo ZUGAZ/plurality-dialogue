@@ -2,7 +2,8 @@
   display: flex;
   flex: 0 0 auto;
   flex-direction: row;
-  align-items: center;
+  align-items: safe center;
+  gap: 0.75rem;
   padding: 0.5rem 0.75rem;
   border-bottom: 1px solid #d0d0d0;
   font-family: system-ui, sans-serif;

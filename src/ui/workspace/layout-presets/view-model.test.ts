@@ -1,0 +1,110 @@
+import { Effect, Layer, Option, Runtime } from "effect"
+import { describe, expect, it } from "@effect/vitest"
+import { FramingRulesReady } from "@domain/messaging/ensure-framing-rules"
+import { inMemoryMessagingLayer } from "@domain/ports/in-memory-messaging"
+import { inMemoryStorageLayer } from "@domain/ports/in-memory-storage"
+import { inMemoryTabsLayer } from "@domain/ports/in-memory-tabs"
+import { Messaging } from "@domain/ports/messaging"
+import { Storage, StorageWriteError } from "@domain/ports/storage"
+import { Tabs } from "@domain/ports/tabs"
+import { workspaceSettingsStorageKey } from "@domain/settings/workspace-settings"
+import { persistLayoutId } from "./view-model"
+import { createPanelGridViewModel } from "../panel-grid/view-model"
+
+const readyLayer = Layer.mergeAll(
+  inMemoryStorageLayer(),
+  inMemoryTabsLayer(1),
+  inMemoryMessagingLayer(() => Effect.succeed(FramingRulesReady.make({}))),
+)
+
+const failingWriteLayer = Layer.mergeAll(
+  Layer.succeed(Storage, {
+    get: () =>
+      Effect.succeed(
+        Option.some({
+          enabledProviders: ["chatgpt", "claude", "gemini"],
+          layout: "1x3",
+        }),
+      ),
+    set: (key) => Effect.fail(new StorageWriteError({ key, cause: "denied" })),
+  }),
+  inMemoryTabsLayer(1),
+  inMemoryMessagingLayer(() => Effect.succeed(FramingRulesReady.make({}))),
+)
+
+describe("persistLayoutId", () => {
+  it.layer(inMemoryStorageLayer())("empty store", (it) => {
+    it.effect("writes layout on workspace-settings and not lastLayout", () =>
+      Effect.gen(function* () {
+        yield* persistLayoutId("2x2")
+        const storage = yield* Storage
+        const stored = yield* storage.get(workspaceSettingsStorageKey)
+        expect(stored).toEqual(
+          Option.some({
+            enabledProviders: ["chatgpt", "claude", "gemini"],
+            layout: "2x2",
+          }),
+        )
+        if (Option.isSome(stored)) {
+          expect(stored.value).not.toHaveProperty("lastLayout")
+        }
+      }),
+    )
+  })
+})
+
+describe("selectLayout", () => {
+  it.layer(readyLayer)("ready workspace", (it) => {
+    it.effect("starts from initialLayout", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        }, "1x1")
+        expect(vm.layoutId()).toBe("1x1")
+        expect(vm.panels()).toHaveLength(1)
+        expect(vm.layoutColumns()).toBe(1)
+        expect(vm.layoutRows()).toBe(1)
+      }),
+    )
+
+    it.effect("selectLayout 2x2 writes layout and updates the signal", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        })
+        expect(vm.layoutId()).toBe("1x3")
+        yield* vm.selectLayout("2x2")
+        expect(vm.layoutId()).toBe("2x2")
+        expect(vm.panels()).toHaveLength(4)
+        const storage = yield* Storage
+        const stored = yield* storage.get(workspaceSettingsStorageKey)
+        expect(stored).toEqual(
+          Option.some({
+            enabledProviders: ["chatgpt", "claude", "gemini"],
+            layout: "2x2",
+          }),
+        )
+        if (Option.isSome(stored)) {
+          expect(stored.value).not.toHaveProperty("lastLayout")
+        }
+      }),
+    )
+  })
+
+  it.layer(failingWriteLayer)("failed persist", (it) => {
+    it.effect("leaves the previous layout id on screen", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        })
+        expect(vm.layoutId()).toBe("1x3")
+        yield* vm.selectLayout("2x2")
+        expect(vm.layoutId()).toBe("1x3")
+        expect(vm.panels()).toHaveLength(3)
+      }),
+    )
+  })
+})

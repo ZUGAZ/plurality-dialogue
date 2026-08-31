@@ -1,8 +1,16 @@
 import {
+  cellCount,
+  defaultLayoutId,
+  presetById,
+  type LayoutId,
+} from "@domain/layout/presets"
+import {
   isProviderId,
   providerIds,
   type ProviderId,
 } from "@domain/provider/provider-id"
+
+export type { LayoutId }
 
 export type PanelId = string
 
@@ -29,7 +37,9 @@ export type PanelViewState = {
   readonly reloadGeneration: number
 }
 
-export const WORKSPACE_DEFAULT_SLOT_COUNT = 3
+export const WORKSPACE_DEFAULT_SLOT_COUNT = cellCount(
+  presetById(defaultLayoutId),
+)
 
 export const panelIdAt = (index: number): PanelId => `panel-${index + 1}`
 
@@ -74,6 +84,30 @@ export const createDefaultSlots = (
     providerId: providerAt(enabledIds, index),
     reloadGeneration: 0,
   }))
+
+export const resizeSlots = (
+  slots: readonly PanelSlot[],
+  enabledIds: readonly ProviderId[],
+  slotCount: number,
+): readonly PanelSlot[] => {
+  if (slotCount === slots.length) {
+    return slots
+  }
+  if (slotCount < slots.length) {
+    return slots.slice(0, slotCount)
+  }
+  return [
+    ...slots,
+    ...createDefaultSlots(enabledIds, slotCount).slice(slots.length),
+  ]
+}
+
+export const layoutTrackCounts = (
+  layoutId: LayoutId,
+): { readonly columns: number; readonly rows: number } => {
+  const grid = presetById(layoutId)
+  return { columns: grid.columnCount, rows: grid.rowCount }
+}
 
 export const decodeProviderId = (
   raw: string,

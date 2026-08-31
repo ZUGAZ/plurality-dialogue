@@ -1,0 +1,49 @@
+.layout-presets {
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
+  align-items: safe center;
+  gap: 0.35rem;
+  margin-inline-start: auto;
+}
+
+.layout-preset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid #d0d0d0;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  cursor: pointer;
+}
+
+.layout-preset[aria-pressed="true"] {
+  border-width: 2px;
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.layout-preset-preview {
+  display: grid;
+  inline-size: 1.35rem;
+  block-size: 1rem;
+  gap: 1px;
+  grid-template-columns: repeat(var(--preview-columns), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--preview-rows), minmax(0, 1fr));
+}
+
+.layout-preset-preview-cell {
+  min-inline-size: 0;
+  min-block-size: 0;
+  border: 1px solid currentColor;
+  background: Canvas;
+}
+
+.layout-preset-label {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}

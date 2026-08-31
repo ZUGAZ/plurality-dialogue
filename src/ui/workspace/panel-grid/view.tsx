@@ -1,11 +1,14 @@
 import { Index } from "solid-js"
-import type { PanelViewState, ProviderOption } from "./model"
+import type { LayoutId, PanelViewState, ProviderOption } from "./model"
 import { PanelFrame } from "./panel-frame"
 import "./panel-grid.css"
 
 export const PanelGridView = (props: {
   panels: () => readonly PanelViewState[]
   options: () => readonly ProviderOption[]
+  layoutId: () => LayoutId
+  layoutColumns: () => number
+  layoutRows: () => number
   onPanelLoad: (id: string) => void
   setPanelProvider: (panelId: string, rawId: string) => void
   refreshPanel: (panelId: string) => void
@@ -13,8 +16,10 @@ export const PanelGridView = (props: {
   <div
     class="panel-grid"
     data-workspace="panel-grid"
+    data-layout={props.layoutId()}
     style={{
-      "grid-template-columns": `repeat(${props.panels().length}, minmax(0, 1fr))`,
+      "--layout-columns": String(props.layoutColumns()),
+      "--layout-rows": String(props.layoutRows()),
     }}
   >
     <Index each={props.panels()}>
