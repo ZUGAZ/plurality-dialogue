@@ -95,6 +95,7 @@ export default tseslint.config(
               allow: {
                 to: [
                   { element: { type: "domain" } },
+                  { element: { type: "infrastructure" } },
                   { module: { origin: "external", source: "effect" } },
                 ],
               },
