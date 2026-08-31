@@ -15,6 +15,19 @@ describe("bindViewModel", () => {
       expect(value).toBe(1)
     }),
   )
+
+  it.effect("runs a bound parameterized Effect action", () =>
+    Effect.gen(function* () {
+      const count = yield* Ref.make(0)
+      const runtime = yield* Effect.runtime()
+      const bound = bindViewModel(runtime, () => ({
+        setX: (n: number) => Ref.update(count, (current) => current + n),
+      }))
+      bound.setX(2)
+      const value = yield* waitUntilCount(count, 2)
+      expect(value).toBe(2)
+    }),
+  )
 })
 
 const waitUntilCount = (

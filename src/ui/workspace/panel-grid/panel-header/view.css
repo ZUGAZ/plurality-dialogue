@@ -1,0 +1,13 @@
+.panel-header {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+}
+
+.panel-header select {
+  flex: 1;
+  min-width: 0;
+}

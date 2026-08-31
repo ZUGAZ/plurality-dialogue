@@ -10,7 +10,11 @@ type BoundProperty<Value> = Value extends Effect.Effect<
   infer _Requirements
 >
   ? () => void
-  : Value
+  : Value extends (
+        ...args: infer Args
+      ) => Effect.Effect<infer _FnSuccess, infer _FnError, infer _FnRequirements>
+    ? (...args: Args) => void
+    : Value
 
 export type BoundViewModel<ViewModel extends Record<string, unknown>> = {
   readonly [Key in keyof ViewModel]: BoundProperty<ViewModel[Key]>
@@ -20,6 +24,23 @@ const isRuntimeEffect = <Requirements>(
   value: unknown,
 ): value is Effect.Effect<unknown, unknown, Requirements> =>
   Effect.isEffect(value)
+
+const isUnknownFunction = (
+  value: unknown,
+): value is (...args: never[]) => unknown => typeof value === "function"
+
+const bindReturnedEffect = <Requirements>(
+  runEffect: RunEffect<Requirements>,
+  fn: (...args: never[]) => unknown,
+): ((...args: never[]) => unknown) =>
+  (...args: never[]) => {
+    const returned = fn(...args)
+    if (isRuntimeEffect<Requirements>(returned)) {
+      runEffect(returned)
+      return
+    }
+    return returned
+  }
 
 export const bindViewModel = <
   Requirements,
@@ -40,6 +61,14 @@ export const bindViewModel = <
         }
         const boundEntry: [string, () => void] = [key, boundAction]
         return boundEntry
+      }
+      if (isUnknownFunction(value)) {
+        const boundFn = bindReturnedEffect(runEffect, value)
+        const boundFnEntry: [string, (...args: never[]) => unknown] = [
+          key,
+          boundFn,
+        ]
+        return boundFnEntry
       }
       const passthroughEntry: [string, unknown] = [key, value]
       return passthroughEntry

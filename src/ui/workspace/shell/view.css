@@ -1,0 +1,15 @@
+.workspace-shell {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #d0d0d0;
+  font-family: system-ui, sans-serif;
+}
+
+.workspace-shell h1 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}

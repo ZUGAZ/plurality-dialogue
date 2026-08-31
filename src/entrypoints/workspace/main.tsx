@@ -9,7 +9,10 @@ if (root !== null) {
     () => (
       <WorkspaceContainer
         panels={workspaceBindings.panels}
+        options={workspaceBindings.options}
         onPanelLoad={workspaceBindings.onPanelLoad}
+        setPanelProvider={workspaceBindings.setPanelProvider}
+        refreshPanel={workspaceBindings.refreshPanel}
       />
     ),
     root,
