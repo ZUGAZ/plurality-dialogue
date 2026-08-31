@@ -101,6 +101,49 @@ export default tseslint.config(
               },
             },
             {
+              from: {
+                element: { type: "infrastructure" },
+                file: { categories: "test" },
+              },
+              allow: {
+                to: [
+                  { element: { type: "infrastructure" } },
+                  { element: { type: "domain" } },
+                  { module: { origin: "external", source: "effect" } },
+                  {
+                    module: {
+                      origin: "external",
+                      source: "@effect/vitest",
+                    },
+                  },
+                  {
+                    module: {
+                      origin: "external",
+                      source: "vitest",
+                    },
+                  },
+                  {
+                    module: {
+                      origin: "core",
+                      source: "node:fs",
+                    },
+                  },
+                  {
+                    module: {
+                      origin: "core",
+                      source: "node:url",
+                    },
+                  },
+                  {
+                    module: {
+                      origin: "core",
+                      source: "node:path",
+                    },
+                  },
+                ],
+              },
+            },
+            {
               from: { element: { type: "ui" } },
               allow: {
                 to: [

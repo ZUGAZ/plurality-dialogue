@@ -8,15 +8,11 @@ export const isDraftEmpty = (text: string): boolean => text.trim().length === 0
 
 export type BarStatus =
   | { readonly kind: "idle" }
-  | { readonly kind: "fill-not-wired" }
-  | { readonly kind: "send-not-wired" }
+  | { readonly kind: "notice"; readonly text: string }
 
 export const statusText = (status: BarStatus): string => {
-  if (status.kind === "fill-not-wired") {
-    return "Fill isn't connected yet."
-  }
-  if (status.kind === "send-not-wired") {
-    return "Send All isn't connected yet."
+  if (status.kind === "notice") {
+    return status.text
   }
   return ""
 }
@@ -30,4 +26,16 @@ export const draftAfterFillOrSend = (
     return ""
   }
   return currentDraft
+}
+
+export const failureLine = (
+  items: ReadonlyArray<{
+    readonly panelId: string
+    readonly label: string
+  }>,
+): string => {
+  if (items.length === 0) {
+    return ""
+  }
+  return `Failed: ${items.map((item) => `${item.panelId} (${item.label})`).join(", ")}`
 }

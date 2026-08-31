@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"></head>
+<body>
+<fieldset data-cds-dock-group="" data-perf-region="composer" class="flex w-full min-w-0 flex-col"><input
+        id="chat-input-file-upload-onpage" data-testid="file-upload" aria-hidden="true" tabindex="-1"
+        class="absolute -z-10 h-0 w-0 overflow-hidden opacity-0 select-none" accept="" multiple=""
+        aria-label="Upload files" type="file">
+    <div role="status" aria-live="polite" aria-atomic="true" data-cds-dock-group=""></div>
+    <div role="status" aria-live="polite" aria-atomic="true" data-cds-dock-group=""></div>
+    <div class="relative">
+        <div
+            class="!box-content flex flex-col bg-surface-3 mx-2 md:mx-0 items-stretch transition-[background-color,border-color,box-shadow,opacity] duration-200 relative z-10 rounded-[20px] compact:rounded-xl cursor-text relative z-[1] border border-transparent shadow-[0_0.25rem_1.25rem_color-mix(in_srgb,var(--cds-black)_3.5%,transparent),0_0_0_var(--cds-ring-hairline)_color-mix(in_srgb,var(--cds-neutral-800)_15%,transparent)] dark:shadow-[0_0.25rem_1.25rem_color-mix(in_srgb,var(--cds-black)_3.5%,transparent),inset_0_0_0_1px_var(--cds-border)] hover:shadow-[0_0.25rem_1.25rem_color-mix(in_srgb,var(--cds-black)_3.5%,transparent),0_0_0_var(--cds-ring-hairline)_color-mix(in_srgb,var(--cds-neutral-800)_30%,transparent)] dark:hover:shadow-[0_0.25rem_1.25rem_color-mix(in_srgb,var(--cds-black)_3.5%,transparent),inset_0_0_0_1px_var(--cds-border-strong)] focus-within:shadow-[0_0.25rem_1.25rem_color-mix(in_srgb,var(--cds-black)_7.5%,transparent),0_0_0_var(--cds-ring-hairline)_color-mix(in_srgb,var(--cds-neutral-800)_30%,transparent)] hover:focus-within:shadow-[0_0.25rem_1.25rem_color-mix(in_srgb,var(--cds-black)_7.5%,transparent),0_0_0_var(--cds-ring-hairline)_color-mix(in_srgb,var(--cds-neutral-800)_30%,transparent)] dark:focus-within:shadow-[0_0.25rem_1.25rem_color-mix(in_srgb,var(--cds-black)_7.5%,transparent),inset_0_0_0_1px_var(--cds-border-strong)] dark:hover:focus-within:shadow-[0_0.25rem_1.25rem_color-mix(in_srgb,var(--cds-black)_7.5%,transparent),inset_0_0_0_1px_var(--cds-border-strong)]">
+            <div></div>
+            <div class="flex flex-col m-3.5 gap-3 compact:m-2 compact:gap-1.5">
+                <div class="relative font-large">
+                    <div
+                        class="w-full overflow-y-auto break-words transition-opacity duration-200 font-large max-h-96 min-h-[calc(2lh+6px)] pl-[6px] pt-[6px] [&amp;_.is-editor-empty]:before:!content-['']">
+                        <div contenteditable="true" role="textbox" enterkeyhint="enter" data-cds="Editor" dir="auto"
+                            data-testid="chat-input" data-composer-editor="classic" data-chat-host-shape="legacy"
+                            aria-label="Write your prompt to Claude" aria-multiline="true" aria-required="false"
+                            aria-invalid="false" aria-describedby="claude-code-nudge-body" translate="no"
+                            class="tiptap ProseMirror" tabindex="0"
+                            style="white-space: break-spaces; overflow-wrap: break-word;">
+                            <p data-placeholder="How can I help you today?" class="is-empty is-editor-empty"><br
+                                    class="ProseMirror-trailingBreak"></p>
+                        </div><span id="skill-arg-hint-sr-fixture" data-skill-arg-hint-sr="skill-arg-hint" role="status"
+                            aria-live="polite"
+                            style="position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap"></span>
+                    </div>
+                    <div
+                        class="grid grid-cols-[minmax(0,1fr)] absolute inset-0 pointer-events-none overflow-hidden pl-[6px] pt-[6px]">
+                        <span
+                            class="col-start-1 row-start-1 block text-muted animate-placeholder-fade-out motion-reduce:hidden"
+                            aria-hidden="true">Type / for skills</span><span
+                            class="col-start-1 row-start-1 block text-muted animate-placeholder-fade-in motion-reduce:animate-none">How
+                            can I help you today?</span></div>
+                </div>
+                <div class="relative flex items-center w-full gap-2 @container">
+                    <div class="relative shrink-0 flex items-center gap-1">
+                        <div><button type="button" data-cds="Button" data-cds-icon-only="" data-cds-ghost=""
+                                class="cds-reset group/btn relative isolate inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap select-none cursor-[var(--cds-cursor-interactive)] aria-disabled:cursor-default data-[disabled]:cursor-default border-0 outline-none focus-visible:outline-hidden [&amp;[data-initial-focus]:focus]:outline-hidden rounded h-control font-sans text-body [&amp;:disabled:not([aria-busy])]:opacity-disabled disabled:pointer-events-none transition-shadow duration-fast text-primary font-normal aria-pressed:text-accent focus-visible:shadow-focus [&amp;[data-initial-focus]:focus]:shadow-focus aspect-square w-control px-0 ml-0.5"
+                                aria-label="Add files, connectors, and more" data-testid="chat-input-attach"
+                                tabindex="0" aria-haspopup="menu" id="base-ui-_r_17_" data-chorus-callout="attach"
+                                data-base-ui-tooltip-trigger="" aria-expanded="false"><span aria-hidden="true"
+                                    class="absolute -z-[1] rounded-[inherit] inset-0 cds-btn-squish"><span
+                                        data-cds-part="paint"
+                                        class="absolute inset-0 rounded-[inherit] transition-[background-color,box-shadow,color] duration-fast ease-out group-focus-visible/btn:shadow-[inset_0_0_0_1px_var(--cds-page-bg)] group-[[data-initial-focus]:focus]/btn:shadow-[inset_0_0_0_1px_var(--cds-page-bg)] bg-transparent group-hover/btn:bg-fill-ghost-hover group-[[aria-haspopup][aria-expanded=true]]/btn:bg-fill-ghost-hover group-aria-pressed/btn:bg-accent group-hover/btn:group-aria-pressed/btn:bg-accent "></span></span><span
+                                    class="inline-flex min-w-0 items-center gap-1 "><span data-cds="Icon"
+                                        aria-hidden="true"
+                                        style="font-family: var(--font-anthropicons, Anthropicons-Variable); font-feature-settings: &quot;liga&quot; 0; font-optical-sizing: auto; font-style: normal; font-variation-settings: normal; line-height: 1; width: 1em; height: 1em; display: flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; font-size: 20px; font-weight: 433.3;"></span></span></button>
+                        </div>
+                        <div class="contents">
+                            <div role="radiogroup" data-cds="SegmentedControl" aria-label="Surface" data-size="sm"
+                                class="relative inline-flex w-fit shrink-0 items-stretch h-control font-sans rounded bg-[var(--cds-segmented-control-track)] p-px">
+                                <div aria-hidden="true"
+                                    class="pointer-events-none absolute inset-0 overflow-clip rounded">
+                                    <div class="invisible absolute left-0 origin-left rounded-[calc(var(--cds-radius)-1px)] bg-[var(--cds-segmented-control-thumb)] top-px bottom-px [box-shadow:inset_0_0_0_1px_var(--cds-border),0_1px_2px_0_rgb(0_0_0/0.05)]"
+                                        data-flip-at="0.6666666666666288,50.000000000000114"
+                                        style="width: 50px; transform: translateX(0.666667px); visibility: inherit;">
+                                    </div>
+                                </div><span data-checked="" role="radio" tabindex="0" aria-checked="true"
+                                    data-composite-item-active="" id="base-ui-_r_26_" data-base-ui-tooltip-trigger=""
+                                    class="cds-reset relative z-[1] inline-flex h-full items-center justify-center gap-1.5 select-none border-0 bg-transparent outline-none focus-visible:outline-hidden rounded-[calc(var(--cds-radius)-2px)] text-body hover:text-primary data-[checked]:text-primary data-[disabled]:opacity-disabled data-[disabled]:hover:text-current transition-shadow duration-fast focus-visible:shadow-focus text-muted px-md"><span
+                                        data-cds="Icon" class="shrink-0 @[360px]:!hidden" aria-hidden="true"
+                                        style="font-family: var(--font-anthropicons, Anthropicons-Variable); font-feature-settings: &quot;liga&quot; 0; font-optical-sizing: auto; font-style: normal; font-variation-settings: normal; line-height: 1; width: 1em; height: 1em; display: flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; font-size: 16px; font-weight: 533.3;"></span><span
+                                        data-surface-segment="chat"
+                                        class="text-footnote sr-only @[360px]:not-sr-only">Chat</span></span><input
+                                    id="_r_23_" tabindex="-1" aria-hidden="true" type="radio" value="chat" checked=""
+                                    style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"><span
+                                    data-unchecked="" role="radio" tabindex="-1" aria-checked="false"
+                                    id="base-ui-_r_2c_" data-base-ui-tooltip-trigger=""
+                                    class="cds-reset relative z-[1] inline-flex h-full items-center justify-center gap-1.5 select-none border-0 bg-transparent outline-none focus-visible:outline-hidden rounded-[calc(var(--cds-radius)-2px)] text-body hover:text-primary data-[checked]:text-primary data-[disabled]:opacity-disabled data-[disabled]:hover:text-current transition-shadow duration-fast focus-visible:shadow-focus text-muted px-md"><span
+                                        data-cds="Icon" class="shrink-0 @[420px]:!hidden" aria-hidden="true"
+                                        style="font-family: var(--font-anthropicons, Anthropicons-Variable); font-feature-settings: &quot;liga&quot; 0; font-optical-sizing: auto; font-style: normal; font-variation-settings: normal; line-height: 1; width: 1em; height: 1em; display: flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; font-size: 16px; font-weight: 533.3;"></span><span
+                                        data-surface-segment="cowork"
+                                        class="text-footnote sr-only @[420px]:not-sr-only">Cowork</span></span><input
+                                    id="_r_29_" tabindex="-1" aria-hidden="true" type="radio" value="cowork"
+                                    style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;">
+                            </div>
+                        </div>
+                        <div class="flex flex-row items-center min-w-0 gap-1"></div>
+                    </div>
+                    <div class="grow"></div>
+                    <div
+                        class="flex items-center gap-2 transition-[opacity,transform,translate,margin-right] duration-snap ease-out min-w-[5rem] @max-[340px]:min-w-9 translate-x-0">
+                        <span class="inline-flex min-w-0" id="_r_2g_" data-trigger-disabled="">
+                            <div class="overflow-hidden min-w-0 p-2 -m-2"><button type="button" data-cds="ModelSelector"
+                                    data-cds-ghost=""
+                                    class="cds-reset group/btn relative isolate inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap select-none cursor-[var(--cds-cursor-interactive)] aria-disabled:cursor-default data-[disabled]:cursor-default border-0 outline-none focus-visible:outline-hidden [&amp;[data-initial-focus]:focus]:outline-hidden rounded h-control font-sans text-body [&amp;:disabled:not([aria-busy])]:opacity-disabled disabled:pointer-events-none transition-shadow duration-fast text-primary font-normal aria-pressed:text-accent focus-visible:shadow-focus [&amp;[data-initial-focus]:focus]:shadow-focus px-md min-w-0 max-w-full !rounded !min-w-0 !shrink"
+                                    aria-label="Model: Sonnet 5 Medium" data-testid="model-selector-dropdown"
+                                    tabindex="0" aria-haspopup="menu" id="base-ui-_r_2p_" data-trigger-disabled=""
+                                    aria-expanded="false"><span aria-hidden="true"
+                                        class="absolute -z-[1] rounded-[inherit] inset-0 cds-btn-squish"><span
+                                            data-cds-part="paint"
+                                            class="absolute inset-0 rounded-[inherit] transition-[background-color,box-shadow,color] duration-fast ease-out group-focus-visible/btn:shadow-[inset_0_0_0_1px_var(--cds-page-bg)] group-[[data-initial-focus]:focus]/btn:shadow-[inset_0_0_0_1px_var(--cds-page-bg)] bg-transparent group-hover/btn:bg-fill-ghost-hover group-[[aria-haspopup][aria-expanded=true]]/btn:bg-fill-ghost-hover group-aria-pressed/btn:bg-accent group-hover/btn:group-aria-pressed/btn:bg-accent "></span></span><span
+                                        class="inline-flex min-w-0 items-center gap-1 "><span class="truncate">Sonnet
+                                            5<span class="text-muted @max-[280px]:hidden ml-1">
+                                                Medium</span></span></span></button></div>
+                        </span></div>
+                    <div
+                        class="shrink-0 transition-transform duration-snap ease-out motion-reduce:transition-none translate-x-0">
+                        <div class="flex items-center rounded-lg transition-colors duration-200">
+                            <div class="overflow-hidden transition-all duration-150 ease-out w-0">
+                                <div class="h-8 w-8"><button type="button"
+                                        class="h-8 w-8 rounded-lg flex items-center justify-center opacity-0 transition-all duration-200 text-secondary hover:bg-alpha-2 data-[popup-open]:bg-alpha-2"
+                                        aria-label="Settings" tabindex="0" aria-haspopup="menu" id="base-ui-_r_7s_"
+                                        aria-expanded="false"><span
+                                            class="flex items-center justify-center w-full h-full" id="_r_7u_"
+                                            data-base-ui-tooltip-trigger=""><span data-cds="Icon" aria-hidden="true"
+                                                style="font-family: var(--font-anthropicons, Anthropicons-Variable); font-feature-settings: &quot;liga&quot; 0; font-optical-sizing: auto; font-style: normal; font-variation-settings: normal; line-height: 1; width: 1em; height: 1em; display: flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; font-size: 12px; font-weight: 577.8;"></span></span></button>
+                                </div>
+                            </div><button type="button"
+                                class="h-8 rounded-lg overflow-hidden flex items-center justify-center gap-1 transition-colors duration-200 cursor-pointer disabled:cursor-default px-1.5 hover:bg-alpha-2"
+                                aria-label="Press and hold to record" id="_r_2t_" data-base-ui-tooltip-trigger=""><span
+                                    class="flex items-center justify-center transition-colors duration-200 rounded-lg"><span
+                                        data-cds="Icon" aria-hidden="true"
+                                        style="font-family: var(--font-anthropicons, Anthropicons-Variable); font-feature-settings: &quot;liga&quot; 0; font-optical-sizing: auto; font-style: normal; font-variation-settings: normal; line-height: 1; width: 1em; height: 1em; display: flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; font-size: 20px; font-weight: 433.3;"></span></span></button>
+                        </div>
+                    </div>
+                    <div
+                        class="shrink-0 flex items-center transition-[opacity,width,margin-left] duration-snap ease-out z-10 justify-end w-8">
+                        <div class="relative flex items-center justify-end" style="opacity: 1;">
+                            <div
+                                class="flex items-center opacity-100 motion-safe:[transition:opacity_120ms_ease-out_80ms,visibility_0s_linear_80ms]">
+                                <div>
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        <div
+                                            class="flex items-center rounded-lg empty:hidden transition-colors duration-200">
+                                        </div><button
+                                            class="h-8 rounded-lg overflow-hidden flex items-center justify-center font-base-bold transition-colors duration-200 hover:bg-fill-ghost-hover"
+                                            aria-label="Use voice mode" id="_r_34_" data-base-ui-tooltip-trigger=""
+                                            tabindex="0" style="padding-left: 6px; padding-right: 6px;"><span
+                                                class="h-5 relative flex items-center justify-center"
+                                                style="width: 20px;"><span
+                                                    class="absolute inset-0 flex items-center justify-center"
+                                                    style="opacity: 1; filter: blur(0px); transform: none;"><svg
+                                                        width="20" height="20" viewBox="0 0 21.2 21.2" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        class="inline-block overflow-visible">
+                                                        <g>
+                                                            <rect x="0" y="7.6" width="1.2" height="6" rx="0.6"
+                                                                fill="currentColor" class="idle-activity-bar"></rect>
+                                                            <rect x="4" y="5.6" width="1.2" height="10" rx="0.6"
+                                                                fill="currentColor" class="idle-activity-bar"></rect>
+                                                            <rect x="8" y="2.5999999999999996" width="1.2" height="16"
+                                                                rx="0.6" fill="currentColor" class="idle-activity-bar">
+                                                            </rect>
+                                                            <rect x="12" y="5.6" width="1.2" height="10" rx="0.6"
+                                                                fill="currentColor" class="idle-activity-bar"></rect>
+                                                            <rect x="16" y="2.5999999999999996" width="1.2" height="16"
+                                                                rx="0.6" fill="currentColor" class="idle-activity-bar">
+                                                            </rect>
+                                                            <rect x="20" y="7.6" width="1.2" height="6" rx="0.6"
+                                                                fill="currentColor" class="idle-activity-bar"></rect>
+                                                        </g>
+                                                    </svg></span></span><span
+                                                class="absolute invisible whitespace-nowrap pl-2"
+                                                aria-hidden="true"></span><span class="overflow-hidden"
+                                                style="width: 0px;"></span></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center absolute inset-y-0 end-0 invisible pointer-events-none opacity-0 motion-safe:[transition:opacity_80ms_ease-out,visibility_0s_linear_80ms]"
+                                inert="">
+                                <div>
+                                    <div class="flex" id="_r_1i_" data-base-ui-tooltip-trigger=""><button type="button"
+                                            disabled="" data-cds="Button" data-cds-icon-only=""
+                                            class="cds-reset group/btn relative isolate inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap select-none cursor-[var(--cds-cursor-interactive)] aria-disabled:cursor-default data-[disabled]:cursor-default border-0 outline-none focus-visible:outline-hidden [&amp;[data-initial-focus]:focus]:outline-hidden rounded h-control font-sans text-body [&amp;:disabled:not([aria-busy])]:opacity-disabled disabled:pointer-events-none transition-shadow duration-fast text-on-brand font-medium [--cds-shortcut-cap-ink:currentColor] focus-visible:shadow-focus [&amp;[data-initial-focus]:focus]:shadow-focus aspect-square w-control px-0"
+                                            aria-label="Send message" data-testid="chat-input-send" id="_r_1l_"
+                                            data-trigger-disabled=""><span aria-hidden="true"
+                                                class="absolute -z-[1] rounded-[inherit] inset-[0.5px] cds-btn-squish"><span
+                                                    data-cds-part="paint"
+                                                    class="absolute inset-0 rounded-[inherit] transition-[background-color,box-shadow,color] duration-fast ease-out group-focus-visible/btn:shadow-[inset_0_0_0_1px_var(--cds-page-bg)] group-[[data-initial-focus]:focus]/btn:shadow-[inset_0_0_0_1px_var(--cds-page-bg)] bg-fill-brand group-hover/btn:bg-fill-brand-hover group-[[aria-haspopup][aria-expanded=true]]/btn:bg-fill-brand-hover group-aria-pressed/btn:bg-accent group-hover/btn:group-aria-pressed/btn:bg-accent "></span></span><span
+                                                class="inline-flex min-w-0 items-center gap-1 "><span data-cds="Icon"
+                                                    aria-hidden="true"
+                                                    style="font-family: var(--font-anthropicons, Anthropicons-Variable); font-feature-settings: &quot;liga&quot; 0; font-optical-sizing: auto; font-style: normal; font-variation-settings: normal; line-height: 1; width: 1em; height: 1em; display: flex; align-items: center; justify-content: center; flex-shrink: 0; user-select: none; font-size: 20px; font-weight: 433.3;"></span></span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="rounded-[inherit]"></div>
+        </div>
+    </div>
+</fieldset>
+</body>
+</html>

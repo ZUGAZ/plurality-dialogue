@@ -1,5 +1,5 @@
-import { Effect, Layer, Option } from "effect"
-import { Messaging, MessagingSendFailed } from "../../domain/ports/messaging"
+import { Effect, Option } from "effect"
+import { MessagingSendFailed } from "../../domain/ports/messaging"
 
 export const sendRuntimeMessage = (
   message: unknown,
@@ -8,10 +8,6 @@ export const sendRuntimeMessage = (
     try: () => chrome.runtime.sendMessage(message),
     catch: (cause) => new MessagingSendFailed({ cause }),
   })
-
-export const ChromeMessagingLive = Layer.succeed(Messaging, {
-  send: sendRuntimeMessage,
-})
 
 export const subscribeRuntimeMessages = (
   respond: (
@@ -33,4 +29,19 @@ export const subscribeRuntimeMessages = (
       },
     }),
   )
+}
+
+export const subscribeRuntimeMessageEffects = (
+  handle: (
+    message: unknown,
+    sender: chrome.runtime.MessageSender,
+  ) => Effect.Effect<unknown | undefined, never> | undefined,
+): void => {
+  chrome.runtime.onMessage.addListener((message, sender) => {
+    const effect = handle(message, sender)
+    if (effect === undefined) {
+      return undefined
+    }
+    return Effect.runPromise(effect)
+  })
 }

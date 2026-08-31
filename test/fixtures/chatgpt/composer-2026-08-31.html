@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"></head>
+<body>
+<form autocomplete="off" class="group/composer w-full"
+    style="view-transition-name:var(--vt-composer);--composer-border-radius:28px" data-type="unified-composer">
+    <div class="hidden"><input multiple="" type="file"
+            style="border:0;clip:rect(0, 0, 0, 0);clip-path:inset(50%);height:1px;margin:0 -1px -1px 0;overflow:hidden;padding:0;position:absolute;width:1px;white-space:nowrap"
+            tabindex="-1" id="upload-files" data-photo-upload-enabled="true"></div>
+    <div class="relative">
+        <div class="bg-(--composer-surface-primary) grid cursor-text flex-col overflow-clip bg-clip-padding contain-inline-size motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-in-out group-not-data-expanded/composer:min-h-[52px] grid-cols-[minmax(0,1fr)] grid-rows-[max-content_0_auto] [grid-template-areas:'eyebrow'_'controls'_'body'] shadow-short-composer max-sm:not-dark:shadow-[0_0_0_1px_rgba(0,_0,_0,_0.04),0_2px_8px_0_rgba(0,_0,_0,_0.04),0px_4px_40px_8px_rgba(0,_0,_0,_0.025)]"
+            data-composer-surface="true" style="border-radius:28px">
+            <div class="relative row-start-2 row-end-3 col-start-1 col-end-2 h-0 shrink-0"
+                data-composer-controls-anchor=""></div>
+            <div data-composer-body="" data-composer-grid=""
+                class="row-start-3 row-end-4 col-start-1 col-end-2 min-h-0 min-w-0 flex-1 px-2 py-[9px] group-not-data-expanded/composer:py-[5px] max-sm:group-not-data-expanded/composer:pb-2 grid grid-cols-[auto_1fr_auto] [grid-template-areas:'header_header_header'_'leading_primary_trailing'_'._footer_.'] group-data-expanded/composer:[grid-template-areas:'header_header_header'_'primary_primary_primary'_'leading_footer_trailing'] max-sm:[grid-template-areas:'header_header_header'_'primary_primary_primary'_'leading_footer_trailing']">
+                <div data-composer-transition-slot="leading" class="self-center [grid-area:leading]">
+                    <div id="_r_7b_" popover="hint" role="tooltip" hidden=""
+                        class="fixed inset-s-[calc(anchor(center)+var(--oai-anchor-align-offset,0px))] inset-e-auto top-[calc(anchor(bottom)+var(--spacing))] bottom-auto h-fit -translate-x-1/2 [position-try-fallbacks:flip-block] flex flex-col overflow-visible bg-transparent z-50 [inset-inline:auto]! translate-none! [position-area:span-all]"
+                        style="--oai-anchor-align-offset: initial; position-anchor: --anchor-_r_7b_;"></div><span
+                        class="flex" style="anchor-name: --anchor-_r_7b_;"><button type="button" class="composer-btn"
+                            data-testid="composer-plus-btn" aria-label="Add files and more" aria-describedby="_r_7b_"
+                            interestfor="_r_7b_" id="composer-plus-btn" aria-haspopup="menu" aria-expanded="false"
+                            data-state="closed"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                viewBox="0 0 20 20" data-icon-shape="non-circular" focusable="false" class="icon"
+                                aria-hidden="true">
+                                <use href="/cdn/assets/sprites-shell-097001e7.svg#plus-regular-20" fill="currentColor">
+                                </use>
+                            </svg></button></span>
+                </div>
+                <div
+                    class="-my-2.5 flex overflow-x-hidden ps-1.75 pe-1.5 [grid-area:primary] group-data-expanded/composer:mb-0 group-data-expanded/composer:ps-2.5 group-data-expanded/composer:pe-2.5 min-h-14 items-center">
+                    <div
+                        class="wcDTda_prosemirror-parent text-token-text-primary max-h-[max(30svh,5rem)] max-h-52 min-h-[var(--deep-research-composer-extra-height,unset)] flex-1 scroll-py-4 overflow-auto [scrollbar-width:thin] default-browser vertical-scroll-fade-mask group-data-[expanded-composer-mode-button]/composer:pe-9">
+                        <textarea dir="auto" class="wcDTda_fallbackTextarea" name="prompt-textarea" autocomplete="off"
+                            inputmode="text" autocorrect="on" autocapitalize="sentences" spellcheck="true" autofocus=""
+                            placeholder="Ask anything" aria-label="Chat with ChatGPT" data-virtualkeyboard="true"
+                            style="display: none;"></textarea>
+                        
+                        <div contenteditable="true" autocomplete="off" inputmode="text" autocorrect="on"
+                            autocapitalize="sentences" spellcheck="true" translate="no" class="ProseMirror"
+                            id="prompt-textarea" data-virtualkeyboard="true" role="textbox" aria-multiline="true"
+                            aria-label="Chat with ChatGPT"><p dir="auto"><br></p></div>
+                    </div>
+                </div>
+                <div data-composer-transition-slot="trailing" class="flex items-center gap-1 [grid-area:trailing]">
+                    <div class="ms-auto flex items-center gap-2">
+                        <div id="_r_16_" popover="hint" role="tooltip"
+                            class="fixed inset-s-[calc(anchor(center)+var(--oai-anchor-align-offset,0px))] inset-e-auto top-[calc(anchor(bottom)+var(--spacing))] bottom-auto h-fit -translate-x-1/2 [position-try-fallbacks:flip-block] flex flex-col overflow-visible bg-transparent z-50 [inset-inline:auto]! translate-none! [position-area:span-all]"
+                            style="--oai-anchor-align-offset: initial; position-anchor: --anchor-_r_16_;">
+                            <div
+                                class="dark:border-token-border-tooltip bg-token-bg-tooltip dark:border mt-0.5 w-max max-w-[min(var(--container-xs),calc(100dvw-2*var(--spacing)))] overflow-hidden px-3 py-[5px] shadow-[0_8px_18px_rgba(15,23,42,0.2)] transition-opacity select-none dark rounded-full touch:sr-only">
+                                <div
+                                    class="text-token-text-primary text-center text-sm leading-[18px] font-semibold tracking-[-0.15px] whitespace-pre-wrap">
+                                    <span aria-label="Dictate, Control, Shift, D"
+                                        class="inline-flex items-center gap-1.5 whitespace-nowrap"
+                                        data-keyboard-action="composerDictation"><span aria-hidden="true">Dictate</span>
+                                        <div
+                                            class="box-trim-text-0.25 inline-flex whitespace-pre *:inline-flex *:font-sans *:not-last:after:px-0.5 *:not-last:after:content-['+'] text-token-text-secondary -me-1.5 inline-flex h-[18px] items-center rounded-full bg-white/25 px-1.5 text-sm leading-[18px] font-semibold touch:hidden">
+                                            <kbd aria-label="Control"><span class="min-w-[1em]">Ctrl</span></kbd><kbd
+                                                aria-label="Shift"><span
+                                                    class="min-w-[1em]">Shift</span></kbd><kbd><span
+                                                    class="min-w-[1em]">D</span></kbd></div>
+                                    </span></div>
+                            </div>
+                        </div><span class="inline-flex" style="anchor-name: --anchor-_r_16_;"><button
+                                aria-label="Start dictation" type="button"
+                                class="composer-btn h-9 min-h-9 w-9 min-w-9 can-hover:relative can-hover:after:absolute can-hover:after:-inset-x-1 can-hover:after:inset-y-0 can-hover:after:content-['']"
+                                aria-describedby="_r_16_" interestfor="_r_16_"><svg font-size="inherit"
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    data-icon-shape="non-circular" focusable="false" class="icon" aria-label=""
+                                    aria-hidden="true">
+                                    <use href="/cdn/assets/sprites-shell-097001e7.svg#microphone-regular-24"
+                                        fill="currentColor"></use>
+                                </svg></button></span>
+                        <div id="_r_7c_" popover="hint" role="tooltip" hidden=""
+                            class="fixed inset-s-[calc(anchor(center)+var(--oai-anchor-align-offset,0px))] inset-e-auto top-[calc(anchor(bottom)+var(--spacing))] bottom-auto h-fit -translate-x-1/2 [position-try-fallbacks:flip-block] flex flex-col overflow-visible bg-transparent z-50 [inset-inline:auto]! translate-none! [position-area:span-all] pointer-events-none"
+                            style="--oai-anchor-align-offset: initial; position-anchor: --anchor-_r_7c_;"></div><button
+                            aria-disabled="false" id="composer-submit-button" aria-label="Send prompt"
+                            data-testid="send-button"
+                            class="composer-submit-btn composer-submit-button-color h-9 can-hover:relative can-hover:after:absolute can-hover:after:-inset-x-1 can-hover:after:inset-y-0 can-hover:after:content-[''] w-9"
+                            aria-describedby="_r_7c_" interestfor="_r_7c_" style="anchor-name: --anchor-_r_7c_;"><svg
+                                xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"
+                                data-icon-shape="non-circular" focusable="false" class="icon" aria-hidden="true">
+                                <use href="/cdn/assets/sprites-composer-ece24c50.svg#send-prompt-style-thin"
+                                    fill="currentColor"></use>
+                            </svg></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</body>
+</html>

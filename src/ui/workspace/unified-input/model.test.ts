@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@effect/vitest"
 import {
   draftAfterFillOrSend,
+  failureLine,
   isDraftEmpty,
   statusText,
 } from "./model"
@@ -14,13 +15,10 @@ describe("isDraftEmpty", () => {
 })
 
 describe("statusText", () => {
-  it("maps each bar status to copy", () => {
+  it("maps idle and notice", () => {
     expect(statusText({ kind: "idle" })).toBe("")
-    expect(statusText({ kind: "fill-not-wired" })).toBe(
-      "Fill isn't connected yet.",
-    )
-    expect(statusText({ kind: "send-not-wired" })).toBe(
-      "Send All isn't connected yet.",
+    expect(statusText({ kind: "notice", text: "Failed: panel-1 (ChatGPT)" })).toBe(
+      "Failed: panel-1 (ChatGPT)",
     )
   })
 })
@@ -31,5 +29,17 @@ describe("draftAfterFillOrSend", () => {
     expect(draftAfterFillOrSend("send", "hi", "succeeded")).toBe("")
     expect(draftAfterFillOrSend("fill", "hi", "failed")).toBe("hi")
     expect(draftAfterFillOrSend("send", "hi", "failed")).toBe("hi")
+  })
+})
+
+describe("failureLine", () => {
+  it("lists failed panel ids and labels", () => {
+    expect(failureLine([])).toBe("")
+    expect(
+      failureLine([
+        { panelId: "panel-1", label: "ChatGPT" },
+        { panelId: "panel-3", label: "Gemini" },
+      ]),
+    ).toBe("Failed: panel-1 (ChatGPT), panel-3 (Gemini)")
   })
 })

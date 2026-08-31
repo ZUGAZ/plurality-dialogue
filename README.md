@@ -13,7 +13,7 @@ pnpm dev
 
 Load the unpacked extension from `.output/chrome-mv3`. Until a toolbar button exists, open the workspace at `chrome-extension://<id>/workspace.html`.
 
-Vendor DOM fixtures will live in `test/fixtures/`.
+Vendor composer fixtures live in `test/fixtures/`.
 
 ## License
 

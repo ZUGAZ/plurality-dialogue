@@ -1,10 +1,12 @@
 import { Either, Schema } from "effect"
 import { describe, expect, it } from "@effect/vitest"
+import { isFillComposer } from "../broadcast/commands/fill-composer"
 import { isEnsureFramingRulesRequest } from "./ensure-framing-rules"
 import {
   decodeIncomingMessage,
   replyToWorkspacePing,
 } from "./incoming-message"
+import { isPanelFrameReady } from "./panel-frame-ready"
 import {
   WorkspacePingRequest,
   isWorkspacePingResponse,
@@ -29,6 +31,30 @@ describe("incoming extension messages", () => {
     )
   })
 
+  it("decodes FillComposer with a prompt and does not pong", () => {
+    const payload = { _tag: "FillComposer", prompt: "hi" }
+    const decoded = decodeIncomingMessage(payload)
+    expect(Either.isRight(decoded)).toBe(true)
+    if (Either.isRight(decoded)) {
+      expect(isFillComposer(decoded.right)).toBe(true)
+    }
+    expect(Either.isLeft(replyToWorkspacePing(payload))).toBe(true)
+  })
+
+  it("decodes PanelFrameReady and does not pong", () => {
+    const payload = {
+      _tag: "PanelFrameReady",
+      providerId: "chatgpt",
+      panelId: "panel-1",
+    }
+    const decoded = decodeIncomingMessage(payload)
+    expect(Either.isRight(decoded)).toBe(true)
+    if (Either.isRight(decoded)) {
+      expect(isPanelFrameReady(decoded.right)).toBe(true)
+    }
+    expect(Either.isLeft(replyToWorkspacePing(payload))).toBe(true)
+  })
+
   it("rejects FramingRulesReady as incoming", () => {
     expect(
       Either.isLeft(decodeIncomingMessage({ _tag: "FramingRulesReady" })),
@@ -44,7 +70,7 @@ describe("incoming extension messages", () => {
     ).toBe(true)
   })
 
-  it("rejects null, empty objects, and unknown tags", () => {
+  it("rejects null, empty objects, and FillComposer without prompt", () => {
     expect(Either.isLeft(decodeIncomingMessage(null))).toBe(true)
     expect(Either.isLeft(decodeIncomingMessage({}))).toBe(true)
     expect(
