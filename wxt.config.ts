@@ -1,5 +1,6 @@
 import { defineConfig } from "wxt"
 import { hostPermissionPatterns } from "./src/domain/workspace/framing-policy.ts"
+import { openWorkspaceCommandName } from "./src/domain/workspace/workspace-page.ts"
 
 export default defineConfig({
   srcDir: "src",
@@ -18,5 +19,15 @@ export default defineConfig({
     permissions: ["storage", "declarativeNetRequestWithHostAccess"],
     // Host access is for embedding those chats in the workspace tab; session rules are applied at runtime and scoped to the workspace tab; there is no static ruleset.
     host_permissions: [...hostPermissionPatterns],
+    action: { default_title: "Open Plurality Dialogue" },
+    commands: {
+      [openWorkspaceCommandName]: {
+        suggested_key: {
+          default: "Ctrl+Shift+E",
+          mac: "Command+Shift+E",
+        },
+        description: "Open the workspace",
+      },
+    },
   },
 })

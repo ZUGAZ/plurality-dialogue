@@ -11,7 +11,7 @@ pnpm install
 pnpm dev
 ```
 
-Load the unpacked extension from `.output/chrome-mv3`. Until a toolbar button exists, open the workspace at `chrome-extension://<id>/workspace.html`.
+Load the unpacked extension from `.output/chrome-mv3`. Click the toolbar icon or press Ctrl/Cmd+Shift+E to open the workspace.
 
 Vendor composer fixtures live in `test/fixtures/`.
 

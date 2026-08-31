@@ -11,6 +11,8 @@ export const workspaceLive = Layer.mergeAll(
 
 export const optionsLive = ChromeStorageLive
 
+export const backgroundLive = ChromeTabsLive
+
 export { chatgptContentLayer } from "./providers/chatgpt/fill-send"
 export { claudeContentLayer } from "./providers/claude/fill-send"
 export { geminiContentLayer } from "./providers/gemini/fill-send"
