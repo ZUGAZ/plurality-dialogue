@@ -7,7 +7,10 @@ import {
   TabQueryFailed,
   Tabs,
 } from "../../domain/ports/tabs"
-import { parseWorkspaceTabId } from "../../domain/workspace/framing-session-rules"
+import {
+  collectWorkspaceTabIds,
+  parseWorkspaceTabId,
+} from "../../domain/workspace/framing-session-rules"
 import { TabIdUnavailable } from "../../domain/workspace/tab-id-unavailable"
 
 const ChromeTabContext = Schema.Struct({
@@ -61,20 +64,81 @@ const openTabsFromPayload = (
     }),
   )
 
-const currentTabId = () =>
+const succeedParsedTabId = (
+  tabId: number | undefined,
+): Effect.Effect<number, TabIdUnavailable> =>
+  pipe(
+    parseWorkspaceTabId(tabId),
+    Either.match({
+      onLeft: (error) => Effect.fail(error),
+      onRight: (id) => Effect.succeed(id),
+    }),
+  )
+
+export const listTabIdsForDocumentUrls = (
+  documentUrls: readonly string[],
+): Effect.Effect<readonly number[], TabIdUnavailable> => {
+  if (documentUrls.length === 0) {
+    return Effect.fail(new TabIdUnavailable())
+  }
+  return Effect.tryPromise({
+    try: () =>
+      chrome.runtime.getContexts({
+        contextTypes: ["TAB"],
+        documentUrls: [...documentUrls],
+      }),
+    catch: () => new TabIdUnavailable(),
+  }).pipe(
+    Effect.flatMap((payload) =>
+      openTabsFromPayload(payload).pipe(
+        Effect.mapError(() => new TabIdUnavailable()),
+        Effect.map((tabs) => collectWorkspaceTabIds(tabs.map((tab) => tab.id))),
+        Effect.flatMap((ids) =>
+          ids.length === 0
+            ? Effect.fail(new TabIdUnavailable())
+            : Effect.succeed(ids),
+        ),
+      ),
+    ),
+  )
+}
+
+const isWorkspacePage = (): boolean => {
+  if (typeof location === "undefined") {
+    return false
+  }
+  return location.pathname.endsWith("/workspace.html")
+}
+
+const tabIdFromGetCurrent = () =>
   Effect.tryPromise({
     try: () => chrome.tabs.getCurrent(),
     catch: () => new TabIdUnavailable(),
-  }).pipe(
-    Effect.flatMap((tab) =>
-      pipe(
-        parseWorkspaceTabId(tab?.id),
-        Either.match({
-          onLeft: (error) => Effect.fail(error),
-          onRight: (id) => Effect.succeed(id),
-        }),
-      ),
-    ),
+  }).pipe(Effect.flatMap((tab) => succeedParsedTabId(tab?.id)))
+
+const tabIdFromOwnDocument = () => {
+  if (!isWorkspacePage()) {
+    return Effect.fail(new TabIdUnavailable())
+  }
+  return listTabIdsForDocumentUrls([location.href]).pipe(
+    Effect.flatMap((ids) => succeedParsedTabId(ids.length === 1 ? ids[0] : undefined)),
+  )
+}
+
+const tabIdFromActiveTab = () => {
+  if (!isWorkspacePage()) {
+    return Effect.fail(new TabIdUnavailable())
+  }
+  return Effect.tryPromise({
+    try: () => chrome.tabs.query({ active: true, currentWindow: true }),
+    catch: () => new TabIdUnavailable(),
+  }).pipe(Effect.flatMap((tabs) => succeedParsedTabId(tabs[0]?.id)))
+}
+
+const currentTabId = () =>
+  tabIdFromGetCurrent().pipe(
+    Effect.orElse(tabIdFromOwnDocument),
+    Effect.orElse(tabIdFromActiveTab),
   )
 
 const queryByUrl = (url: string) =>

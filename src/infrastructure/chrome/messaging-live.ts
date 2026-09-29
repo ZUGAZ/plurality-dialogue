@@ -6,11 +6,11 @@ import {
   Messaging,
   MessagingFault,
 } from "../../domain/ports/messaging"
-import { sendRuntimeMessage } from "./runtime-messaging"
+import { sendFramingHandshake } from "./ensure-framing-on-page"
 import { sendMessageToFrame } from "./tabs"
 
 export const ChromeMessagingLive = Layer.succeed(Messaging, {
-  send: sendRuntimeMessage,
+  send: sendFramingHandshake,
   sendToFrame: (target, message) => sendCommandToFrame(target, message),
 })
 

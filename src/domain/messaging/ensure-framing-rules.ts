@@ -2,7 +2,11 @@ import { Schema } from "effect"
 
 export const EnsureFramingRulesRequest = Schema.TaggedStruct(
   "EnsureFramingRules",
-  {},
+  {
+    tabId: Schema.optional(
+      Schema.Number.pipe(Schema.int(), Schema.greaterThanOrEqualTo(1)),
+    ),
+  },
 )
 
 export type EnsureFramingRulesRequest = typeof EnsureFramingRulesRequest.Type
@@ -26,7 +30,9 @@ export const isFramingTabIdUnavailable = Schema.is(FramingTabIdUnavailable)
 
 export const FramingSessionRulesUpdateFailed = Schema.TaggedStruct(
   "FramingSessionRulesUpdateFailed",
-  {},
+  {
+    message: Schema.optional(Schema.String),
+  },
 )
 
 export type FramingSessionRulesUpdateFailed =

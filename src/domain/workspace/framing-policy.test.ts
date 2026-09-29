@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@effect/vitest"
 import {
+  dnrUrlFilters,
   embeddableHosts,
   framingHeaderNames,
   framingResourceTypes,
@@ -34,6 +35,14 @@ describe("framing policy", () => {
       "https://chatgpt.com/*",
       "https://claude.ai/*",
       "https://gemini.google.com/*",
+    ])
+  })
+
+  it("exposes DNR domain-anchor filters, not match patterns", () => {
+    expect(dnrUrlFilters).toEqual([
+      "||chatgpt.com/",
+      "||claude.ai/",
+      "||gemini.google.com/",
     ])
   })
 

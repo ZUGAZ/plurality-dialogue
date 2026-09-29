@@ -27,6 +27,7 @@ import {
   replacePanelProvider,
   resizeSlots,
   selectOptions,
+  handshakeErrorText,
   toPanelViewState,
   type PanelSlot,
   type PanelViewState,
@@ -59,6 +60,9 @@ export const createPanelGridViewModel = (
   const [enabledListReady, setEnabledListReady] = createSignal(false)
   const [framingReady, setFramingReady] = createSignal(false)
   const [framingFailed, setFramingFailed] = createSignal(false)
+  const [framingError, setFramingError] = createSignal<string | undefined>(
+    undefined,
+  )
   const [loadedPanelIds, setLoadedPanelIds] =
     createSignal<ReadonlySet<string>>(emptyLoadedIds)
   const [layoutId, setLayoutId] = createSignal<LayoutId>(initialLayout)
@@ -119,11 +123,13 @@ export const createPanelGridViewModel = (
   runEffect(
     requestFramingRules().pipe(
       Effect.match({
-        onFailure: () => {
+        onFailure: (error) => {
           setFramingFailed(true)
+          setFramingError(handshakeErrorText(error))
         },
         onSuccess: () => {
           setFramingReady(true)
+          setFramingError(undefined)
         },
       }),
     ),
@@ -143,6 +149,7 @@ export const createPanelGridViewModel = (
         framingReady: ready,
         failed,
         hasLoaded: loaded.has(slot.id),
+        errorDetail: framingError(),
       })
     })
   }

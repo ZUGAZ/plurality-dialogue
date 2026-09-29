@@ -37,6 +37,7 @@ export const PanelFrame = (props: {
         iconSrc={props.panel.iconSrc}
         visible={props.panel.failed || !props.panel.hasLoaded}
         failed={props.panel.failed}
+        detail={props.panel.errorDetail}
       />
       <For each={iframeMountKeys(props.panel)}>
         {(_mountKey) => (

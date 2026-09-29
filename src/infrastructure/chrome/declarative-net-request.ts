@@ -16,10 +16,10 @@ const toChromeRule = (
 ): chrome.declarativeNetRequest.Rule => {
   const responseHeaders: chrome.declarativeNetRequest.ModifyHeaderInfo[] = []
   for (const header of spec.action.responseHeaders) {
-    responseHeaders.push({
-      header: header.header,
-      operation: header.operation,
-    })
+      responseHeaders.push({
+        header: header.header,
+        operation: chrome.declarativeNetRequest.HeaderOperation.REMOVE,
+      })
   }
   const resourceTypes: Array<
     `${chrome.declarativeNetRequest.ResourceType}`
@@ -54,6 +54,11 @@ export const applyFramingSessionRules = (
       const addRules: chrome.declarativeNetRequest.Rule[] = []
       for (const spec of framingSessionRulesForTab(tabId)) {
         addRules.push(toChromeRule(spec))
+      }
+      if (typeof chrome.declarativeNetRequest?.updateSessionRules !== "function") {
+        return Promise.reject(
+          new Error("declarativeNetRequest.updateSessionRules is not available"),
+        )
       }
       return chrome.declarativeNetRequest.updateSessionRules({
         removeRuleIds: [...framingRuleIdsForTab(tabId)],

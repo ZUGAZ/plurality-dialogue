@@ -8,6 +8,9 @@
 }
 
 .panel-header select {
-  flex: 1;
-  min-width: 0;
+  flex: 0 1 auto;
+  width: auto;
+  min-inline-size: 10ch;
+  max-inline-size: 100%;
+  field-sizing: content;
 }

@@ -33,6 +33,7 @@ export type PanelViewState = {
   readonly src: string | undefined
   readonly hasLoaded: boolean
   readonly failed: boolean
+  readonly errorDetail?: string
   readonly providerId: ProviderId | null
   readonly reloadGeneration: number
 }
@@ -62,6 +63,21 @@ export type PanelFrameInputs = {
   readonly framingReady: boolean
   readonly failed: boolean
   readonly hasLoaded: boolean
+  readonly errorDetail?: string
+}
+
+export const handshakeErrorText = (error: {
+  readonly _tag: string
+  readonly reason?: string
+  readonly cause?: unknown
+}): string => {
+  if (error.reason !== undefined && error.reason.length > 0) {
+    return error.reason
+  }
+  if (error.cause instanceof Error && error.cause.message.length > 0) {
+    return `${error._tag}: ${error.cause.message}`
+  }
+  return error._tag
 }
 
 export const labelForProvider = (id: ProviderId): string => {
@@ -193,6 +209,7 @@ export const toPanelViewState = (
         : iframeSrc(inputs.framingReady, embedUrl),
     hasLoaded: inputs.hasLoaded,
     failed: inputs.failed,
+    errorDetail: inputs.failed ? inputs.errorDetail : undefined,
     providerId,
     reloadGeneration: slot.reloadGeneration,
   }

@@ -21,14 +21,22 @@ describe("incoming extension messages", () => {
   })
 
   it("decodes EnsureFramingRules as that request, not a pong", () => {
-    const decoded = decodeIncomingMessage({ _tag: "EnsureFramingRules" })
+    const payload = { _tag: "EnsureFramingRules", tabId: 3 }
+    const decoded = decodeIncomingMessage(payload)
     expect(Either.isRight(decoded)).toBe(true)
     if (Either.isRight(decoded)) {
       expect(isEnsureFramingRulesRequest(decoded.right)).toBe(true)
     }
-    expect(Either.isLeft(replyToWorkspacePing({ _tag: "EnsureFramingRules" }))).toBe(
-      true,
-    )
+    expect(Either.isLeft(replyToWorkspacePing(payload))).toBe(true)
+  })
+
+  it("decodes EnsureFramingRules without a tab id", () => {
+    const payload = { _tag: "EnsureFramingRules" }
+    const decoded = decodeIncomingMessage(payload)
+    expect(Either.isRight(decoded)).toBe(true)
+    if (Either.isRight(decoded)) {
+      expect(isEnsureFramingRulesRequest(decoded.right)).toBe(true)
+    }
   })
 
   it("decodes FillComposer with a prompt and does not pong", () => {

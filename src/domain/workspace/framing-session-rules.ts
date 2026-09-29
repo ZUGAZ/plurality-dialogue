@@ -1,9 +1,9 @@
 import { Either } from "effect"
 import {
+  dnrUrlFilter,
   embeddableHosts,
   framingHeaderNames,
   framingResourceTypes,
-  hostPermissionPattern,
 } from "./framing-policy"
 import { TabIdUnavailable } from "./tab-id-unavailable"
 
@@ -20,14 +20,23 @@ export type FramingSessionRuleSpec = {
     readonly responseHeaders: readonly FramingRemovedHeader[]
   }
   readonly condition: {
-    readonly urlFilter: ReturnType<typeof hostPermissionPattern>
+    readonly urlFilter: ReturnType<typeof dnrUrlFilter>
     readonly resourceTypes: typeof framingResourceTypes
     readonly tabIds: readonly number[]
   }
 }
 
+const signedIntegerMax = 2_147_483_647
+const ruleIdStride = 4
+
+// Chrome rule ids are signed 32-bit. tabId * stride overflows once the tab
+// id passes ~5.3e8, and Chrome then rejects the whole updateSessionRules call.
+const maxTabSlot = Math.floor(
+  (signedIntegerMax - (ruleIdStride - 1)) / ruleIdStride,
+)
+
 export const framingRuleId = (tabId: number, hostIndex: number): number =>
-  tabId * 4 + hostIndex + 1
+  (tabId % maxTabSlot) * ruleIdStride + hostIndex + 1
 
 const removedHeader = (
   header: (typeof framingHeaderNames)[number],
@@ -47,7 +56,7 @@ export const framingSessionRulesForTab = (
       responseHeaders: framingHeaderNames.map(removedHeader),
     },
     condition: {
-      urlFilter: hostPermissionPattern(host),
+      urlFilter: dnrUrlFilter(host),
       resourceTypes: framingResourceTypes,
       tabIds: [tabId],
     },
@@ -66,4 +75,50 @@ export const parseWorkspaceTabId = (
     return Either.left(new TabIdUnavailable())
   }
   return Either.right(tabId)
+}
+
+export const collectWorkspaceTabIds = (
+  tabIds: readonly (number | undefined)[],
+): readonly number[] => {
+  const unique: number[] = []
+  const seen = new Set<number>()
+  for (const tabId of tabIds) {
+    Either.match(parseWorkspaceTabId(tabId), {
+      onLeft: () => undefined,
+      onRight: (parsed) => {
+        if (seen.has(parsed)) {
+          return
+        }
+        seen.add(parsed)
+        unique.push(parsed)
+      },
+    })
+  }
+  return unique
+}
+
+export const nonEmptyDocumentUrls = (
+  urls: readonly (string | undefined)[],
+): readonly string[] => {
+  const unique: string[] = []
+  const seen = new Set<string>()
+  for (const url of urls) {
+    if (url === undefined || url.length === 0 || seen.has(url)) {
+      continue
+    }
+    seen.add(url)
+    unique.push(url)
+  }
+  return unique
+}
+
+export const resolveFramingTabId = (
+  senderTabId: number | undefined,
+  requestedTabId: number | undefined,
+): Either.Either<number, TabIdUnavailable> => {
+  const first = collectWorkspaceTabIds([senderTabId, requestedTabId])[0]
+  if (first === undefined) {
+    return Either.left(new TabIdUnavailable())
+  }
+  return Either.right(first)
 }

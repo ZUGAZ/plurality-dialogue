@@ -5,6 +5,7 @@ import {
   bumpPanelGeneration,
   createDefaultSlots,
   decodeProviderId,
+  handshakeErrorText,
   iframeSrc,
   labelForProvider,
   reconcileSlotsWithEnabled,
@@ -18,6 +19,18 @@ describe("panel grid model", () => {
     const url = "https://example.com/chat"
     expect(iframeSrc(false, url)).toBeUndefined()
     expect(iframeSrc(true, url)).toBe(url)
+  })
+
+  it("prefers handshake reason text over the error tag", () => {
+    expect(
+      handshakeErrorText({
+        _tag: "FramingHandshakeFailed",
+        reason: "Could not apply framing rules",
+      }),
+    ).toBe("Could not apply framing rules")
+    expect(handshakeErrorText({ _tag: "MessagingSendFailed" })).toBe(
+      "MessagingSendFailed",
+    )
   })
 
   it("cycles three enabled ids into default slots", () => {

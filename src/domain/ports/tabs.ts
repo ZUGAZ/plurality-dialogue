@@ -22,9 +22,11 @@ export class TabFocusFailed extends Data.TaggedError("TabFocusFailed")<{
 }> {}
 
 /**
- * Live `currentTabId` is `chrome.tabs.getCurrent()` in the workspace page.
- * Background authoritative tab id for DNR is `sender.tab.id`, never a value
- * from the page.
+ * Live `currentTabId` is the workspace page asking Chrome who this tab is.
+ * `getCurrent()` is first; own-document `getContexts` and the active tab
+ * are fallbacks. The id is optional on EnsureFramingRules. Background
+ * prefers `sender.tab.id`, then the request, then workspace document
+ * contexts. Do not add the tabs permission to paper over a missing sender.
  */
 export class Tabs extends Context.Tag("Tabs")<
   Tabs,
