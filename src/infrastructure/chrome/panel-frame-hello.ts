@@ -1,7 +1,10 @@
 import { Either, Schema } from "effect"
 import { PanelTarget } from "../../domain/broadcast/panel-target"
 import { PanelFrameReady } from "../../domain/messaging/panel-frame-ready"
-import { subscribeRuntimeMessageEffects } from "./runtime-messaging"
+import {
+  subscribeRuntimeMessageEffects,
+  type RunPromise,
+} from "./runtime-messaging"
 
 export const ingestPanelFrameReady = (
   message: unknown,
@@ -31,12 +34,16 @@ export const ingestPanelFrameReady = (
   })
 }
 
-export const subscribeWorkspacePanelHellos = (
+export const subscribeWorkspacePanelHellos = <Requirements>(
   workspaceTabId: number,
   upsert: (hello: PanelTarget) => void,
+  run: RunPromise<Requirements>,
 ): void => {
-  subscribeRuntimeMessageEffects((message, sender) => {
-    ingestPanelFrameReady(message, sender, workspaceTabId, upsert)
-    return undefined
-  })
+  subscribeRuntimeMessageEffects(
+    (message, sender) => {
+      ingestPanelFrameReady(message, sender, workspaceTabId, upsert)
+      return undefined
+    },
+    run,
+  )
 }

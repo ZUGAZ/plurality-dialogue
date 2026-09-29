@@ -25,7 +25,13 @@ export const contentCommandEffect = (
   if (!isFillComposer(incoming) && !isFillAndSubmit(incoming)) {
     return undefined
   }
-  return executePanelCommand(incoming, identity).pipe(
+  return Effect.log(
+    "panel command",
+    incoming._tag,
+    identity.providerId,
+    identity.panelId,
+  ).pipe(
+    Effect.zipRight(executePanelCommand(incoming, identity)),
     Effect.map((response) =>
       pipe(
         Schema.encodeUnknownEither(PanelCommandResponse)(response),
@@ -35,5 +41,7 @@ export const contentCommandEffect = (
         }),
       ),
     ),
+    Effect.withLogSpan("contentCommand"),
+    Effect.withLogSpan("content"),
   )
 }

@@ -20,6 +20,16 @@ import { applyFramingSessionRules } from "./declarative-net-request"
 import { extensionPageUrl } from "./extension-page-url"
 import { listTabIdsForDocumentUrls } from "./tabs"
 
+const withMessageLog = (
+  tag: string,
+  effect: Effect.Effect<unknown>,
+): Effect.Effect<unknown> =>
+  Effect.log("message", tag).pipe(
+    Effect.zipRight(effect),
+    Effect.withLogSpan("handleBackgroundMessage"),
+    Effect.withLogSpan("background"),
+  )
+
 const encodeReply = <A, I>(schema: Schema.Schema<A, I>, value: A): unknown =>
   pipe(
     Schema.encodeUnknownEither(schema)(value),
@@ -31,8 +41,11 @@ const encodeReply = <A, I>(schema: Schema.Schema<A, I>, value: A): unknown =>
 
 const pingReply = (): Option.Option<Effect.Effect<unknown>> =>
   Option.some(
-    Effect.succeed(
-      encodeReply(WorkspacePingResponse, WorkspacePingResponse.make({})),
+    withMessageLog(
+      "WorkspacePing",
+      Effect.succeed(
+        encodeReply(WorkspacePingResponse, WorkspacePingResponse.make({})),
+      ),
     ),
   )
 
@@ -101,10 +114,13 @@ export const handleBackgroundMessage = (
         }
         if (isEnsureFramingRulesRequest(incoming)) {
           return Option.some(
-            ensureFramingRulesReply(
-              sender.tab?.id,
-              incoming.tabId,
-              sender.url,
+            withMessageLog(
+              "EnsureFramingRules",
+              ensureFramingRulesReply(
+                sender.tab?.id,
+                incoming.tabId,
+                sender.url,
+              ),
             ),
           )
         }

@@ -111,7 +111,9 @@ export const createPanelGridViewModel = (
   }
 
   runEffect(
-    listEnabledProviders().pipe(
+    Effect.log("load enabled providers").pipe(
+      Effect.zipRight(listEnabledProviders()),
+      Effect.withLogSpan("loadEnabledProviders"),
       Effect.match({
         onFailure: () => {
           applyEnabledProviders(emptyProviders)
@@ -121,7 +123,9 @@ export const createPanelGridViewModel = (
     ),
   )
   runEffect(
-    requestFramingRules().pipe(
+    Effect.log("request framing rules").pipe(
+      Effect.zipRight(requestFramingRules()),
+      Effect.withLogSpan("requestFramingRules"),
       Effect.match({
         onFailure: (error) => {
           setFramingFailed(true)
@@ -175,20 +179,28 @@ export const createPanelGridViewModel = (
     if (decoded === null) {
       return Effect.void
     }
-    return Effect.sync(() => {
-      commitSlots(replacePanelProvider(slots(), panelId, decoded))
-    })
+    return Effect.log("set panel provider", panelId, decoded).pipe(
+      Effect.zipRight(
+        Effect.sync(() => {
+          commitSlots(replacePanelProvider(slots(), panelId, decoded))
+        }),
+      ),
+    )
   }
 
   const refreshPanel = (panelId: string): Effect.Effect<void> =>
-    Effect.sync(() => {
-      const current = slots()
-      const slot = current.find((item) => item.id === panelId)
-      if (slot === undefined || slot.providerId === null) {
-        return
-      }
-      commitSlots(bumpPanelGeneration(current, panelId))
-    })
+    Effect.log("refresh panel", panelId).pipe(
+      Effect.zipRight(
+        Effect.sync(() => {
+          const current = slots()
+          const slot = current.find((item) => item.id === panelId)
+          if (slot === undefined || slot.providerId === null) {
+            return
+          }
+          commitSlots(bumpPanelGeneration(current, panelId))
+        }),
+      ),
+    )
 
   const applySelectedLayout = (id: LayoutId): void => {
     setLayoutId(id)
@@ -198,7 +210,8 @@ export const createPanelGridViewModel = (
   }
 
   const selectLayout = (id: LayoutId) =>
-    persistLayoutId(id).pipe(
+    Effect.log("select layout", id).pipe(
+      Effect.zipRight(persistLayoutId(id)),
       Effect.tap(() => Effect.sync(() => applySelectedLayout(id))),
       Effect.catchTag("StorageWriteError", () => Effect.void),
       Effect.catchTag("ParseError", () => Effect.void),

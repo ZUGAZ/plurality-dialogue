@@ -1,4 +1,5 @@
 import { Effect, Layer, Option, Runtime } from "effect"
+import { silentLoggerLayer } from "@test-support/silent-logger"
 import { createRoot } from "solid-js"
 import { describe, expect, it } from "@effect/vitest"
 import { inMemoryStorageLayer } from "@domain/ports/in-memory-storage"
@@ -6,13 +7,18 @@ import { Storage, StorageWriteError } from "@domain/ports/storage"
 import { workspaceSettingsStorageKey } from "@domain/settings/workspace-settings"
 import { createProviderTogglesViewModel } from "./view-model"
 
+const quiet = <Success, Error, Requirements>(
+  layer: Layer.Layer<Success, Error, Requirements>,
+): Layer.Layer<Success, Error, Requirements> =>
+  Layer.merge(layer, silentLoggerLayer)
+
 const failingWriteLayer = Layer.succeed(Storage, {
   get: () => Effect.succeed(Option.none()),
   set: (key) => Effect.fail(new StorageWriteError({ key, cause: "denied" })),
 })
 
 describe("provider toggles view-model", () => {
-  it.layer(inMemoryStorageLayer())("fresh settings", (it) => {
+  it.layer(quiet(inMemoryStorageLayer()))("fresh settings", (it) => {
     it.effect("loads three enabled rows", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
@@ -31,7 +37,7 @@ describe("provider toggles view-model", () => {
     )
   })
 
-  it.layer(inMemoryStorageLayer())("disable gemini", (it) => {
+  it.layer(quiet(inMemoryStorageLayer()))("disable gemini", (it) => {
     it.effect("persists and updates rows", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
@@ -54,7 +60,7 @@ describe("provider toggles view-model", () => {
     )
   })
 
-  it.layer(inMemoryStorageLayer())("two disables", (it) => {
+  it.layer(quiet(inMemoryStorageLayer()))("two disables", (it) => {
     it.effect("marks the last on-row isLastEnabled", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
@@ -71,12 +77,14 @@ describe("provider toggles view-model", () => {
   })
 
   it.layer(
-    inMemoryStorageLayer({
-      [workspaceSettingsStorageKey]: {
-        enabledProviders: ["gemini"],
-        layout: "1x3",
-      },
-    }),
+    quiet(
+      inMemoryStorageLayer({
+        [workspaceSettingsStorageKey]: {
+          enabledProviders: ["gemini"],
+          layout: "1x3",
+        },
+      }),
+    ),
   )("last remaining provider", (it) => {
     it.effect("LastProviderDisabled leaves rows unchanged", () =>
       Effect.gen(function* () {
@@ -95,7 +103,7 @@ describe("provider toggles view-model", () => {
     )
   })
 
-  it.layer(failingWriteLayer)("failed persist", (it) => {
+  it.layer(quiet(failingWriteLayer))("failed persist", (it) => {
     it.effect("sets Could not save. and does not flip rows", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
@@ -109,12 +117,14 @@ describe("provider toggles view-model", () => {
   })
 
   it.layer(
-    inMemoryStorageLayer({
-      [workspaceSettingsStorageKey]: {
-        enabledProviders: [],
-        layout: "1x3",
-      },
-    }),
+    quiet(
+      inMemoryStorageLayer({
+        [workspaceSettingsStorageKey]: {
+          enabledProviders: [],
+          layout: "1x3",
+        },
+      }),
+    ),
   )("empty enabled list", (it) => {
     it.effect("shows three off rows and allows turning one on", () =>
       Effect.gen(function* () {

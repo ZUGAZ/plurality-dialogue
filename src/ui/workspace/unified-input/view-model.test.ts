@@ -1,4 +1,5 @@
-import { Effect } from "effect"
+import { Effect, Layer } from "effect"
+import { silentLoggerLayer } from "@test-support/silent-logger"
 import { createRoot } from "solid-js"
 import { describe, expect, it } from "@effect/vitest"
 import { PanelCommandErr } from "@domain/messaging/panel-command-err"
@@ -8,6 +9,11 @@ import { PanelTarget } from "@domain/broadcast/panel-target"
 import type { BroadcastPlan } from "@domain/broadcast/resolve-targets"
 import { inMemoryMessagingLayer } from "@domain/ports/in-memory-messaging"
 import { createUnifiedInputViewModel } from "./view-model"
+
+const quiet = <Success, Error, Requirements>(
+  layer: Layer.Layer<Success, Error, Requirements>,
+): Layer.Layer<Success, Error, Requirements> =>
+  Layer.merge(layer, silentLoggerLayer)
 
 const emptyPlan: BroadcastPlan = { targets: [], notReady: [] }
 
@@ -44,7 +50,7 @@ describe("unified input view-model", () => {
     }),
   )
 
-  it.layer(
+  it.layer(quiet(
     inMemoryMessagingLayer(() => Effect.succeed({}), {
       replies: new Map([
         [
@@ -58,7 +64,7 @@ describe("unified input view-model", () => {
       ]),
       sent: [],
     }),
-  )("wired fill", (it) => {
+  ))("wired fill", (it) => {
     it.effect("fill keeps draft and stays idle when every panel succeeds", () =>
       Effect.gen(function* () {
         const session = openSession(() => ({
@@ -74,7 +80,7 @@ describe("unified input view-model", () => {
     )
   })
 
-  it.layer(
+  it.layer(quiet(
     inMemoryMessagingLayer(() => Effect.succeed({}), {
       replies: new Map([
         [
@@ -88,7 +94,7 @@ describe("unified input view-model", () => {
       ]),
       sent: [],
     }),
-  )("wired send", (it) => {
+  ))("wired send", (it) => {
     it.effect("sendAll clears draft when every panel succeeds", () =>
       Effect.gen(function* () {
         const session = openSession(() => ({
@@ -104,7 +110,7 @@ describe("unified input view-model", () => {
     )
   })
 
-  it.layer(inMemoryMessagingLayer(() => Effect.succeed({})))(
+  it.layer(quiet(inMemoryMessagingLayer(() => Effect.succeed({}))))(
     "frame not ready",
     (it) => {
       it.effect("lists failed panels and keeps draft", () =>
@@ -132,7 +138,7 @@ describe("unified input view-model", () => {
     },
   )
 
-  it.layer(
+  it.layer(quiet(
     inMemoryMessagingLayer(() => Effect.succeed({}), {
       replies: new Map([
         [
@@ -146,7 +152,7 @@ describe("unified input view-model", () => {
       ]),
       sent: [],
     }),
-  )("panel command error", (it) => {
+  ))("panel command error", (it) => {
     it.effect("maps a composer miss onto the status line", () =>
       Effect.gen(function* () {
         const session = openSession(() => ({

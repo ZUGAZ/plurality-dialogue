@@ -2,16 +2,18 @@ import { Layer } from "effect"
 import { ChromeMessagingLive } from "./chrome/messaging-live"
 import { ChromeStorageLive } from "./chrome/storage"
 import { ChromeTabsLive } from "./chrome/tabs"
+import { SpanLoggerLive } from "./logging/span-logger"
 
 export const workspaceLive = Layer.mergeAll(
   ChromeStorageLive,
   ChromeTabsLive,
   ChromeMessagingLive,
+  SpanLoggerLive,
 )
 
-export const optionsLive = ChromeStorageLive
+export const optionsLive = Layer.mergeAll(ChromeStorageLive, SpanLoggerLive)
 
-export const backgroundLive = ChromeTabsLive
+export const backgroundLive = Layer.mergeAll(ChromeTabsLive, SpanLoggerLive)
 
 export { chatgptContentLayer } from "./providers/chatgpt/fill-send"
 export { claudeContentLayer } from "./providers/claude/fill-send"

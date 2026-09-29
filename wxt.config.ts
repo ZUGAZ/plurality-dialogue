@@ -10,10 +10,11 @@ export default defineConfig({
     "@domain": "src/domain",
     "@infrastructure": "src/infrastructure",
     "@ui": "src/ui",
+    "@test-support": "src/test-support",
   },
   manifest: {
     name: "Plurality Dialogue",
-    version: "0.1.0",
+    version: "0.1.1",
     description:
       "Compare ChatGPT, Claude, and Gemini in one workspace using the chats you already have.",
     permissions: ["storage", "declarativeNetRequestWithHostAccess"],

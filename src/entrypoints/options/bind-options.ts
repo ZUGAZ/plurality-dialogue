@@ -7,5 +7,12 @@ const managedRuntime = ManagedRuntime.make(optionsLive)
 const runtime = Effect.runSync(managedRuntime)
 
 export const optionsBindingsReady = managedRuntime.runPromise(
-  Effect.sync(() => bindViewModel(runtime, createProviderTogglesViewModel)),
+  Effect.gen(function* () {
+    yield* Effect.log("runtime initialized")
+    return bindViewModel(
+      runtime,
+      "providerToggles",
+      createProviderTogglesViewModel,
+    )
+  }).pipe(Effect.withLogSpan("options")),
 )

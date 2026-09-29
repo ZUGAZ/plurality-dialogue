@@ -1,4 +1,5 @@
-import { Effect, Ref } from "effect"
+import { Deferred, Effect, List, Logger, Ref } from "effect"
+import type { LogSpan } from "effect/LogSpan"
 import { describe, expect, it } from "@effect/vitest"
 import { bindViewModel } from "./bind-viewmodel"
 
@@ -7,7 +8,7 @@ describe("bindViewModel", () => {
     Effect.gen(function* () {
       const count = yield* Ref.make(0)
       const runtime = yield* Effect.runtime()
-      const bound = bindViewModel(runtime, () => ({
+      const bound = bindViewModel(runtime, "counter", () => ({
         increment: Ref.update(count, (n) => n + 1),
       }))
       bound.increment()
@@ -20,7 +21,7 @@ describe("bindViewModel", () => {
     Effect.gen(function* () {
       const count = yield* Ref.make(0)
       const runtime = yield* Effect.runtime()
-      const bound = bindViewModel(runtime, () => ({
+      const bound = bindViewModel(runtime, "counter", () => ({
         setX: (n: number) => Ref.update(count, (current) => current + n),
       }))
       bound.setX(2)
@@ -28,7 +29,34 @@ describe("bindViewModel", () => {
       expect(value).toBe(2)
     }),
   )
+
+  it.effect("prefixes the viewmodel name outside the action key", () => {
+    const labels: string[][] = []
+    const recording = Logger.make(
+      ({ spans }: Logger.Logger.Options<unknown>) => {
+        labels.push(outerFirst(spans))
+      },
+    )
+    return Effect.gen(function* () {
+      const done = yield* Deferred.make<string>()
+      const runtime = yield* Effect.runtime()
+      const bound = bindViewModel(runtime, "unifiedInput", () => ({
+        sendAll: () =>
+          Effect.log("send").pipe(
+            Effect.zipRight(Deferred.succeed(done, "sent")),
+          ),
+      }))
+      bound.sendAll()
+      yield* Deferred.await(done)
+      expect(labels).toEqual([["unifiedInput", "sendAll"]])
+    }).pipe(Effect.provide(Logger.replace(Logger.defaultLogger, recording)))
+  })
 })
+
+const outerFirst = (spans: List.List<LogSpan>): string[] =>
+  List.toArray(spans)
+    .reverse()
+    .map((span) => span.label)
 
 const waitUntilCount = (
   count: Ref.Ref<number>,

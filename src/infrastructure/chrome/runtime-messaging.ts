@@ -9,17 +9,22 @@ export const sendRuntimeMessage = (
     catch: (cause) => new MessagingSendFailed({ cause }),
   })
 
-export const subscribeRuntimeMessages = (
+export type RunPromise<Requirements> = <Success, Error>(
+  effect: Effect.Effect<Success, Error, Requirements>,
+) => Promise<Success>
+
+export const subscribeRuntimeMessages = <Requirements>(
   respond: (
     message: unknown,
     sender: chrome.runtime.MessageSender,
-  ) => Option.Option<Effect.Effect<unknown>>,
+  ) => Option.Option<Effect.Effect<unknown, never, Requirements>>,
+  run: RunPromise<Requirements>,
 ): void => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) =>
     Option.match(respond(message, sender), {
       onNone: () => undefined,
       onSome: (effect) => {
-        void Effect.runPromise(effect).then(
+        void run(effect).then(
           (response) => {
             sendResponse(response)
           },
@@ -31,17 +36,18 @@ export const subscribeRuntimeMessages = (
   )
 }
 
-export const subscribeRuntimeMessageEffects = (
+export const subscribeRuntimeMessageEffects = <Requirements>(
   handle: (
     message: unknown,
     sender: chrome.runtime.MessageSender,
-  ) => Effect.Effect<unknown | undefined, never> | undefined,
+  ) => Effect.Effect<unknown | undefined, never, Requirements> | undefined,
+  run: RunPromise<Requirements>,
 ): void => {
   chrome.runtime.onMessage.addListener((message, sender) => {
     const effect = handle(message, sender)
     if (effect === undefined) {
       return undefined
     }
-    return Effect.runPromise(effect)
+    return run(effect)
   })
 }

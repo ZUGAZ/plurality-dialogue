@@ -37,6 +37,7 @@ export default tseslint.config(
         { type: "infrastructure", pattern: "src/infrastructure" },
         { type: "entrypoints", pattern: "src/entrypoints" },
         { type: "ui", pattern: "src/ui" },
+        { type: "test-support", pattern: "src/test-support" },
       ],
       "boundaries/files": [
         { pattern: "src/**/*.test.ts", category: "test" },
@@ -87,6 +88,7 @@ export default tseslint.config(
                       source: "vitest",
                     },
                   },
+                  { element: { type: "test-support" } },
                 ],
               },
             },
@@ -138,6 +140,28 @@ export default tseslint.config(
                     module: {
                       origin: "core",
                       source: "node:path",
+                    },
+                  },
+                  { element: { type: "test-support" } },
+                ],
+              },
+            },
+            {
+              from: { element: { type: "test-support" } },
+              allow: {
+                to: [
+                  { element: { type: "test-support" } },
+                  { module: { origin: "external", source: "effect" } },
+                  {
+                    module: {
+                      origin: "external",
+                      source: "@effect/vitest",
+                    },
+                  },
+                  {
+                    module: {
+                      origin: "external",
+                      source: "vitest",
                     },
                   },
                 ],
@@ -208,6 +232,7 @@ export default tseslint.config(
                       source: "solid-js",
                     },
                   },
+                  { element: { type: "test-support" } },
                 ],
               },
             },

@@ -1,4 +1,5 @@
 import { Effect, Layer, Runtime } from "effect"
+import { silentLoggerLayer } from "@test-support/silent-logger"
 import { describe, expect, it } from "@effect/vitest"
 import {
   FramingRulesReady,
@@ -18,6 +19,7 @@ const readyLayer = Layer.mergeAll(
   inMemoryStorageLayer(),
   inMemoryTabsLayer(1),
   inMemoryMessagingLayer(() => Effect.succeed(FramingRulesReady.make({}))),
+  silentLoggerLayer,
 )
 
 const failedLayer = Layer.mergeAll(
@@ -26,6 +28,7 @@ const failedLayer = Layer.mergeAll(
   inMemoryMessagingLayer(() =>
     Effect.succeed(FramingSessionRulesUpdateFailed.make({})),
   ),
+  silentLoggerLayer,
 )
 
 const twoEnabledLayer = Layer.mergeAll(
@@ -37,6 +40,7 @@ const twoEnabledLayer = Layer.mergeAll(
   }),
   inMemoryTabsLayer(1),
   inMemoryMessagingLayer(() => Effect.succeed(FramingRulesReady.make({}))),
+  silentLoggerLayer,
 )
 
 const zeroEnabledLayer = Layer.mergeAll(
@@ -48,6 +52,7 @@ const zeroEnabledLayer = Layer.mergeAll(
   }),
   inMemoryTabsLayer(1),
   inMemoryMessagingLayer(() => Effect.succeed(FramingRulesReady.make({}))),
+  silentLoggerLayer,
 )
 
 const chatgptUrl = builtInProviders.find(

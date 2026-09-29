@@ -78,7 +78,8 @@ const runBroadcast = (
     kind === "fill"
       ? broadcastFill(sink.draft(), plan.targets)
       : broadcastFillSend(sink.draft(), plan.targets)
-  return program.pipe(
+  return Effect.log(kind, { targets: plan.targets.length }).pipe(
+    Effect.zipRight(program),
     Effect.map((results) => [...plan.notReady, ...results]),
     Effect.match({
       onFailure: () => {

@@ -6,6 +6,8 @@ import {
 } from "@domain/broadcast/resolve-targets"
 import type { PanelTarget } from "@domain/broadcast/panel-target"
 import { layoutIdOrDefault } from "@domain/layout/presets"
+import type { Messaging } from "@domain/ports/messaging"
+import type { Storage } from "@domain/ports/storage"
 import { Tabs } from "@domain/ports/tabs"
 import { loadWorkspaceSettings } from "@domain/settings/workspace-settings-storage"
 import { subscribeWorkspacePanelHellos } from "@infrastructure/chrome/panel-frame-hello"
@@ -19,6 +21,7 @@ const runtime = Effect.runSync(managedRuntime)
 
 export const workspaceBindingsReady = managedRuntime.runPromise(
   Effect.gen(function* () {
+    yield* Effect.log("runtime initialized")
     const settings = yield* loadWorkspaceSettings()
     const tabs = yield* Tabs
     const workspaceTabId = yield* tabs.currentTabId().pipe(Effect.option)
@@ -27,13 +30,17 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
       Option.match(workspaceTabId, {
         onNone: () => undefined,
         onSome: (tabId) => {
-          subscribeWorkspacePanelHellos(tabId, (hello) => {
-            frames.upsert(hello)
-          })
+          subscribeWorkspacePanelHellos<Storage | Tabs | Messaging>(
+            tabId,
+            (hello) => {
+              frames.upsert(hello)
+            },
+            (effect) => managedRuntime.runPromise(effect),
+          )
         },
       })
     })
-    const grid = bindViewModel(runtime, (runEffect) =>
+    const grid = bindViewModel(runtime, "panelGrid", (runEffect) =>
       createPanelGridViewModel(
         runEffect,
         layoutIdOrDefault(settings.layout),
@@ -41,7 +48,7 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
     )
     return {
       ...grid,
-      unifiedInput: bindViewModel(runtime, (runEffect) =>
+      unifiedInput: bindViewModel(runtime, "unifiedInput", (runEffect) =>
         createUnifiedInputViewModel(runEffect, () =>
           resolveBroadcastTargets(
             toVisiblePanels(grid.panels()),
@@ -50,7 +57,7 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
         ),
       ),
     }
-  }),
+  }).pipe(Effect.withLogSpan("workspace")),
 )
 
 const createFrameList = () => {

@@ -30,7 +30,9 @@ export const createProviderTogglesViewModel = (
   const [saveError, setSaveError] = createSignal<string | undefined>(undefined)
 
   runEffect(
-    listProviders().pipe(
+    Effect.log("load providers").pipe(
+      Effect.zipRight(listProviders()),
+      Effect.withLogSpan("loadProviders"),
       Effect.match({
         onFailure: () => {
           setLoadError(loadSettingsErrorText)
@@ -52,7 +54,8 @@ export const createProviderTogglesViewModel = (
   )
 
   const setEnabled = (id: ProviderId, enabled: boolean) =>
-    setProviderEnabled(id, enabled).pipe(
+    Effect.log("set enabled", id, enabled).pipe(
+      Effect.zipRight(setProviderEnabled(id, enabled)),
       Effect.tap((enabledIds) =>
         Effect.sync(() => {
           setRows(toToggleRows(builtInProviders, enabledIds))

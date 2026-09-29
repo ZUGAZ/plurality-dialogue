@@ -31,12 +31,13 @@ const isUnknownFunction = (
 
 const bindReturnedEffect = <Requirements>(
   runEffect: RunEffect<Requirements>,
+  key: string,
   fn: (...args: never[]) => unknown,
 ): ((...args: never[]) => unknown) =>
   (...args: never[]) => {
     const returned = fn(...args)
     if (isRuntimeEffect<Requirements>(returned)) {
-      runEffect(returned)
+      runEffect(returned.pipe(Effect.withLogSpan(key)))
       return
     }
     return returned
@@ -47,23 +48,24 @@ export const bindViewModel = <
   ViewModel extends Record<string, unknown>,
 >(
   runtime: Runtime.Runtime<Requirements>,
+  name: string,
   createViewModel: (runEffect: RunEffect<Requirements>) => ViewModel,
 ): BoundViewModel<ViewModel> => {
   const runEffect: RunEffect<Requirements> = (effect) => {
-    Runtime.runFork(runtime)(effect)
+    Runtime.runFork(runtime)(effect.pipe(Effect.withLogSpan(name)))
   }
   const viewModel = createViewModel(runEffect)
   return Object.fromEntries(
     Object.entries(viewModel).map(([key, value]) => {
       if (isRuntimeEffect<Requirements>(value)) {
         const boundAction = () => {
-          runEffect(value)
+          runEffect(value.pipe(Effect.withLogSpan(key)))
         }
         const boundEntry: [string, () => void] = [key, boundAction]
         return boundEntry
       }
       if (isUnknownFunction(value)) {
-        const boundFn = bindReturnedEffect(runEffect, value)
+        const boundFn = bindReturnedEffect(runEffect, key, value)
         const boundFnEntry: [string, (...args: never[]) => unknown] = [
           key,
           boundFn,
