@@ -1,0 +1,64 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 1rem;
+  font-family: system-ui, sans-serif;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.provider-toggles {
+  font-family: system-ui, sans-serif;
+  color: CanvasText;
+  background: Canvas;
+}
+
+.provider-toggles fieldset {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0.5rem 1rem 1rem;
+  border: 1px solid currentColor;
+}
+
+.provider-toggles legend {
+  padding-inline: 0.35rem;
+}
+
+.provider-toggles-hint {
+  margin-block: 0 0.5rem;
+  max-inline-size: 80ch;
+  line-height: 1.5;
+}
+
+.provider-toggles label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-block-size: 48px;
+  padding-block: 0.75rem;
+  padding-inline: 0.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.provider-toggles input[type="checkbox"] {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.provider-toggles input[type="checkbox"]:focus-visible {
+  outline: 3px solid CanvasText;
+  outline-offset: 2px;
+}
+
+.provider-toggles label:has(:disabled) {
+  cursor: not-allowed;
+}
+
+.provider-toggles-alert {
+  margin-block-start: 0.75rem;
+  line-height: 1.5;
+}
