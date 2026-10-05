@@ -14,3 +14,7 @@
   max-inline-size: 100%;
   field-sizing: content;
 }
+
+.panel-header-remove {
+  margin-inline-start: auto;
+}

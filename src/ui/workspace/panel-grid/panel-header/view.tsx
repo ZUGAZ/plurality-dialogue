@@ -13,6 +13,8 @@ export const PanelHeaderView = (props: {
   onProviderChange: (rawId: string) => void
   onRefresh: () => void
   isRefreshEnabled: boolean
+  onRemove: () => void
+  canRemove: boolean
 }) => (
   <header data-panel-header class="panel-header">
     <select
@@ -32,6 +34,15 @@ export const PanelHeaderView = (props: {
       onClick={() => props.onRefresh()}
     >
       Refresh
+    </button>
+    <button
+      type="button"
+      class="panel-header-remove"
+      aria-label={`Remove panel ${props.panelIndex}`}
+      disabled={!props.canRemove}
+      onClick={() => props.onRemove()}
+    >
+      ×
     </button>
   </header>
 )

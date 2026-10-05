@@ -41,10 +41,10 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
       })
     })
     const grid = bindViewModel(runtime, "panelGrid", (runEffect) =>
-      createPanelGridViewModel(
-        runEffect,
-        layoutIdOrDefault(settings.layout),
-      ),
+      createPanelGridViewModel(runEffect, {
+        layoutId: layoutIdOrDefault(settings.layout),
+        panelProviders: settings.panelProviders,
+      }),
     )
     return {
       ...grid,

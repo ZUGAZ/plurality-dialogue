@@ -259,7 +259,7 @@ describe("panel grid view-model", () => {
         const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
         const vm = createPanelGridViewModel((effect) => {
           Runtime.runSync(runtime)(effect)
-        }, "2x2")
+        }, { layoutId: "2x2" })
         expect(vm.panels()).toHaveLength(4)
         yield* vm.selectLayout("1x2")
         const panels = vm.panels()

@@ -16,6 +16,10 @@ if (root !== null) {
           layoutRows={workspaceBindings.layoutRows}
           onPanelLoad={workspaceBindings.onPanelLoad}
           onSelectLayout={workspaceBindings.selectLayout}
+          addPanel={workspaceBindings.addPanel}
+          removePanel={workspaceBindings.removePanel}
+          canAddPanel={workspaceBindings.canAddPanel}
+          canRemovePanel={workspaceBindings.canRemovePanel}
           setPanelProvider={workspaceBindings.setPanelProvider}
           refreshPanel={workspaceBindings.refreshPanel}
           unifiedInput={workspaceBindings.unifiedInput}

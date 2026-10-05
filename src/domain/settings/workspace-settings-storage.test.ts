@@ -107,6 +107,56 @@ describe("workspace settings storage", () => {
     )
   })
 
+  it.layer(inMemoryStorageLayer())("round-trip with panelProviders", (it) => {
+    it.effect("persist then load keeps the provider order", () =>
+      Effect.gen(function* () {
+        const written: WorkspaceSettings = {
+          enabledProviders: ["chatgpt", "claude", "gemini"],
+          layout: "2x2",
+          panelProviders: ["claude", "claude", "gemini", "chatgpt"],
+        }
+        yield* persistWorkspaceSettings(written)
+        expect(yield* loadWorkspaceSettings()).toEqual(written)
+      }),
+    )
+  })
+
+  it.layer(
+    inMemoryStorageLayer({
+      [workspaceSettingsStorageKey]: {
+        enabledProviders: ["claude"],
+        layout: "1x2",
+      },
+    }),
+  )("legacy document", (it) => {
+    it.effect("loads without inventing panelProviders", () =>
+      Effect.gen(function* () {
+        const settings = yield* loadWorkspaceSettings()
+        expect(settings).toEqual({
+          enabledProviders: ["claude"],
+          layout: "1x2",
+        })
+        expect(settings).not.toHaveProperty("panelProviders")
+      }),
+    )
+  })
+
+  it.layer(
+    inMemoryStorageLayer({
+      [workspaceSettingsStorageKey]: {
+        enabledProviders: ["claude"],
+        layout: "1x2",
+        panelProviders: [],
+      },
+    }),
+  )("empty panelProviders", (it) => {
+    it.effect("loads defaults", () =>
+      Effect.gen(function* () {
+        expect(yield* loadWorkspaceSettings()).toEqual(defaultWorkspaceSettings)
+      }),
+    )
+  })
+
   it.layer(
     inMemoryStorageLayer({
       "other-key": "keep-me",

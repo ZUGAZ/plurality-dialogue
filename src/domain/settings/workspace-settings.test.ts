@@ -44,6 +44,80 @@ describe("workspace settings schema", () => {
     }
   })
 
+  it("decodes a legacy document without panelProviders unchanged", () => {
+    const decoded = decodeWorkspaceSettings({
+      enabledProviders: ["chatgpt"],
+      layout: "1x2",
+    })
+    expect(Either.isRight(decoded)).toBe(true)
+    if (Either.isRight(decoded)) {
+      expect(decoded.right).toEqual({
+        enabledProviders: ["chatgpt"],
+        layout: "1x2",
+      })
+      expect(decoded.right.panelProviders).toBeUndefined()
+    }
+  })
+
+  it("decodes panelProviders of length 1..4 including null entries", () => {
+    const decoded = decodeWorkspaceSettings({
+      enabledProviders: ["chatgpt", "claude", "gemini"],
+      layout: "1x3",
+      panelProviders: ["claude", "claude", "gemini"],
+    })
+    expect(Either.isRight(decoded)).toBe(true)
+    if (Either.isRight(decoded)) {
+      expect(decoded.right.panelProviders).toEqual([
+        "claude",
+        "claude",
+        "gemini",
+      ])
+    }
+    expect(
+      Either.isRight(
+        decodeWorkspaceSettings({
+          enabledProviders: [],
+          layout: "1x1",
+          panelProviders: [null],
+        }),
+      ),
+    ).toBe(true)
+    expect(
+      Either.isRight(
+        decodeWorkspaceSettings({
+          enabledProviders: ["chatgpt"],
+          layout: "2x2",
+          panelProviders: ["chatgpt", "chatgpt", "chatgpt", "chatgpt"],
+        }),
+      ),
+    ).toBe(true)
+  })
+
+  it("rejects panelProviders with grok, bad lengths, or a non-array", () => {
+    const base = { enabledProviders: ["chatgpt"], layout: "1x3" }
+    expect(
+      Either.isLeft(
+        decodeWorkspaceSettings({ ...base, panelProviders: ["grok"] }),
+      ),
+    ).toBe(true)
+    expect(
+      Either.isLeft(decodeWorkspaceSettings({ ...base, panelProviders: [] })),
+    ).toBe(true)
+    expect(
+      Either.isLeft(
+        decodeWorkspaceSettings({
+          ...base,
+          panelProviders: ["chatgpt", "chatgpt", "chatgpt", "chatgpt", "chatgpt"],
+        }),
+      ),
+    ).toBe(true)
+    expect(
+      Either.isLeft(
+        decodeWorkspaceSettings({ ...base, panelProviders: "chatgpt" }),
+      ),
+    ).toBe(true)
+  })
+
   it("rejects null, empty objects, and a missing provider list", () => {
     expect(Either.isLeft(decodeWorkspaceSettings(null))).toBe(true)
     expect(Either.isLeft(decodeWorkspaceSettings({}))).toBe(true)
@@ -108,6 +182,7 @@ describe("workspace settings schema", () => {
       "claude",
       "gemini",
     ])
+    expect(defaultWorkspaceSettings.panelProviders).toBeUndefined()
   })
 
   it("does not treat grok as a provider id", () => {

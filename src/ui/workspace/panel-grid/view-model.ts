@@ -3,6 +3,7 @@ import { batch, createSignal } from "solid-js"
 import {
   cellCount,
   defaultLayoutId,
+  layoutIdForCellCount,
   presetById,
   type LayoutId,
 } from "@domain/layout/presets"
@@ -10,22 +11,17 @@ import type { Messaging } from "@domain/ports/messaging"
 import type { Storage } from "@domain/ports/storage"
 import type { Tabs } from "@domain/ports/tabs"
 import type { Provider } from "@domain/provider/provider"
-import { providerIds, type ProviderId } from "@domain/provider/provider-id"
+import type { ProviderId } from "@domain/provider/provider-id"
 import {
   getBuiltInProvider,
   listEnabledProviders,
 } from "@domain/provider/registry"
 import { requestFramingRules } from "@domain/workspace/request-framing-rules"
 import type { RunEffect } from "@ui/common/viewmodel/bind-viewmodel"
-import { persistLayoutId } from "@ui/workspace/layout-presets/view-model"
+import { persistLayoutAndPanelProviders } from "@ui/workspace/layout-presets/view-model"
 import {
-  bumpPanelGeneration,
-  createDefaultSlots,
   decodeProviderId,
   layoutTrackCounts,
-  reconcileSlotsWithEnabled,
-  replacePanelProvider,
-  resizeSlots,
   selectOptions,
   handshakeErrorText,
   toPanelViewState,
@@ -33,6 +29,20 @@ import {
   type PanelViewState,
   type ProviderOption,
 } from "./model"
+import {
+  appendPanelSlot,
+  bumpPanelGeneration,
+  canAddPanel,
+  canRemovePanel,
+  hiddenSlot,
+  initialPanelGrid,
+  panelProvidersFromSlots,
+  reconcileSlotsWithEnabled,
+  removePanelSlot,
+  replacePanelProvider,
+  resizeSlots,
+  staleLoadedPanelIds,
+} from "./slots"
 
 export type PanelGridViewModel = {
   readonly layoutId: () => LayoutId
@@ -44,17 +54,29 @@ export type PanelGridViewModel = {
   readonly selectLayout: (
     id: LayoutId,
   ) => Effect.Effect<void, never, Storage>
+  readonly addPanel: () => Effect.Effect<void, never, Storage>
+  readonly removePanel: (
+    panelId: string,
+  ) => Effect.Effect<void, never, Storage>
+  readonly canAddPanel: () => boolean
+  readonly canRemovePanel: () => boolean
   readonly setPanelProvider: (
     panelId: string,
     rawId: string,
-  ) => Effect.Effect<void>
+  ) => Effect.Effect<void, never, Storage>
   readonly refreshPanel: (panelId: string) => Effect.Effect<void>
+}
+
+export type PanelGridInitial = {
+  readonly layoutId: LayoutId
+  readonly panelProviders?: readonly (ProviderId | null)[]
 }
 
 export const createPanelGridViewModel = (
   runEffect: RunEffect<Storage | Tabs | Messaging>,
-  initialLayout: LayoutId = defaultLayoutId,
+  initial: PanelGridInitial = { layoutId: defaultLayoutId },
 ): PanelGridViewModel => {
+  const start = initialPanelGrid(initial.layoutId, initial.panelProviders)
   const [providers, setProviders] =
     createSignal<readonly Provider[]>(emptyProviders)
   const [enabledListReady, setEnabledListReady] = createSignal(false)
@@ -65,13 +87,8 @@ export const createPanelGridViewModel = (
   )
   const [loadedPanelIds, setLoadedPanelIds] =
     createSignal<ReadonlySet<string>>(emptyLoadedIds)
-  const [layoutId, setLayoutId] = createSignal<LayoutId>(initialLayout)
-  const [slots, setSlots] = createSignal<readonly PanelSlot[]>(
-    createDefaultSlots(
-      providerIds,
-      cellCount(presetById(initialLayout)),
-    ),
-  )
+  const [layoutId, setLayoutId] = createSignal<LayoutId>(start.layoutId)
+  const [slots, setSlots] = createSignal<readonly PanelSlot[]>(start.slots)
 
   const dropLoadedPanelIds = (panelIds: readonly string[]): void => {
     if (panelIds.length === 0) {
@@ -96,10 +113,7 @@ export const createPanelGridViewModel = (
     }
     batch(() => {
       setSlots(next)
-      dropLoadedPanelIds([
-        ...bumpedPanelIds(previous, next),
-        ...removedPanelIds(previous, next),
-      ])
+      dropLoadedPanelIds(staleLoadedPanelIds(previous, next))
     })
   }
 
@@ -171,23 +185,6 @@ export const createPanelGridViewModel = (
     })
   }
 
-  const setPanelProvider = (
-    panelId: string,
-    rawId: string,
-  ): Effect.Effect<void> => {
-    const decoded = decodeProviderId(rawId, enabledIds())
-    if (decoded === null) {
-      return Effect.void
-    }
-    return Effect.log("set panel provider", panelId, decoded).pipe(
-      Effect.zipRight(
-        Effect.sync(() => {
-          commitSlots(replacePanelProvider(slots(), panelId, decoded))
-        }),
-      ),
-    )
-  }
-
   const refreshPanel = (panelId: string): Effect.Effect<void> =>
     Effect.log("refresh panel", panelId).pipe(
       Effect.zipRight(
@@ -202,19 +199,88 @@ export const createPanelGridViewModel = (
       ),
     )
 
-  const applySelectedLayout = (id: LayoutId): void => {
-    setLayoutId(id)
-    commitSlots(
-      resizeSlots(slots(), enabledIds(), cellCount(presetById(id))),
+  const persistGrid = (
+    layout: LayoutId,
+    next: readonly PanelSlot[],
+  ): Effect.Effect<boolean, never, Storage> =>
+    persistLayoutAndPanelProviders(layout, panelProvidersFromSlots(next)).pipe(
+      Effect.as(true),
+      Effect.catchTag("StorageWriteError", () => Effect.succeed(false)),
+      Effect.catchTag("ParseError", () => Effect.succeed(false)),
+    )
+
+  const persistThenApply = (
+    layout: LayoutId,
+    next: readonly PanelSlot[],
+  ): Effect.Effect<void, never, Storage> =>
+    persistGrid(layout, next).pipe(
+      Effect.flatMap((saved) =>
+        saved
+          ? Effect.sync(() => {
+              batch(() => {
+                setLayoutId(layout)
+                commitSlots(next)
+              })
+            })
+          : Effect.void,
+      ),
+    )
+
+  const setPanelProvider = (
+    panelId: string,
+    rawId: string,
+  ): Effect.Effect<void, never, Storage> => {
+    const decoded = decodeProviderId(rawId, enabledIds())
+    const next =
+      decoded === null
+        ? slots()
+        : replacePanelProvider(slots(), panelId, decoded)
+    if (next === slots()) {
+      return Effect.void
+    }
+    return Effect.log("set panel provider", panelId, decoded).pipe(
+      Effect.zipRight(persistThenApply(layoutId(), next)),
     )
   }
 
   const selectLayout = (id: LayoutId) =>
     Effect.log("select layout", id).pipe(
-      Effect.zipRight(persistLayoutId(id)),
-      Effect.tap(() => Effect.sync(() => applySelectedLayout(id))),
-      Effect.catchTag("StorageWriteError", () => Effect.void),
-      Effect.catchTag("ParseError", () => Effect.void),
+      Effect.zipRight(
+        Effect.suspend(() =>
+          persistThenApply(
+            id,
+            resizeSlots(slots(), enabledIds(), cellCount(presetById(id))),
+          ),
+        ),
+      ),
+    )
+
+  const changePanelCount = (
+    label: string,
+    next: () => readonly PanelSlot[],
+  ): Effect.Effect<void, never, Storage> =>
+    Effect.log(label).pipe(
+      Effect.zipRight(
+        Effect.suspend(() => {
+          const slotsAfter = next()
+          return slotsAfter === slots()
+            ? Effect.void
+            : persistThenApply(
+                layoutIdForCellCount(slotsAfter.length),
+                slotsAfter,
+              )
+        }),
+      ),
+    )
+
+  const addPanel = () =>
+    changePanelCount("add panel", () =>
+      appendPanelSlot(slots(), enabledIds()),
+    )
+
+  const removePanel = (panelId: string) =>
+    changePanelCount(`remove panel ${panelId}`, () =>
+      removePanelSlot(slots(), panelId),
     )
 
   const tracks = () => layoutTrackCounts(layoutId())
@@ -227,6 +293,10 @@ export const createPanelGridViewModel = (
     options,
     onPanelLoad,
     selectLayout,
+    addPanel,
+    removePanel,
+    canAddPanel: () => canAddPanel(slots()),
+    canRemovePanel: () => canRemovePanel(slots()),
     setPanelProvider,
     refreshPanel,
   }
@@ -236,12 +306,6 @@ const emptyProviders: readonly Provider[] = []
 
 const emptyLoadedIds: ReadonlySet<string> = new Set()
 
-const hiddenSlot = (slot: PanelSlot): PanelSlot => ({
-  id: slot.id,
-  providerId: null,
-  reloadGeneration: slot.reloadGeneration,
-})
-
 const embedUrlFor = (providerId: ProviderId | null): string | undefined => {
   if (providerId === null) {
     return undefined
@@ -249,25 +313,4 @@ const embedUrlFor = (providerId: ProviderId | null): string | undefined => {
   return Option.getOrUndefined(
     Option.map(getBuiltInProvider(providerId), (definition) => definition.url),
   )
-}
-
-const bumpedPanelIds = (
-  previous: readonly PanelSlot[],
-  next: readonly PanelSlot[],
-): readonly string[] =>
-  next
-    .filter(
-      (slot, index) =>
-        slot.reloadGeneration !== previous[index]?.reloadGeneration,
-    )
-    .map((slot) => slot.id)
-
-const removedPanelIds = (
-  previous: readonly PanelSlot[],
-  next: readonly PanelSlot[],
-): readonly string[] => {
-  const nextIds = new Set(next.map((slot) => slot.id))
-  return previous
-    .filter((slot) => !nextIds.has(slot.id))
-    .map((slot) => slot.id)
 }

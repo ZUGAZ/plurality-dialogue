@@ -4,6 +4,6 @@ import "./view.css"
 export const WorkspaceShell = (props: { children: JSX.Element }) => (
   <header class="workspace-shell">
     <h1>Plurality Dialogue</h1>
-    {props.children}
+    <div class="workspace-shell-actions">{props.children}</div>
   </header>
 )

@@ -54,6 +54,12 @@ const gridById: { readonly [Id in LayoutId]: LayoutGrid } = {
 
 export const presetById = (id: LayoutId): LayoutGrid => gridById[id]
 
+export const maxCellCount: number = Math.max(...layoutPresets.map(cellCount))
+
+export const layoutIdForCellCount = (count: number): LayoutId =>
+  layoutPresets.find((preset) => cellCount(preset) === count)?.id ??
+  defaultLayoutId
+
 export const providerAt = (
   enabledIds: readonly ProviderId[],
   index: number,

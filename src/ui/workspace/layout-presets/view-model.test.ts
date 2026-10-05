@@ -8,7 +8,7 @@ import { Messaging } from "@domain/ports/messaging"
 import { Storage, StorageWriteError } from "@domain/ports/storage"
 import { Tabs } from "@domain/ports/tabs"
 import { workspaceSettingsStorageKey } from "@domain/settings/workspace-settings"
-import { persistLayoutId } from "./view-model"
+import { persistLayoutAndPanelProviders } from "./view-model"
 import { createPanelGridViewModel } from "../panel-grid/view-model"
 
 const readyLayer = Layer.mergeAll(
@@ -32,17 +32,23 @@ const failingWriteLayer = Layer.mergeAll(
   inMemoryMessagingLayer(() => Effect.succeed(FramingRulesReady.make({}))),
 )
 
-describe("persistLayoutId", () => {
+describe("persistLayoutAndPanelProviders", () => {
   it.layer(inMemoryStorageLayer())("empty store", (it) => {
-    it.effect("writes layout on workspace-settings and not lastLayout", () =>
+    it.effect("writes layout and panelProviders on workspace-settings and not lastLayout", () =>
       Effect.gen(function* () {
-        yield* persistLayoutId("2x2")
+        yield* persistLayoutAndPanelProviders("2x2", [
+          "chatgpt",
+          "claude",
+          "gemini",
+          "chatgpt",
+        ])
         const storage = yield* Storage
         const stored = yield* storage.get(workspaceSettingsStorageKey)
         expect(stored).toEqual(
           Option.some({
             enabledProviders: ["chatgpt", "claude", "gemini"],
             layout: "2x2",
+            panelProviders: ["chatgpt", "claude", "gemini", "chatgpt"],
           }),
         )
         if (Option.isSome(stored)) {
@@ -60,7 +66,7 @@ describe("selectLayout", () => {
         const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
         const vm = createPanelGridViewModel((effect) => {
           Runtime.runSync(runtime)(effect)
-        }, "1x1")
+        }, { layoutId: "1x1" })
         expect(vm.layoutId()).toBe("1x1")
         expect(vm.panels()).toHaveLength(1)
         expect(vm.layoutColumns()).toBe(1)
@@ -84,6 +90,7 @@ describe("selectLayout", () => {
           Option.some({
             enabledProviders: ["chatgpt", "claude", "gemini"],
             layout: "2x2",
+            panelProviders: ["chatgpt", "claude", "gemini", "chatgpt"],
           }),
         )
         if (Option.isSome(stored)) {

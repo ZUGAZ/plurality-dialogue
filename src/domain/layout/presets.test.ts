@@ -4,7 +4,9 @@ import {
   cellCount,
   defaultLayoutId,
   isLayoutId,
+  layoutIdForCellCount,
   layoutIdOrDefault,
+  maxCellCount,
   layoutPresets,
   presetById,
   providerAt,
@@ -64,6 +66,18 @@ describe("layout presets", () => {
     expect(layoutIdOrDefault("")).toBe("1x3")
     expect(layoutIdOrDefault(null)).toBe("1x3")
     expect(layoutIdOrDefault({})).toBe("1x3")
+  })
+
+  it("layoutIdForCellCount maps 1..4 and falls back to the default", () => {
+    expect(layoutIdForCellCount(1)).toBe("1x1")
+    expect(layoutIdForCellCount(2)).toBe("1x2")
+    expect(layoutIdForCellCount(3)).toBe("1x3")
+    expect(layoutIdForCellCount(4)).toBe("2x2")
+    expect(layoutIdForCellCount(0)).toBe(defaultLayoutId)
+    expect(layoutIdForCellCount(5)).toBe(defaultLayoutId)
+    expect(layoutPresets).toHaveLength(4)
+    expect(layoutPresets.map((preset) => preset.id)).not.toContain("1x4")
+    expect(maxCellCount).toBe(4)
   })
 
   it("providerAt cycles enabled ids and is none when empty", () => {

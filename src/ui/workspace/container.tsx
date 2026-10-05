@@ -9,6 +9,10 @@ export const WorkspaceContainer = (props: WorkspaceViewProps) => (
     layoutRows={props.layoutRows}
     onPanelLoad={props.onPanelLoad}
     onSelectLayout={props.onSelectLayout}
+    addPanel={props.addPanel}
+    removePanel={props.removePanel}
+    canAddPanel={props.canAddPanel}
+    canRemovePanel={props.canRemovePanel}
     setPanelProvider={props.setPanelProvider}
     refreshPanel={props.refreshPanel}
     unifiedInput={props.unifiedInput}
