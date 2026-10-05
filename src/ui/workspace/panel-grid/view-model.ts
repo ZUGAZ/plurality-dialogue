@@ -3,7 +3,7 @@ import { batch, createSignal } from "solid-js"
 import {
   cellCount,
   defaultLayoutId,
-  layoutIdForCellCount,
+  layoutIdForCellCountOnTrack,
   presetById,
   type LayoutId,
 } from "@domain/layout/presets"
@@ -266,7 +266,7 @@ export const createPanelGridViewModel = (
           return slotsAfter === slots()
             ? Effect.void
             : persistThenApply(
-                layoutIdForCellCount(slotsAfter.length),
+                layoutIdForCellCountOnTrack(slotsAfter.length, layoutId()),
                 slotsAfter,
               )
         }),

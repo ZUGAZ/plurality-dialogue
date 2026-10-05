@@ -49,7 +49,7 @@ const storedSettings = Effect.gen(function* () {
 })
 
 describe("panel grid view-model panel count", () => {
-  it.effect("addPanel on 1x3 yields four panels, 2x2, and persists both", () =>
+  it.effect("addPanel on 1x3 yields four panels, 1x4, and persists both", () =>
     Effect.gen(function* () {
       const vm = yield* makeVm()
       yield* vm.setPanelProvider("panel-2", "chatgpt")
@@ -67,14 +67,14 @@ describe("panel grid view-model panel count", () => {
         "gemini",
         "chatgpt",
       ])
-      expect(vm.layoutId()).toBe("2x2")
-      expect(vm.layoutColumns()).toBe(2)
-      expect(vm.layoutRows()).toBe(2)
+      expect(vm.layoutId()).toBe("1x4")
+      expect(vm.layoutColumns()).toBe(4)
+      expect(vm.layoutRows()).toBe(1)
       expect(vm.canAddPanel()).toBe(false)
       expect(yield* storedSettings).toEqual(
         Option.some({
           enabledProviders: ["chatgpt", "claude", "gemini"],
-          layout: "2x2",
+          layout: "1x4",
           panelProviders: ["chatgpt", "chatgpt", "gemini", "chatgpt"],
         }),
       )

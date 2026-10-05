@@ -98,6 +98,29 @@ describe("selectLayout", () => {
         }
       }),
     )
+
+    it.effect("selectLayout 1x4 writes layout and updates the signal", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        })
+        yield* vm.selectLayout("1x4")
+        expect(vm.layoutId()).toBe("1x4")
+        expect(vm.panels()).toHaveLength(4)
+        expect(vm.layoutColumns()).toBe(4)
+        expect(vm.layoutRows()).toBe(1)
+        const storage = yield* Storage
+        const stored = yield* storage.get(workspaceSettingsStorageKey)
+        expect(stored).toEqual(
+          Option.some({
+            enabledProviders: ["chatgpt", "claude", "gemini"],
+            layout: "1x4",
+            panelProviders: ["chatgpt", "claude", "gemini", "chatgpt"],
+          }),
+        )
+      }),
+    )
   })
 
   it.layer(failingWriteLayer)("failed persist", (it) => {

@@ -6,6 +6,7 @@ export const LayoutId = Schema.Union(
   Schema.Literal("1x2"),
   Schema.Literal("1x3"),
   Schema.Literal("2x2"),
+  Schema.Literal("1x4"),
 )
 
 export type LayoutId = typeof LayoutId.Type
@@ -37,19 +38,22 @@ const layout1x1: LayoutGrid = { id: "1x1", columnCount: 1, rowCount: 1 }
 const layout1x2: LayoutGrid = { id: "1x2", columnCount: 2, rowCount: 1 }
 const layout1x3: LayoutGrid = { id: "1x3", columnCount: 3, rowCount: 1 }
 const layout2x2: LayoutGrid = { id: "2x2", columnCount: 2, rowCount: 2 }
+const layout1x4: LayoutGrid = { id: "1x4", columnCount: 4, rowCount: 1 }
 
 export const layoutPresets: readonly [
   LayoutGrid,
   LayoutGrid,
   LayoutGrid,
   LayoutGrid,
-] = [layout1x1, layout1x2, layout1x3, layout2x2]
+  LayoutGrid,
+] = [layout1x1, layout1x2, layout1x3, layout2x2, layout1x4]
 
 const gridById: { readonly [Id in LayoutId]: LayoutGrid } = {
   "1x1": layout1x1,
   "1x2": layout1x2,
   "1x3": layout1x3,
   "2x2": layout2x2,
+  "1x4": layout1x4,
 }
 
 export const presetById = (id: LayoutId): LayoutGrid => gridById[id]
@@ -59,6 +63,20 @@ export const maxCellCount: number = Math.max(...layoutPresets.map(cellCount))
 export const layoutIdForCellCount = (count: number): LayoutId =>
   layoutPresets.find((preset) => cellCount(preset) === count)?.id ??
   defaultLayoutId
+
+export const is1xN = (id: LayoutId): boolean => presetById(id).rowCount === 1
+
+export const layoutIdForCellCountOnTrack = (
+  count: number,
+  currentLayoutId: LayoutId,
+): LayoutId => {
+  const onTrack = is1xN(currentLayoutId)
+    ? layoutPresets.find(
+        (preset) => preset.rowCount === 1 && cellCount(preset) === count,
+      )
+    : undefined
+  return onTrack?.id ?? layoutIdForCellCount(count)
+}
 
 export const providerAt = (
   enabledIds: readonly ProviderId[],

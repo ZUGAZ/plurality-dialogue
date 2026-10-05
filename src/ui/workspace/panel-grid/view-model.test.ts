@@ -271,4 +271,56 @@ describe("panel grid view-model", () => {
       }),
     )
   })
+
+  it.layer(readyLayer)("1xN add and remove", (it) => {
+    it.effect("addPanel on 1x3 selects 1x4", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        })
+        expect(vm.layoutId()).toBe("1x3")
+        yield* vm.addPanel()
+        expect(vm.layoutId()).toBe("1x4")
+        expect(vm.panels()).toHaveLength(4)
+        expect(vm.layoutColumns()).toBe(4)
+        expect(vm.layoutRows()).toBe(1)
+      }),
+    )
+
+    it.effect("removePanel on 1x4 selects 1x3", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        }, { layoutId: "1x4" })
+        expect(vm.layoutId()).toBe("1x4")
+        expect(vm.panels()).toHaveLength(4)
+        expect(vm.layoutColumns()).toBe(4)
+        expect(vm.layoutRows()).toBe(1)
+        yield* vm.removePanel("panel-4")
+        expect(vm.layoutId()).toBe("1x3")
+        expect(vm.panels()).toHaveLength(3)
+        expect(vm.layoutColumns()).toBe(3)
+        expect(vm.layoutRows()).toBe(1)
+      }),
+    )
+
+    it.effect("removePanel after an explicit 2x2 pick selects 1x3", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        })
+        yield* vm.selectLayout("2x2")
+        expect(vm.layoutId()).toBe("2x2")
+        expect(vm.panels()).toHaveLength(4)
+        yield* vm.removePanel("panel-4")
+        expect(vm.layoutId()).toBe("1x3")
+        expect(vm.panels()).toHaveLength(3)
+        expect(vm.layoutColumns()).toBe(3)
+        expect(vm.layoutRows()).toBe(1)
+      }),
+    )
+  })
 })

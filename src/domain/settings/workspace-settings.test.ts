@@ -1,5 +1,6 @@
 import { Either } from "effect"
 import { describe, expect, it } from "@effect/vitest"
+import { layoutIdOrDefault } from "@domain/layout/presets"
 import { isProviderId } from "../provider/provider-id"
 import {
   decodeWorkspaceSettings,
@@ -27,6 +28,18 @@ describe("workspace settings schema", () => {
         }),
       ),
     ).toBe(true)
+  })
+
+  it("decodes 1x4 and treats it as a real preset", () => {
+    expect(
+      Either.isRight(
+        decodeWorkspaceSettings({
+          enabledProviders: ["chatgpt"],
+          layout: "1x4",
+        }),
+      ),
+    ).toBe(true)
+    expect(layoutIdOrDefault("1x4")).toBe("1x4")
   })
 
   it("ignores an extra unused key when required fields are valid", () => {
