@@ -1,12 +1,6 @@
 import { Effect, Option } from "effect"
 import { batch, createSignal } from "solid-js"
-import {
-  cellCount,
-  defaultLayoutId,
-  layoutIdForCellCountOnTrack,
-  presetById,
-  type LayoutId,
-} from "@domain/layout/presets"
+import { defaultLayoutId, type LayoutId } from "@domain/layout/presets"
 import type { Messaging } from "@domain/ports/messaging"
 import type { Storage } from "@domain/ports/storage"
 import type { Tabs } from "@domain/ports/tabs"
@@ -18,29 +12,24 @@ import {
 } from "@domain/provider/registry"
 import { requestFramingRules } from "@domain/workspace/request-framing-rules"
 import type { RunEffect } from "@ui/common/viewmodel/bind-viewmodel"
-import { persistLayoutAndPanelProviders } from "@ui/workspace/layout-presets/view-model"
 import {
-  decodeProviderId,
+  handshakeErrorText,
   layoutTrackCounts,
   selectOptions,
-  handshakeErrorText,
   toPanelViewState,
   type PanelSlot,
   type PanelViewState,
   type ProviderOption,
 } from "./model"
+import { createPersistedGridActions } from "./persisted-grid-actions"
 import {
-  appendPanelSlot,
+  bumpAllLoadedPanels,
   bumpPanelGeneration,
   canAddPanel,
   canRemovePanel,
   hiddenSlot,
   initialPanelGrid,
-  panelProvidersFromSlots,
   reconcileSlotsWithEnabled,
-  removePanelSlot,
-  replacePanelProvider,
-  resizeSlots,
   staleLoadedPanelIds,
 } from "./slots"
 
@@ -65,6 +54,7 @@ export type PanelGridViewModel = {
     rawId: string,
   ) => Effect.Effect<void, never, Storage>
   readonly refreshPanel: (panelId: string) => Effect.Effect<void>
+  readonly newChatForAll: () => Effect.Effect<void>
 }
 
 export type PanelGridInitial = {
@@ -199,88 +189,29 @@ export const createPanelGridViewModel = (
       ),
     )
 
-  const persistGrid = (
-    layout: LayoutId,
-    next: readonly PanelSlot[],
-  ): Effect.Effect<boolean, never, Storage> =>
-    persistLayoutAndPanelProviders(layout, panelProvidersFromSlots(next)).pipe(
-      Effect.as(true),
-      Effect.catchTag("StorageWriteError", () => Effect.succeed(false)),
-      Effect.catchTag("ParseError", () => Effect.succeed(false)),
-    )
+  const persisted = createPersistedGridActions({
+    slots,
+    layoutId,
+    enabledIds,
+    applySavedGrid: (layout, next) => {
+      batch(() => {
+        setLayoutId(layout)
+        commitSlots(next)
+      })
+    },
+  })
 
-  const persistThenApply = (
-    layout: LayoutId,
-    next: readonly PanelSlot[],
-  ): Effect.Effect<void, never, Storage> =>
-    persistGrid(layout, next).pipe(
-      Effect.flatMap((saved) =>
-        saved
-          ? Effect.sync(() => {
-              batch(() => {
-                setLayoutId(layout)
-                commitSlots(next)
-              })
-            })
-          : Effect.void,
-      ),
-    )
-
-  const setPanelProvider = (
-    panelId: string,
-    rawId: string,
-  ): Effect.Effect<void, never, Storage> => {
-    const decoded = decodeProviderId(rawId, enabledIds())
-    const next =
-      decoded === null
-        ? slots()
-        : replacePanelProvider(slots(), panelId, decoded)
-    if (next === slots()) {
-      return Effect.void
-    }
-    return Effect.log("set panel provider", panelId, decoded).pipe(
-      Effect.zipRight(persistThenApply(layoutId(), next)),
-    )
-  }
-
-  const selectLayout = (id: LayoutId) =>
-    Effect.log("select layout", id).pipe(
+  const newChatForAll = (): Effect.Effect<void> =>
+    Effect.log("new chat for all").pipe(
       Effect.zipRight(
-        Effect.suspend(() =>
-          persistThenApply(
-            id,
-            resizeSlots(slots(), enabledIds(), cellCount(presetById(id))),
-          ),
-        ),
-      ),
-    )
-
-  const changePanelCount = (
-    label: string,
-    next: () => readonly PanelSlot[],
-  ): Effect.Effect<void, never, Storage> =>
-    Effect.log(label).pipe(
-      Effect.zipRight(
-        Effect.suspend(() => {
-          const slotsAfter = next()
-          return slotsAfter === slots()
-            ? Effect.void
-            : persistThenApply(
-                layoutIdForCellCountOnTrack(slotsAfter.length, layoutId()),
-                slotsAfter,
-              )
+        Effect.sync(() => {
+          const bumped = bumpAllLoadedPanels(slots(), loadedPanelIds())
+          if (bumped !== slots()) {
+            commitSlots(bumped)
+            setLoadedPanelIds(new Set<string>())
+          }
         }),
       ),
-    )
-
-  const addPanel = () =>
-    changePanelCount("add panel", () =>
-      appendPanelSlot(slots(), enabledIds()),
-    )
-
-  const removePanel = (panelId: string) =>
-    changePanelCount(`remove panel ${panelId}`, () =>
-      removePanelSlot(slots(), panelId),
     )
 
   const tracks = () => layoutTrackCounts(layoutId())
@@ -292,13 +223,14 @@ export const createPanelGridViewModel = (
     panels,
     options,
     onPanelLoad,
-    selectLayout,
-    addPanel,
-    removePanel,
+    selectLayout: persisted.selectLayout,
+    addPanel: persisted.addPanel,
+    removePanel: persisted.removePanel,
     canAddPanel: () => canAddPanel(slots()),
     canRemovePanel: () => canRemovePanel(slots()),
-    setPanelProvider,
+    setPanelProvider: persisted.setPanelProvider,
     refreshPanel,
+    newChatForAll,
   }
 }
 

@@ -15,6 +15,7 @@ export const WorkspaceContainer = (props: WorkspaceViewProps) => (
     canRemovePanel={props.canRemovePanel}
     setPanelProvider={props.setPanelProvider}
     refreshPanel={props.refreshPanel}
+    onNewChat={props.onNewChat}
     unifiedInput={props.unifiedInput}
   />
 )

@@ -22,6 +22,7 @@ if (root !== null) {
           canRemovePanel={workspaceBindings.canRemovePanel}
           setPanelProvider={workspaceBindings.setPanelProvider}
           refreshPanel={workspaceBindings.refreshPanel}
+          onNewChat={workspaceBindings.newChatForAll}
           unifiedInput={workspaceBindings.unifiedInput}
         />
       ),

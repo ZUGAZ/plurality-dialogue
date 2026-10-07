@@ -43,6 +43,10 @@ export default tseslint.config(
         { pattern: "src/**/*.test.ts", category: "test" },
         { pattern: "src/**/*.tsx", category: "tsx" },
         { pattern: "src/ui/**/view-model.ts", category: "view-model" },
+        {
+          pattern: "src/ui/workspace/panel-grid/persisted-grid-actions.ts",
+          category: "view-model",
+        },
         { pattern: "src/ui/**/model.ts", category: "presentation-model" },
         { pattern: "src/ui/**/slots.ts", category: "presentation-model" },
       ],

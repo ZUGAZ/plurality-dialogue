@@ -3,6 +3,7 @@ import { LayoutPresetsView } from "./layout-presets/view"
 import type { PanelViewState, ProviderOption } from "./panel-grid/model"
 import { PanelGridView } from "./panel-grid/view"
 import { AddPanelButton } from "./shell/add-panel-button"
+import { NewChatButton } from "./shell/new-chat-button"
 import { WorkspaceShell } from "./shell/view"
 import { UnifiedInputContainer } from "./unified-input/container"
 import type { UnifiedInputViewProps } from "./unified-input/view"
@@ -22,12 +23,14 @@ export type WorkspaceViewProps = {
   readonly canRemovePanel: () => boolean
   readonly setPanelProvider: (panelId: string, rawId: string) => void
   readonly refreshPanel: (panelId: string) => void
+  readonly onNewChat: () => void
   readonly unifiedInput: UnifiedInputViewProps
 }
 
 export const WorkspaceView = (props: WorkspaceViewProps) => (
   <div class="workspace">
     <WorkspaceShell>
+      <NewChatButton onClick={props.onNewChat} />
       <AddPanelButton canAdd={props.canAddPanel()} onAdd={props.addPanel} />
       <LayoutPresetsView
         items={layoutPickerItems}

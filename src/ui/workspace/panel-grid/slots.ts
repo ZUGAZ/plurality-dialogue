@@ -127,6 +127,18 @@ export const bumpPanelGeneration = (
   )
 }
 
+export const bumpAllLoadedPanels = (
+  slots: readonly PanelSlot[],
+  loadedIds: ReadonlySet<string>,
+): readonly PanelSlot[] => {
+  const next = slots.map((slot) =>
+    loadedIds.has(slot.id) && slot.providerId !== null
+      ? { ...slot, reloadGeneration: slot.reloadGeneration + 1 }
+      : slot,
+  )
+  return sameSlots(slots, next) ? slots : next
+}
+
 export const reconcileSlotsWithEnabled = (
   slots: readonly PanelSlot[],
   enabledIds: readonly ProviderId[],

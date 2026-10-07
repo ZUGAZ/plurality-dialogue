@@ -46,16 +46,21 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
         panelProviders: settings.panelProviders,
       }),
     )
-    return {
-      ...grid,
-      unifiedInput: bindViewModel(runtime, "unifiedInput", (runEffect) =>
-        createUnifiedInputViewModel(runEffect, () =>
-          resolveBroadcastTargets(
-            toVisiblePanels(grid.panels()),
-            frames.list(),
-          ),
+    const unifiedInput = bindViewModel(runtime, "unifiedInput", (runEffect) =>
+      createUnifiedInputViewModel(runEffect, () =>
+        resolveBroadcastTargets(
+          toVisiblePanels(grid.panels()),
+          frames.list(),
         ),
       ),
+    )
+    return {
+      ...grid,
+      unifiedInput,
+      newChatForAll: () => {
+        unifiedInput.clearStatus()
+        return grid.newChatForAll()
+      },
     }
   }).pipe(Effect.withLogSpan("workspace")),
 )

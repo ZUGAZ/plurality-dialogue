@@ -25,6 +25,7 @@ export type UnifiedInputViewModel = {
   readonly statusText: () => string
   readonly setDraft: (text: string) => void
   readonly clear: () => void
+  readonly clearStatus: () => void
   readonly fill: () => Effect.Effect<void, never, Messaging>
   readonly sendAll: () => Effect.Effect<void, never, Messaging>
 }
@@ -44,6 +45,10 @@ export const createUnifiedInputViewModel = <Requirements>(
     setStatus(idleStatus)
   }
 
+  const clearStatus = (): void => {
+    setStatus(idleStatus)
+  }
+
   const sink = { draft, setDraft, setStatus }
   const fill = () => runBroadcast("fill", getPlan, sink)
   const sendAll = () => runBroadcast("send", getPlan, sink)
@@ -55,6 +60,7 @@ export const createUnifiedInputViewModel = <Requirements>(
     statusText,
     setDraft,
     clear,
+    clearStatus,
     fill,
     sendAll,
   }

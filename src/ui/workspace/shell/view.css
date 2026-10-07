@@ -26,3 +26,18 @@
 .add-panel-button {
   min-inline-size: 2rem;
 }
+
+.new-chat-button {
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d0d0d0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.new-chat-button:focus-visible {
+  outline: 3px solid #0b57d0;
+  outline-offset: 2px;
+}

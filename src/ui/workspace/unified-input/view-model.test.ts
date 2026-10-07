@@ -135,6 +135,30 @@ describe("unified input view-model", () => {
           session.dispose()
         }),
       )
+
+      it.effect("clearStatus returns to idle and keeps the draft", () =>
+        Effect.gen(function* () {
+          const session = openSession(() => ({
+            targets: [],
+            notReady: [
+              PanelFailed.make({
+                panelId: "panel-1",
+                providerId: "chatgpt",
+                reason: "frame-not-ready",
+              }),
+            ],
+          }))
+          session.vm.setDraft("hi")
+          yield* session.vm.fill()
+          expect(session.vm.statusText()).toBe("Failed: panel-1 (ChatGPT)")
+          session.vm.clearStatus()
+          expect(session.vm.draft()).toBe("hi")
+          expect(session.vm.hasDraft()).toBe(true)
+          expect(session.vm.status()).toEqual({ kind: "idle" })
+          expect(session.vm.statusText()).toBe("")
+          session.dispose()
+        }),
+      )
     },
   )
 
