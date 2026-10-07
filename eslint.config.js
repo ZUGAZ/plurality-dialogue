@@ -55,6 +55,10 @@ export default tseslint.config(
           pattern: "src/ui/workspace/panel-grid/persisted-grid-actions.ts",
           category: "view-model",
         },
+        {
+          pattern: "src/ui/workspace/prompt-library/fill-actions.ts",
+          category: "view-model",
+        },
         { pattern: "src/ui/**/model.ts", category: "presentation-model" },
         { pattern: "src/ui/**/slots.ts", category: "presentation-model" },
       ],

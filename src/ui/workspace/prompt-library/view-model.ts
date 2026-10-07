@@ -9,11 +9,11 @@ import {
   deletePrompt,
   listPrompts,
   setPromptFavorite,
-  touchPromptUsed,
   updatePrompt,
 } from "@domain/prompt/prompt-crud"
 import type { PromptLibrary } from "@domain/ports/prompt-library"
 import type { RunEffect } from "@ui/common/viewmodel/bind-viewmodel"
+import { createPromptFill, type PromptFillActions } from "./fill-actions"
 import {
   couldNotLoadPrompts,
   couldNotSaveText,
@@ -23,6 +23,7 @@ import {
   splitTags,
   titleRequiredText,
   type ListedPrompt,
+  type PendingPromptFill,
   type PromptEditorDraft,
   type PromptLibraryMode,
 } from "./model"
@@ -32,7 +33,7 @@ export type PromptLibraryDeps = {
   readonly focusPrompt: () => void
 }
 
-export type PromptLibraryViewModel = {
+export type PromptLibraryViewModel = PromptFillActions & {
   readonly isOpen: () => boolean
   readonly mode: () => PromptLibraryMode
   readonly prompts: () => readonly Prompt[]
@@ -64,9 +65,6 @@ export type PromptLibraryViewModel = {
   readonly cancelEdit: () => void
   readonly save: () => Effect.Effect<void, never, PromptLibrary>
   readonly remove: () => Effect.Effect<void, never, PromptLibrary>
-  readonly applyPrompt: (
-    prompt: ListedPrompt,
-  ) => Effect.Effect<void, never, PromptLibrary>
 }
 
 type WriteOutcome = "saved" | "gone" | "failed"
@@ -83,6 +81,9 @@ export const createPromptLibraryViewModel = (
   const [favoritesOnly, setFavoritesOnly] = createSignal(false)
   const [sort, setSort] = createSignal<PromptSort>("updated")
   const [editor, setEditor] = createSignal<PromptEditorDraft>(emptyEditorDraft())
+  const [pendingFill, setPendingFill] = createSignal<
+    PendingPromptFill | undefined
+  >(undefined)
   const [loadError, setLoadError] = createSignal<string | undefined>(undefined)
   const [actionError, setActionError] = createSignal<string | undefined>(
     undefined,
@@ -158,6 +159,7 @@ export const createPromptLibraryViewModel = (
     Effect.gen(function* () {
       setIsOpen(true)
       setMode("browse")
+      setPendingFill(undefined)
       setActionError(undefined)
       yield* refresh()
     }).pipe(Effect.withLogSpan("open"))
@@ -215,21 +217,6 @@ export const createPromptLibraryViewModel = (
       yield* refreshAfter(outcome, false)
     })
 
-  const applyPrompt = (
-    prompt: ListedPrompt,
-  ): Effect.Effect<void, never, PromptLibrary> =>
-    Effect.gen(function* () {
-      yield* Effect.log("apply prompt", prompt.id)
-      deps.setDraft(prompt.body)
-      yield* touchPromptUsed(prompt.id).pipe(Effect.ignore)
-      setIsOpen(false)
-      // Closing the modal restores focus to the opener. Focus the prompt
-      // after that so Apply leaves the caret in the bar.
-      yield* Effect.sync(() => {
-        queueMicrotask(deps.focusPrompt)
-      })
-    }).pipe(Effect.withLogSpan("applyPrompt"))
-
   const startCreate = (): void => {
     setMode("edit")
     setActionError(undefined)
@@ -250,6 +237,15 @@ export const createPromptLibraryViewModel = (
   const cancelEdit = (): void => {
     returnToBrowse()
   }
+
+  const fill = createPromptFill({
+    pending: pendingFill,
+    setPending: setPendingFill,
+    setMode,
+    setOpen: setIsOpen,
+    setDraft: deps.setDraft,
+    focusPrompt: deps.focusPrompt,
+  })
 
   return {
     isOpen,
@@ -286,6 +282,6 @@ export const createPromptLibraryViewModel = (
     cancelEdit,
     save,
     remove,
-    applyPrompt,
+    ...fill,
   }
 }

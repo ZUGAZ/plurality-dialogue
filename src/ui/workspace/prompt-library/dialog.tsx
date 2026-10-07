@@ -1,10 +1,12 @@
 import { createEffect, Show } from "solid-js"
 import { PromptEditor } from "./editor"
+import { PromptFill } from "./fill"
 import { PromptLibraryList } from "./list"
 import {
   closeLibraryLabel,
   libraryHeading,
   libraryShortcutText,
+  type FillValues,
   type ListedPrompt,
   type PromptEditorDraft,
   type PromptLibraryMode,
@@ -39,6 +41,12 @@ export type PromptLibraryDialogProps = {
   readonly save: () => void
   readonly remove: () => void
   readonly applyPrompt: (prompt: ListedPrompt) => void
+  readonly fillTitle: () => string
+  readonly fillNames: () => readonly string[]
+  readonly fillValues: () => FillValues
+  readonly setFillValue: (name: string, value: string) => void
+  readonly cancelFill: () => void
+  readonly insertFill: () => void
 }
 
 export const PromptLibraryDialog = (props: PromptLibraryDialogProps) => {
@@ -119,6 +127,16 @@ export const PromptLibraryDialog = (props: PromptLibraryDialogProps) => {
           onSave={props.save}
           onCancel={props.cancelEdit}
           onDelete={props.remove}
+        />
+      </Show>
+      <Show when={props.mode() === "fill"}>
+        <PromptFill
+          title={props.fillTitle}
+          names={props.fillNames}
+          values={props.fillValues}
+          onValue={props.setFillValue}
+          onInsert={props.insertFill}
+          onCancel={props.cancelFill}
         />
       </Show>
     </dialog>
