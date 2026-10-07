@@ -2,6 +2,7 @@ import { Effect, Option } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import { inMemoryStorageLayer } from "../ports/in-memory-storage"
 import { Storage } from "../ports/storage"
+import type { ThemePreference } from "./theme-preference"
 import type { WorkspaceSettings } from "./workspace-settings"
 import {
   defaultWorkspaceSettings,
@@ -16,6 +17,7 @@ const geminiOnly: WorkspaceSettings = {
   enabledProviders: ["gemini"],
   layout: "2x2",
   toolbarCollapsed: false,
+  theme: "system",
 }
 
 describe("workspace settings storage", () => {
@@ -102,6 +104,7 @@ describe("workspace settings storage", () => {
           enabledProviders: ["claude"],
           layout: "2x2",
           toolbarCollapsed: false,
+          theme: "system",
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* loadWorkspaceSettings()).toEqual(written)
@@ -117,6 +120,7 @@ describe("workspace settings storage", () => {
           layout: "2x2",
           panelProviders: ["claude", "claude", "gemini", "chatgpt"],
           toolbarCollapsed: false,
+          theme: "system",
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* loadWorkspaceSettings()).toEqual(written)
@@ -139,6 +143,7 @@ describe("workspace settings storage", () => {
           enabledProviders: ["claude"],
           layout: "1x2",
           toolbarCollapsed: false,
+          theme: "system",
         })
         expect(settings).not.toHaveProperty("panelProviders")
       }),
@@ -161,6 +166,48 @@ describe("workspace settings storage", () => {
     )
   })
 
+  it.layer(inMemoryStorageLayer())("theme round-trip", (it) => {
+    it.effect("persist then load keeps light, dark, and system", () =>
+      Effect.gen(function* () {
+        const themes: readonly ThemePreference[] = ["light", "dark", "system"]
+        for (const theme of themes) {
+          const written: WorkspaceSettings = {
+            enabledProviders: ["claude"],
+            layout: "1x2",
+            panelProviders: ["claude", "gemini"],
+            toolbarCollapsed: true,
+            theme,
+          }
+          yield* persistWorkspaceSettings(written)
+          expect(yield* loadWorkspaceSettings()).toEqual(written)
+        }
+      }),
+    )
+  })
+
+  it.layer(
+    inMemoryStorageLayer({
+      [workspaceSettingsStorageKey]: {
+        enabledProviders: ["claude"],
+        layout: "1x2",
+        panelProviders: ["claude"],
+        toolbarCollapsed: true,
+      },
+    }),
+  )("document without theme", (it) => {
+    it.effect("loads system and keeps the other fields", () =>
+      Effect.gen(function* () {
+        expect(yield* loadWorkspaceSettings()).toEqual({
+          enabledProviders: ["claude"],
+          layout: "1x2",
+          panelProviders: ["claude"],
+          toolbarCollapsed: true,
+          theme: "system",
+        })
+      }),
+    )
+  })
+
   it.layer(
     inMemoryStorageLayer({
       "other-key": "keep-me",
@@ -173,6 +220,7 @@ describe("workspace settings storage", () => {
           enabledProviders: ["gemini"],
           layout: "1x1",
           toolbarCollapsed: false,
+          theme: "system",
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* storage.get("other-key")).toEqual(Option.some("keep-me"))

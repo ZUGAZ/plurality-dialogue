@@ -50,6 +50,7 @@ describe("persistLayoutAndPanelProviders", () => {
             layout: "2x2",
             panelProviders: ["chatgpt", "claude", "gemini", "chatgpt"],
             toolbarCollapsed: false,
+            theme: "system",
           }),
         )
         if (Option.isSome(stored)) {
@@ -79,6 +80,7 @@ describe("persistLayoutAndPanelProviders", () => {
             layout: "1x2",
             panelProviders: ["chatgpt", "claude"],
             toolbarCollapsed: true,
+            theme: "system",
           }),
         )
       }),
@@ -119,6 +121,7 @@ describe("selectLayout", () => {
             layout: "2x2",
             panelProviders: ["chatgpt", "claude", "gemini", "chatgpt"],
             toolbarCollapsed: false,
+            theme: "system",
           }),
         )
         if (Option.isSome(stored)) {
@@ -146,6 +149,7 @@ describe("selectLayout", () => {
             layout: "1x4",
             panelProviders: ["chatgpt", "claude", "gemini", "chatgpt"],
             toolbarCollapsed: false,
+            theme: "system",
           }),
         )
       }),

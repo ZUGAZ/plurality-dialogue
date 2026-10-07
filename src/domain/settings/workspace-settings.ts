@@ -1,6 +1,9 @@
 import { Schema } from "effect"
 import { LayoutId, maxCellCount } from "@domain/layout/presets"
 import { ProviderId } from "@domain/provider/provider-id"
+import { ThemePreference } from "./theme-preference"
+
+const defaultThemePreference: "system" = "system"
 
 export const WorkspaceSettings = Schema.Struct({
   enabledProviders: Schema.Array(ProviderId),
@@ -13,6 +16,9 @@ export const WorkspaceSettings = Schema.Struct({
   ),
   toolbarCollapsed: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
+  }),
+  theme: Schema.optionalWith(ThemePreference, {
+    default: () => defaultThemePreference,
   }),
 })
 
@@ -29,4 +35,5 @@ export const defaultWorkspaceSettings: WorkspaceSettings = {
   enabledProviders: ["chatgpt", "claude", "gemini"],
   layout: "1x3",
   toolbarCollapsed: false,
+  theme: defaultThemePreference,
 }

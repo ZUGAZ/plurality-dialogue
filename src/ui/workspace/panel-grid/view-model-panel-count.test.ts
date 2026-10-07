@@ -77,6 +77,7 @@ describe("panel grid view-model panel count", () => {
           layout: "1x4",
           panelProviders: ["chatgpt", "chatgpt", "gemini", "chatgpt"],
           toolbarCollapsed: false,
+          theme: "system",
         }),
       )
     }).pipe(Effect.provide(freshLayer)),
@@ -114,6 +115,7 @@ describe("panel grid view-model panel count", () => {
           layout: "1x2",
           panelProviders: ["chatgpt", "gemini"],
           toolbarCollapsed: false,
+          theme: "system",
         }),
       )
     }).pipe(Effect.provide(freshLayer)),
@@ -196,6 +198,7 @@ describe("panel grid view-model panel count", () => {
           layout: "1x3",
           panelProviders: ["chatgpt", "claude", "claude"],
           toolbarCollapsed: false,
+          theme: "system",
         }),
       )
     }).pipe(Effect.provide(freshLayer)),
@@ -211,6 +214,7 @@ describe("panel grid view-model panel count", () => {
           layout: "1x2",
           panelProviders: ["chatgpt", "claude"],
           toolbarCollapsed: false,
+          theme: "system",
         }),
       )
     }).pipe(Effect.provide(freshLayer)),

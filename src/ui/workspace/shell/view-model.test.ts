@@ -71,6 +71,7 @@ describe("shell toolbar collapse", () => {
           layout: "1x2",
           panelProviders: ["chatgpt", "claude"],
           toolbarCollapsed: true,
+          theme: "system",
         })
       }),
     )

@@ -5,7 +5,7 @@
   align-items: safe center;
   gap: 0.75rem;
   padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid #d0d0d0;
+  border-bottom: 1px solid light-dark(#d0d0d0, #444);
   font-family: system-ui, sans-serif;
 }
 
@@ -41,7 +41,7 @@
 }
 
 .workspace-shell-toggle:focus-visible {
-  outline: 3px solid #0b57d0;
+  outline: 3px solid AccentColor;
   outline-offset: 2px;
 }
 
@@ -52,7 +52,7 @@
 .new-chat-button {
   margin: 0;
   padding: 0.25rem 0.5rem;
-  border: 1px solid #d0d0d0;
+  border: 1px solid light-dark(#d0d0d0, #444);
   background: transparent;
   color: inherit;
   font: inherit;
@@ -60,6 +60,6 @@
 }
 
 .new-chat-button:focus-visible {
-  outline: 3px solid #0b57d0;
+  outline: 3px solid AccentColor;
   outline-offset: 2px;
 }

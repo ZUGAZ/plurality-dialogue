@@ -46,6 +46,7 @@ describe("provider registry", () => {
           enabledProviders: ["gemini", "chatgpt"],
           layout: "1x3",
           toolbarCollapsed: false,
+          theme: "system",
         })
         const enabled = yield* listEnabledProviders()
         expect(enabled.map((provider) => provider.id)).toEqual([
@@ -168,6 +169,7 @@ describe("provider registry", () => {
           enabledProviders: ["gemini"],
           layout: "1x3",
           toolbarCollapsed: false,
+          theme: "system",
         })
       }),
     )

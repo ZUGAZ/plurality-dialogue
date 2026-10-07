@@ -39,6 +39,6 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: #fff;
-  color: #111;
+  background: Canvas;
+  color: CanvasText;
 }

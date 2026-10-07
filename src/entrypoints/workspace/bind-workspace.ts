@@ -9,6 +9,7 @@ import { layoutIdOrDefault } from "@domain/layout/presets"
 import type { Messaging } from "@domain/ports/messaging"
 import type { Storage } from "@domain/ports/storage"
 import { Tabs } from "@domain/ports/tabs"
+import { themeToColorScheme } from "@domain/settings/theme-preference"
 import { loadWorkspaceSettings } from "@domain/settings/workspace-settings-storage"
 import { subscribeWorkspacePanelHellos } from "@infrastructure/chrome/panel-frame-hello"
 import { workspaceLive } from "@infrastructure/layers"
@@ -25,6 +26,11 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
   Effect.gen(function* () {
     yield* Effect.log("runtime initialized")
     const settings = yield* loadWorkspaceSettings()
+    yield* Effect.sync(() => {
+      document.documentElement.style.colorScheme = themeToColorScheme(
+        settings.theme,
+      )
+    })
     const tabs = yield* Tabs
     const workspaceTabId = yield* tabs.currentTabId().pipe(Effect.option)
     const frames = createFrameList()

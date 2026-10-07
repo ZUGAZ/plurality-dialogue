@@ -55,6 +55,7 @@ describe("workspace settings schema", () => {
         enabledProviders: ["chatgpt", "claude", "gemini"],
         layout: "1x3",
         toolbarCollapsed: false,
+        theme: "system",
       })
     }
   })
@@ -70,6 +71,7 @@ describe("workspace settings schema", () => {
         enabledProviders: ["chatgpt"],
         layout: "1x2",
         toolbarCollapsed: false,
+        theme: "system",
       })
       expect(decoded.right.panelProviders).toBeUndefined()
     }
@@ -188,6 +190,7 @@ describe("workspace settings schema", () => {
         enabledProviders: [],
         layout: "1x3",
         toolbarCollapsed: false,
+        theme: "system",
       })
     }
   })
@@ -201,6 +204,7 @@ describe("workspace settings schema", () => {
     ])
     expect(defaultWorkspaceSettings.panelProviders).toBeUndefined()
     expect(defaultWorkspaceSettings.toolbarCollapsed).toBe(false)
+    expect(defaultWorkspaceSettings.theme).toBe("system")
   })
 
   it("decodes toolbarCollapsed as an optional expanded default", () => {
@@ -227,7 +231,11 @@ describe("workspace settings schema", () => {
       Either.isRight(withPanels) &&
       Either.isRight(collapsed)
     ) {
-      expect(missing.right).toEqual({ ...base, toolbarCollapsed: false })
+      expect(missing.right).toEqual({
+        ...base,
+        toolbarCollapsed: false,
+        theme: "system",
+      })
       expect(missing.right.panelProviders).toBeUndefined()
       expect(withPanels.right.panelProviders).toEqual(["chatgpt", null])
       expect(withPanels.right.toolbarCollapsed).toBe(false)
@@ -241,6 +249,7 @@ describe("workspace settings schema", () => {
       enabledProviders: ["chatgpt"],
       layout: "1x3",
       toolbarCollapsed: true,
+      theme: "system",
     }
     const encoded = Schema.encodeEither(WorkspaceSettings)(settings)
     expect(Either.isRight(encoded)).toBe(true)

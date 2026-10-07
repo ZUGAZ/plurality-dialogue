@@ -8,10 +8,17 @@ if (root !== null) {
     render(
       () => (
         <OptionsView
-          rows={bindings.rows}
-          loadError={bindings.loadError}
-          saveError={bindings.saveError}
-          onEnabledChange={bindings.setEnabled}
+          providers={{
+            rows: bindings.providers.rows,
+            loadError: bindings.providers.loadError,
+            saveError: bindings.providers.saveError,
+            onEnabledChange: bindings.providers.setEnabled,
+          }}
+          theme={{
+            selectedTheme: bindings.theme.selectedTheme,
+            saveError: bindings.theme.saveError,
+            onThemeChange: bindings.theme.setTheme,
+          }}
         />
       ),
       root,

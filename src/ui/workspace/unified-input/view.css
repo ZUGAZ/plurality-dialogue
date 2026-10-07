@@ -2,10 +2,9 @@
   box-sizing: border-box;
   flex-shrink: 0;
   padding: 0.75rem;
-  border-block-start: 1px solid #5c5c5c;
-  background: #fff;
-  color: #111;
-  color-scheme: light;
+  border-block-start: 1px solid light-dark(#5c5c5c, #888);
+  background: Canvas;
+  color: CanvasText;
   font-family: system-ui, sans-serif;
 }
 
@@ -32,9 +31,9 @@
   max-block-size: 8lh;
   margin: 0;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #5c5c5c;
-  background: #fff;
-  color: #111;
+  border: 1px solid light-dark(#5c5c5c, #888);
+  background: Field;
+  color: FieldText;
   font: inherit;
   font-size: 1rem;
   line-height: 1.4;
@@ -44,7 +43,7 @@
 }
 
 .unified-input textarea:focus-visible {
-  outline: 3px solid #0b57d0;
+  outline: 3px solid AccentColor;
   outline-offset: 2px;
 }
 
@@ -60,22 +59,22 @@
   min-block-size: 2.5rem;
   min-inline-size: 2.5rem;
   padding-inline: 0.85rem;
-  border: 1px solid #5c5c5c;
-  background: #fff;
-  color: #111;
+  border: 1px solid light-dark(#5c5c5c, #888);
+  background: ButtonFace;
+  color: ButtonText;
   font: inherit;
   font-size: 1rem;
   cursor: pointer;
 }
 
 .unified-input-actions .unified-input-send {
-  border-color: #111;
-  background: #111;
-  color: #fff;
+  border-color: CanvasText;
+  background: CanvasText;
+  color: Canvas;
 }
 
 .unified-input-actions button:focus-visible {
-  outline: 3px solid #0b57d0;
+  outline: 3px solid AccentColor;
   outline-offset: 2px;
 }
 
@@ -97,9 +96,9 @@
 .unified-input-status button {
   margin: 0;
   padding: 0 0.35rem;
-  border: 1px solid #5c5c5c;
-  background: #fff;
-  color: #111;
+  border: 1px solid light-dark(#5c5c5c, #888);
+  background: ButtonFace;
+  color: ButtonText;
   font: inherit;
   font-size: inherit;
   line-height: inherit;
@@ -107,7 +106,7 @@
 }
 
 .unified-input-status button:focus-visible {
-  outline: 3px solid #0b57d0;
+  outline: 3px solid AccentColor;
   outline-offset: 2px;
 }
 
