@@ -213,6 +213,15 @@ export const sendMessageToFrame = (
     catch: (cause) => new TabMessageFailed({ cause }),
   })
 
+export const sendMessageToTab = (
+  tabId: number,
+  message: unknown,
+): Effect.Effect<unknown, TabMessageFailed> =>
+  Effect.tryPromise({
+    try: () => chrome.tabs.sendMessage(tabId, message),
+    catch: (cause) => new TabMessageFailed({ cause }),
+  })
+
 export const subscribeTabRemoved = (
   onRemoved: (tabId: number) => void,
 ): void => {

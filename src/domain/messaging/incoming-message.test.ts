@@ -1,6 +1,10 @@
 import { Either, Schema } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import { isFillComposer } from "../broadcast/commands/fill-composer"
+import {
+  ApplyContextMenuDraft,
+  isClaimPendingContextMenu,
+} from "./context-menu-draft"
 import { isEnsureFramingRulesRequest } from "./ensure-framing-rules"
 import {
   decodeIncomingMessage,
@@ -61,6 +65,44 @@ describe("incoming extension messages", () => {
       expect(isPanelFrameReady(decoded.right)).toBe(true)
     }
     expect(Either.isLeft(replyToWorkspacePing(payload))).toBe(true)
+  })
+
+  it("decodes ClaimPendingContextMenu", () => {
+    const decoded = decodeIncomingMessage({ _tag: "ClaimPendingContextMenu" })
+    expect(Either.isRight(decoded)).toBe(true)
+    if (Either.isRight(decoded)) {
+      expect(isClaimPendingContextMenu(decoded.right)).toBe(true)
+    }
+  })
+
+  it("rejects ApplyContextMenuDraft as a background incoming message", () => {
+    expect(
+      Either.isLeft(
+        decodeIncomingMessage({
+          _tag: "ApplyContextMenuDraft",
+          draftText: "hello",
+        }),
+      ),
+    ).toBe(true)
+    expect(
+      Either.isLeft(decodeIncomingMessage({ _tag: "ApplyContextMenuDraft" })),
+    ).toBe(true)
+  })
+
+  it("encodes ApplyContextMenuDraft without pageUrl", () => {
+    const encoded = Schema.encodeUnknownSync(ApplyContextMenuDraft)(
+      ApplyContextMenuDraft.make({ draftText: "hello" }),
+    )
+    expect(encoded).toEqual({
+      _tag: "ApplyContextMenuDraft",
+      draftText: "hello",
+    })
+    expect(encoded).not.toHaveProperty("pageUrl")
+    expect(
+      Schema.encodeUnknownSync(ApplyContextMenuDraft)(
+        ApplyContextMenuDraft.make({}),
+      ),
+    ).toEqual({ _tag: "ApplyContextMenuDraft" })
   })
 
   it("rejects FramingRulesReady as incoming", () => {

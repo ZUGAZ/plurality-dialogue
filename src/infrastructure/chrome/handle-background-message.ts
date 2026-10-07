@@ -1,5 +1,10 @@
 import { Effect, Either, Option, Schema, pipe } from "effect"
 import {
+  NoPendingContextMenu,
+  PendingContextMenu,
+  isClaimPendingContextMenu,
+} from "../../domain/messaging/context-menu-draft"
+import {
   FramingRulesReady,
   FramingSessionRulesUpdateFailed,
   FramingTabIdUnavailable,
@@ -18,6 +23,7 @@ import { workspacePagePath } from "../../domain/workspace/workspace-page"
 import { chromeErrorMessage } from "./chrome-error-message"
 import { applyFramingSessionRules } from "./declarative-net-request"
 import { extensionPageUrl } from "./extension-page-url"
+import { takePendingContextMenu } from "./pending-context-menu"
 import { listTabIdsForDocumentUrls } from "./tabs"
 
 const withMessageLog = (
@@ -38,6 +44,20 @@ const encodeReply = <A, I>(schema: Schema.Schema<A, I>, value: A): unknown =>
       onRight: (encoded) => encoded,
     }),
   )
+
+const claimPendingContextMenuReply = (): unknown => {
+  const pending = takePendingContextMenu()
+  if (pending === undefined) {
+    return encodeReply(NoPendingContextMenu, NoPendingContextMenu.make({}))
+  }
+  if (pending.draftText === undefined) {
+    return encodeReply(PendingContextMenu, PendingContextMenu.make({}))
+  }
+  return encodeReply(
+    PendingContextMenu,
+    PendingContextMenu.make({ draftText: pending.draftText }),
+  )
+}
 
 const pingReply = (): Option.Option<Effect.Effect<unknown>> =>
   Option.some(
@@ -111,6 +131,14 @@ export const handleBackgroundMessage = (
       onRight: (incoming) => {
         if (isWorkspacePingRequest(incoming)) {
           return pingReply()
+        }
+        if (isClaimPendingContextMenu(incoming)) {
+          return Option.some(
+            withMessageLog(
+              "ClaimPendingContextMenu",
+              Effect.succeed(claimPendingContextMenuReply()),
+            ),
+          )
         }
         if (isEnsureFramingRulesRequest(incoming)) {
           return Option.some(

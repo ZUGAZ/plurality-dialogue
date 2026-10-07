@@ -7,11 +7,13 @@ import {
 import type { PanelTarget } from "@domain/broadcast/panel-target"
 import { layoutIdOrDefault } from "@domain/layout/presets"
 import type { Messaging } from "@domain/ports/messaging"
+import type { PromptLibrary } from "@domain/ports/prompt-library"
 import type { Storage } from "@domain/ports/storage"
 import { Tabs } from "@domain/ports/tabs"
 import { themeToColorScheme } from "@domain/settings/theme-preference"
 import { loadWorkspaceSettings } from "@domain/settings/workspace-settings-storage"
 import { subscribeWorkspacePanelHellos } from "@infrastructure/chrome/panel-frame-hello"
+import { bindWorkspaceContextMenuDraft } from "@infrastructure/chrome/workspace-context-menu"
 import { workspaceLive } from "@infrastructure/layers"
 import { bindViewModel } from "@ui/common/viewmodel/bind-viewmodel"
 import { createPanelGridViewModel } from "@ui/workspace/panel-grid/view-model"
@@ -70,6 +72,14 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
         (panels) => resolveBroadcastTargets(panels, frames.list()),
       ),
     )
+    bindWorkspaceContextMenuDraft<
+      Storage | Tabs | Messaging | PromptLibrary
+    >(
+      (draftText) => {
+        dropContextMenuDraft(unifiedInput, draftText)
+      },
+      (effect) => managedRuntime.runPromise(effect),
+    )
     const promptLibrary = bindViewModel(runtime, "promptLibrary", (runEffect) =>
       createPromptLibraryViewModel(runEffect, {
         setDraft: unifiedInput.setDraft,
@@ -99,6 +109,24 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
     }
   }).pipe(Effect.withLogSpan("workspace")),
 )
+
+const dropContextMenuDraft = (
+  input: {
+    readonly setDraft: (text: string) => void
+    readonly focusPrompt: () => void
+  },
+  draftText: string | undefined,
+): void => {
+  if (draftText === undefined) {
+    return
+  }
+  const trimmed = draftText.trim()
+  if (trimmed.length === 0) {
+    return
+  }
+  input.setDraft(trimmed)
+  input.focusPrompt()
+}
 
 const createFrameList = () => {
   let rows: readonly PanelTarget[] = []
