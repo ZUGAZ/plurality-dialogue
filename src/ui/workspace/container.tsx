@@ -19,5 +19,6 @@ export const WorkspaceContainer = (props: WorkspaceViewProps) => (
     collapsed={props.collapsed}
     onToggleCollapse={props.onToggleCollapse}
     unifiedInput={props.unifiedInput}
+    promptLibrary={props.promptLibrary}
   />
 )

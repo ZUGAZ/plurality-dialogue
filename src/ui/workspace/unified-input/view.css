@@ -55,6 +55,13 @@
   gap: 0.5rem;
 }
 
+.unified-input-send-cluster {
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  gap: 0.5rem;
+}
+
 .unified-input-actions button {
   min-block-size: 2.5rem;
   min-inline-size: 2.5rem;

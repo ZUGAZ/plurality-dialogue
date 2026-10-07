@@ -1,4 +1,5 @@
 import { Show } from "solid-js"
+import { libraryButtonLabel } from "../prompt-library/model"
 import {
   clearLabel,
   fillLabel,
@@ -21,6 +22,7 @@ export type UnifiedInputViewProps = {
   readonly retryFailed: () => void
   readonly registerTextarea: (el: HTMLTextAreaElement) => void
   readonly focusPrompt: () => void
+  readonly onOpenLibrary: () => void
 }
 
 export const UnifiedInputView = (props: UnifiedInputViewProps) => (
@@ -39,6 +41,9 @@ export const UnifiedInputView = (props: UnifiedInputViewProps) => (
         onInput={(event) => props.setDraft(event.currentTarget.value)}
       />
       <div class="unified-input-actions">
+        <button type="button" onClick={() => props.onOpenLibrary()}>
+          {libraryButtonLabel}
+        </button>
         <button
           type="button"
           disabled={!props.hasDraft()}
@@ -46,17 +51,19 @@ export const UnifiedInputView = (props: UnifiedInputViewProps) => (
         >
           {clearLabel}
         </button>
-        <button type="button" disabled={!props.hasDraft()} onClick={props.fill}>
-          {fillLabel}
-        </button>
-        <button
-          type="button"
-          class="unified-input-send"
-          disabled={!props.hasDraft()}
-          onClick={props.sendAll}
-        >
-          {sendAllLabel}
-        </button>
+        <div class="unified-input-send-cluster">
+          <button type="button" disabled={!props.hasDraft()} onClick={props.fill}>
+            {fillLabel}
+          </button>
+          <button
+            type="button"
+            class="unified-input-send"
+            disabled={!props.hasDraft()}
+            onClick={props.sendAll}
+          >
+            {sendAllLabel}
+          </button>
+        </div>
       </div>
     </div>
     <div class="unified-input-status" role="status" aria-live="polite">

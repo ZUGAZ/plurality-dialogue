@@ -4,6 +4,7 @@ import { workspaceBindingsReady } from "./bind-workspace"
 import "./workspace.css"
 
 let releaseFocusGuard: (() => void) | undefined
+let releaseLibraryShortcut: (() => void) | undefined
 
 const root = document.getElementById("root")
 if (root !== null) {
@@ -28,6 +29,7 @@ if (root !== null) {
           collapsed={workspaceBindings.collapsed}
           onToggleCollapse={workspaceBindings.onToggleCollapse}
           unifiedInput={workspaceBindings.unifiedInput}
+          promptLibrary={workspaceBindings.promptLibrary}
         />
       ),
       root,
@@ -36,5 +38,7 @@ if (root !== null) {
     // pointer events and treats every iframe focus as a steal.
     releaseFocusGuard?.()
     releaseFocusGuard = workspaceBindings.mountFocusGuard()
+    releaseLibraryShortcut?.()
+    releaseLibraryShortcut = workspaceBindings.mountLibraryShortcut()
   })
 }

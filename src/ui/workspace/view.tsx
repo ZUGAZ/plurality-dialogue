@@ -2,6 +2,10 @@ import { layoutPickerItems, type LayoutId } from "./layout-presets/model"
 import { LayoutPresetsView } from "./layout-presets/view"
 import type { PanelViewState, ProviderOption } from "./panel-grid/model"
 import { PanelGridView } from "./panel-grid/view"
+import {
+  PromptLibraryDialog,
+  type PromptLibraryDialogProps,
+} from "./prompt-library/dialog"
 import { AddPanelButton } from "./shell/add-panel-button"
 import { NewChatButton } from "./shell/new-chat-button"
 import { WorkspaceShell } from "./shell/view"
@@ -27,6 +31,7 @@ export type WorkspaceViewProps = {
   readonly collapsed: () => boolean
   readonly onToggleCollapse: () => void
   readonly unifiedInput: UnifiedInputViewProps
+  readonly promptLibrary: PromptLibraryDialogProps
 }
 
 export const WorkspaceView = (props: WorkspaceViewProps) => (
@@ -56,5 +61,6 @@ export const WorkspaceView = (props: WorkspaceViewProps) => (
       removePanel={props.removePanel}
     />
     <UnifiedInputContainer {...props.unifiedInput} />
+    <PromptLibraryDialog {...props.promptLibrary} />
   </div>
 )

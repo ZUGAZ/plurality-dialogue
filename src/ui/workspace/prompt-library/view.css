@@ -1,0 +1,175 @@
+.prompt-library {
+  box-sizing: border-box;
+  inline-size: min(42rem, calc(100vw - 2rem));
+  max-block-size: calc(100vh - 2rem);
+  margin: auto;
+  padding: 1rem;
+  overflow: auto;
+  border: 1px solid light-dark(#5c5c5c, #888);
+  background: Canvas;
+  color: CanvasText;
+  font-family: system-ui, sans-serif;
+}
+
+.prompt-library *,
+.prompt-library *::before,
+.prompt-library *::after {
+  box-sizing: border-box;
+}
+
+.prompt-library::backdrop {
+  background: color-mix(in srgb, CanvasText 45%, transparent);
+}
+
+.prompt-library-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.prompt-library-header h2,
+.prompt-library-editor h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.prompt-library-shortcut {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.prompt-library-header form {
+  margin: 0;
+}
+
+.prompt-library button,
+.prompt-library input,
+.prompt-library textarea,
+.prompt-library select {
+  font: inherit;
+  font-size: 1rem;
+}
+
+.prompt-library button {
+  min-block-size: 2.5rem;
+  min-inline-size: 2.5rem;
+  padding-inline: 0.85rem;
+  border: 1px solid light-dark(#5c5c5c, #888);
+  background: ButtonFace;
+  color: ButtonText;
+  cursor: pointer;
+}
+
+.prompt-library button.prompt-library-primary {
+  border-color: CanvasText;
+  background: CanvasText;
+  color: Canvas;
+}
+
+.prompt-library button:focus-visible,
+.prompt-library input:focus-visible,
+.prompt-library textarea:focus-visible,
+.prompt-library select:focus-visible {
+  outline: 3px solid AccentColor;
+  outline-offset: 2px;
+}
+
+.prompt-library-load-error,
+.prompt-library-alert {
+  margin: 0.75rem 0 0;
+  line-height: 1.5;
+}
+
+.prompt-library-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.75rem;
+  margin: 0.75rem 0 0;
+}
+
+.prompt-library-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.prompt-library-favorites {
+  flex-direction: row;
+  align-items: center;
+  min-block-size: 2.5rem;
+}
+
+.prompt-library input[type="search"],
+.prompt-library input[type="text"],
+.prompt-library select,
+.prompt-library textarea {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid light-dark(#5c5c5c, #888);
+  background: Field;
+  color: FieldText;
+}
+
+.prompt-library input[type="search"],
+.prompt-library input[type="text"],
+.prompt-library select {
+  min-block-size: 2.5rem;
+}
+
+.prompt-library-browse > button {
+  margin-block-start: 0.75rem;
+}
+
+.prompt-library-browse > p {
+  margin: 0.75rem 0 0;
+  line-height: 1.5;
+}
+
+.prompt-library-rows {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prompt-library-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+  border-block-end: 1px solid light-dark(#5c5c5c, #888);
+}
+
+.prompt-library-row-title {
+  flex: 1 1 12rem;
+  min-inline-size: 0;
+}
+
+.prompt-library-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-block-start: 0.75rem;
+}
+
+.prompt-library-editor label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prompt-library-editor textarea {
+  min-block-size: 6rem;
+  resize: vertical;
+}
+
+.prompt-library-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
