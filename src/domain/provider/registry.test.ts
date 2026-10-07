@@ -45,6 +45,7 @@ describe("provider registry", () => {
         yield* persistWorkspaceSettings({
           enabledProviders: ["gemini", "chatgpt"],
           layout: "1x3",
+          toolbarCollapsed: false,
         })
         const enabled = yield* listEnabledProviders()
         expect(enabled.map((provider) => provider.id)).toEqual([
@@ -166,6 +167,7 @@ describe("provider registry", () => {
         expect(yield* loadWorkspaceSettings()).toEqual({
           enabledProviders: ["gemini"],
           layout: "1x3",
+          toolbarCollapsed: false,
         })
       }),
     )

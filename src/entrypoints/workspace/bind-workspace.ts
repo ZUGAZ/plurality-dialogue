@@ -14,6 +14,7 @@ import { subscribeWorkspacePanelHellos } from "@infrastructure/chrome/panel-fram
 import { workspaceLive } from "@infrastructure/layers"
 import { bindViewModel } from "@ui/common/viewmodel/bind-viewmodel"
 import { createPanelGridViewModel } from "@ui/workspace/panel-grid/view-model"
+import { createShellViewModel } from "@ui/workspace/shell/view-model"
 import { setupFocusGuard } from "@ui/workspace/unified-input/focus-guard"
 import { createUnifiedInputViewModel } from "@ui/workspace/unified-input/view-model"
 
@@ -47,6 +48,9 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
         panelProviders: settings.panelProviders,
       }),
     )
+    const shell = bindViewModel(runtime, "shell", () =>
+      createShellViewModel(settings.toolbarCollapsed),
+    )
     const unifiedInput = bindViewModel(runtime, "unifiedInput", (runEffect) =>
       createUnifiedInputViewModel(
         runEffect,
@@ -60,6 +64,8 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
     )
     return {
       ...grid,
+      collapsed: shell.collapsed,
+      onToggleCollapse: shell.toggleCollapse,
       unifiedInput,
       newChatForAll: () => {
         unifiedInput.clearStatus()

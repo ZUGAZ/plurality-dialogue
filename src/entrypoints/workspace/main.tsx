@@ -25,6 +25,8 @@ if (root !== null) {
           setPanelProvider={workspaceBindings.setPanelProvider}
           refreshPanel={workspaceBindings.refreshPanel}
           onNewChat={workspaceBindings.newChatForAll}
+          collapsed={workspaceBindings.collapsed}
+          onToggleCollapse={workspaceBindings.onToggleCollapse}
           unifiedInput={workspaceBindings.unifiedInput}
         />
       ),

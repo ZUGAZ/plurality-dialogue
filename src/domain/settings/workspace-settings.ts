@@ -11,6 +11,9 @@ export const WorkspaceSettings = Schema.Struct({
       Schema.maxItems(maxCellCount),
     ),
   ),
+  toolbarCollapsed: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
 })
 
 export type WorkspaceSettings = typeof WorkspaceSettings.Type
@@ -25,4 +28,5 @@ export const workspaceSettingsStorageKey = "workspace-settings"
 export const defaultWorkspaceSettings: WorkspaceSettings = {
   enabledProviders: ["chatgpt", "claude", "gemini"],
   layout: "1x3",
+  toolbarCollapsed: false,
 }

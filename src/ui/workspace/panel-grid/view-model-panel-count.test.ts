@@ -76,6 +76,7 @@ describe("panel grid view-model panel count", () => {
           enabledProviders: ["chatgpt", "claude", "gemini"],
           layout: "1x4",
           panelProviders: ["chatgpt", "chatgpt", "gemini", "chatgpt"],
+          toolbarCollapsed: false,
         }),
       )
     }).pipe(Effect.provide(freshLayer)),
@@ -112,6 +113,7 @@ describe("panel grid view-model panel count", () => {
           enabledProviders: ["chatgpt", "claude", "gemini"],
           layout: "1x2",
           panelProviders: ["chatgpt", "gemini"],
+          toolbarCollapsed: false,
         }),
       )
     }).pipe(Effect.provide(freshLayer)),
@@ -193,6 +195,7 @@ describe("panel grid view-model panel count", () => {
           enabledProviders: ["chatgpt", "claude", "gemini"],
           layout: "1x3",
           panelProviders: ["chatgpt", "claude", "claude"],
+          toolbarCollapsed: false,
         }),
       )
     }).pipe(Effect.provide(freshLayer)),
@@ -207,6 +210,7 @@ describe("panel grid view-model panel count", () => {
           enabledProviders: ["chatgpt", "claude", "gemini"],
           layout: "1x2",
           panelProviders: ["chatgpt", "claude"],
+          toolbarCollapsed: false,
         }),
       )
     }).pipe(Effect.provide(freshLayer)),

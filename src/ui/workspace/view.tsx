@@ -24,12 +24,17 @@ export type WorkspaceViewProps = {
   readonly setPanelProvider: (panelId: string, rawId: string) => void
   readonly refreshPanel: (panelId: string) => void
   readonly onNewChat: () => void
+  readonly collapsed: () => boolean
+  readonly onToggleCollapse: () => void
   readonly unifiedInput: UnifiedInputViewProps
 }
 
 export const WorkspaceView = (props: WorkspaceViewProps) => (
   <div class="workspace">
-    <WorkspaceShell>
+    <WorkspaceShell
+      collapsed={props.collapsed}
+      onToggleCollapse={props.onToggleCollapse}
+    >
       <NewChatButton onClick={props.onNewChat} />
       <AddPanelButton canAdd={props.canAddPanel()} onAdd={props.addPanel} />
       <LayoutPresetsView

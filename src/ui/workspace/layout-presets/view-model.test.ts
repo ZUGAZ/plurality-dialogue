@@ -49,11 +49,38 @@ describe("persistLayoutAndPanelProviders", () => {
             enabledProviders: ["chatgpt", "claude", "gemini"],
             layout: "2x2",
             panelProviders: ["chatgpt", "claude", "gemini", "chatgpt"],
+            toolbarCollapsed: false,
           }),
         )
         if (Option.isSome(stored)) {
           expect(stored.value).not.toHaveProperty("lastLayout")
         }
+      }),
+    )
+  })
+
+  it.layer(
+    inMemoryStorageLayer({
+      [workspaceSettingsStorageKey]: {
+        enabledProviders: ["chatgpt"],
+        layout: "1x3",
+        panelProviders: ["chatgpt", "claude", "gemini"],
+        toolbarCollapsed: true,
+      },
+    }),
+  )("toolbar already collapsed", (it) => {
+    it.effect("layout persist keeps toolbarCollapsed", () =>
+      Effect.gen(function* () {
+        yield* persistLayoutAndPanelProviders("1x2", ["chatgpt", "claude"])
+        const storage = yield* Storage
+        expect(yield* storage.get(workspaceSettingsStorageKey)).toEqual(
+          Option.some({
+            enabledProviders: ["chatgpt"],
+            layout: "1x2",
+            panelProviders: ["chatgpt", "claude"],
+            toolbarCollapsed: true,
+          }),
+        )
       }),
     )
   })
@@ -91,6 +118,7 @@ describe("selectLayout", () => {
             enabledProviders: ["chatgpt", "claude", "gemini"],
             layout: "2x2",
             panelProviders: ["chatgpt", "claude", "gemini", "chatgpt"],
+            toolbarCollapsed: false,
           }),
         )
         if (Option.isSome(stored)) {
@@ -117,6 +145,7 @@ describe("selectLayout", () => {
             enabledProviders: ["chatgpt", "claude", "gemini"],
             layout: "1x4",
             panelProviders: ["chatgpt", "claude", "gemini", "chatgpt"],
+            toolbarCollapsed: false,
           }),
         )
       }),

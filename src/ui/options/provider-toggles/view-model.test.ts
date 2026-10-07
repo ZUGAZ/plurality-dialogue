@@ -53,6 +53,7 @@ describe("provider toggles view-model", () => {
           Option.some({
             enabledProviders: ["chatgpt", "claude"],
             layout: "1x3",
+            toolbarCollapsed: false,
           }),
         )
         session.dispose()

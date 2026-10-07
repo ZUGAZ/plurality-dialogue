@@ -15,6 +15,7 @@ import {
 const geminiOnly: WorkspaceSettings = {
   enabledProviders: ["gemini"],
   layout: "2x2",
+  toolbarCollapsed: false,
 }
 
 describe("workspace settings storage", () => {
@@ -100,6 +101,7 @@ describe("workspace settings storage", () => {
         const written: WorkspaceSettings = {
           enabledProviders: ["claude"],
           layout: "2x2",
+          toolbarCollapsed: false,
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* loadWorkspaceSettings()).toEqual(written)
@@ -114,6 +116,7 @@ describe("workspace settings storage", () => {
           enabledProviders: ["chatgpt", "claude", "gemini"],
           layout: "2x2",
           panelProviders: ["claude", "claude", "gemini", "chatgpt"],
+          toolbarCollapsed: false,
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* loadWorkspaceSettings()).toEqual(written)
@@ -135,6 +138,7 @@ describe("workspace settings storage", () => {
         expect(settings).toEqual({
           enabledProviders: ["claude"],
           layout: "1x2",
+          toolbarCollapsed: false,
         })
         expect(settings).not.toHaveProperty("panelProviders")
       }),
@@ -168,6 +172,7 @@ describe("workspace settings storage", () => {
         const written: WorkspaceSettings = {
           enabledProviders: ["gemini"],
           layout: "1x1",
+          toolbarCollapsed: false,
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* storage.get("other-key")).toEqual(Option.some("keep-me"))
