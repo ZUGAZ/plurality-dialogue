@@ -14,7 +14,7 @@ export default defineConfig({
   },
   manifest: {
     name: "Plurality Dialogue",
-    version: "0.1.1",
+    version: "0.2.0",
     description:
       "Compare ChatGPT, Claude, and Gemini in one workspace using the chats you already have.",
     permissions: ["storage", "declarativeNetRequestWithHostAccess"],
