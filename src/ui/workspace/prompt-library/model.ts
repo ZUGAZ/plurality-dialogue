@@ -21,6 +21,11 @@ export type PromptEditorDraft = {
 
 export type FillValues = Readonly<Record<string, string>>
 
+export type PendingLibraryExport = {
+  readonly token: number
+  readonly json: string
+}
+
 export type PendingPromptFill = {
   readonly prompt: ListedPrompt
   readonly names: readonly string[]
@@ -58,6 +63,11 @@ export const couldNotLoadPrompts = "Could not load prompts."
 export const promptGoneText = "That prompt is gone."
 export const couldNotSaveText = "Could not save."
 export const titleRequiredText = "Title is required."
+export const exportLibraryLabel = "Export"
+export const importLibraryLabel = "Import"
+export const couldNotReadFileText = "Could not read that file."
+export const notPromptLibraryText = "That file is not a prompt library."
+export const couldNotImportText = "Could not import."
 
 export const sortOptions: readonly SortOption[] = [
   { id: "updated", label: "Updated" },

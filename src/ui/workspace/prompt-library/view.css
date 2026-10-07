@@ -121,7 +121,10 @@
   min-block-size: 2.5rem;
 }
 
-.prompt-library-browse > button {
+.prompt-library-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin-block-start: 0.75rem;
 }
 

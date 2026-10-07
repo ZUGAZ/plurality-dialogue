@@ -8,6 +8,7 @@ import {
   libraryShortcutText,
   type FillValues,
   type ListedPrompt,
+  type PendingLibraryExport,
   type PromptEditorDraft,
   type PromptLibraryMode,
   type PromptSort,
@@ -36,6 +37,11 @@ export type PromptLibraryDialogProps = {
   readonly setEditorTags: (tags: string) => void
   readonly setFavorite: (id: string, favorite: boolean) => void
   readonly startCreate: () => void
+  readonly pendingExport: () => PendingLibraryExport | undefined
+  readonly clearPendingExport: () => void
+  readonly exportLibrary: () => void
+  readonly importLibraryText: (text: string) => void
+  readonly failImportRead: () => void
   readonly startEdit: (prompt: ListedPrompt) => void
   readonly cancelEdit: () => void
   readonly save: () => void
@@ -112,6 +118,11 @@ export const PromptLibraryDialog = (props: PromptLibraryDialogProps) => {
           onFavoritesOnly={props.setFavoritesOnly}
           onSort={props.setSort}
           onCreate={props.startCreate}
+          pendingExport={props.pendingExport}
+          onExport={props.exportLibrary}
+          onImportText={props.importLibraryText}
+          onFailImportRead={props.failImportRead}
+          onExportConsumed={props.clearPendingExport}
           onFavorite={props.setFavorite}
           onApply={props.applyPrompt}
           onEdit={props.startEdit}

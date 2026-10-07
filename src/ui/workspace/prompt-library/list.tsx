@@ -13,8 +13,10 @@ import {
   starredLabel,
   tagLabel,
   type ListedPrompt,
+  type PendingLibraryExport,
   type PromptSort,
 } from "./model"
+import { PromptLibraryTransfer } from "./transfer"
 
 export type PromptLibraryListProps = {
   readonly prompts: () => readonly ListedPrompt[]
@@ -29,6 +31,11 @@ export type PromptLibraryListProps = {
   readonly onFavoritesOnly: (favoritesOnly: boolean) => void
   readonly onSort: (sort: PromptSort) => void
   readonly onCreate: () => void
+  readonly pendingExport: () => PendingLibraryExport | undefined
+  readonly onExport: () => void
+  readonly onImportText: (text: string) => void
+  readonly onFailImportRead: () => void
+  readonly onExportConsumed: () => void
   readonly onFavorite: (id: string, favorite: boolean) => void
   readonly onApply: (prompt: ListedPrompt) => void
   readonly onEdit: (prompt: ListedPrompt) => void
@@ -92,9 +99,18 @@ export const PromptLibraryList = (props: PromptLibraryListProps) => {
           </label>
         </form>
       </search>
-      <button type="button" onClick={() => props.onCreate()}>
-        {newPromptLabel}
-      </button>
+      <div class="prompt-library-actions">
+        <button type="button" onClick={() => props.onCreate()}>
+          {newPromptLabel}
+        </button>
+        <PromptLibraryTransfer
+          pendingExport={props.pendingExport}
+          exportLibrary={props.onExport}
+          importLibraryText={props.onImportText}
+          failImportRead={props.onFailImportRead}
+          clearPendingExport={props.onExportConsumed}
+        />
+      </div>
       <Show when={showEmpty()}>
         <p>{emptyLibraryText}</p>
       </Show>

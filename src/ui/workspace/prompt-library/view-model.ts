@@ -15,6 +15,10 @@ import type { PromptLibrary } from "@domain/ports/prompt-library"
 import type { RunEffect } from "@ui/common/viewmodel/bind-viewmodel"
 import { createPromptFill, type PromptFillActions } from "./fill-actions"
 import {
+  createPromptTransfer,
+  type PromptTransferActions,
+} from "./transfer-actions"
+import {
   couldNotLoadPrompts,
   couldNotSaveText,
   emptyEditorDraft,
@@ -33,7 +37,8 @@ export type PromptLibraryDeps = {
   readonly focusPrompt: () => void
 }
 
-export type PromptLibraryViewModel = PromptFillActions & {
+export type PromptLibraryViewModel = PromptFillActions &
+  PromptTransferActions & {
   readonly isOpen: () => boolean
   readonly mode: () => PromptLibraryMode
   readonly prompts: () => readonly Prompt[]
@@ -247,6 +252,12 @@ export const createPromptLibraryViewModel = (
     focusPrompt: deps.focusPrompt,
   })
 
+  const transfer = createPromptTransfer({
+    setLoadError,
+    setActionError,
+    refresh,
+  })
+
   return {
     isOpen,
     mode,
@@ -283,5 +294,6 @@ export const createPromptLibraryViewModel = (
     save,
     remove,
     ...fill,
+    ...transfer,
   }
 }
