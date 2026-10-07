@@ -1,5 +1,7 @@
+// @vitest-environment happy-dom
 import { Effect } from "effect"
 import { describe, expect, it } from "@effect/vitest"
+import { vi } from "vitest"
 import {
   chatgpt,
   claude,
@@ -205,4 +207,54 @@ describe("unified input retry", () => {
         session.dispose()
       }),
   )
+
+  it.effect("a successful retry returns focus and keeps the draft", () =>
+    Effect.gen(function* () {
+      const session = openRetrySession()
+      const prompt = watchPrompt(session.vm, "hi")
+      replyOk(session.replies, chatgpt, "filled")
+      replyMiss(session.replies, claude)
+      yield* session.vm.fill().pipe(Effect.provide(session.layer))
+      prompt.focus.mockClear()
+      replyOk(session.replies, claude, "filled")
+      yield* session.vm.retryFailed().pipe(Effect.provide(session.layer))
+      expect(prompt.focus).toHaveBeenCalledTimes(1)
+      expect(prompt.focus).toHaveBeenCalledWith({ preventScroll: true })
+      expect(prompt.textarea.selectionStart).toBe("hi".length)
+      expect(session.vm.draft()).toBe("hi")
+      expect(session.vm.canRetry()).toBe(false)
+      session.dispose()
+    }),
+  )
+
+  it.effect("a retry that still fails returns focus and keeps the draft", () =>
+    Effect.gen(function* () {
+      const session = openRetrySession()
+      const prompt = watchPrompt(session.vm, "hi")
+      replyOk(session.replies, chatgpt, "filled")
+      replyMiss(session.replies, claude)
+      yield* session.vm.fill().pipe(Effect.provide(session.layer))
+      prompt.focus.mockClear()
+      yield* session.vm.retryFailed().pipe(Effect.provide(session.layer))
+      expect(prompt.focus).toHaveBeenCalledWith({ preventScroll: true })
+      expect(session.vm.draft()).toBe("hi")
+      expect(session.vm.canRetry()).toBe(true)
+      session.dispose()
+    }),
+  )
 })
+
+const watchPrompt = (
+  vm: {
+    readonly setDraft: (text: string) => void
+    readonly registerTextarea: (el: HTMLTextAreaElement) => void
+  },
+  text: string,
+) => {
+  const textarea = document.createElement("textarea")
+  textarea.value = text
+  const focus = vi.spyOn(textarea, "focus")
+  vm.setDraft(text)
+  vm.registerTextarea(textarea)
+  return { textarea, focus }
+}

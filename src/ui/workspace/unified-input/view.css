@@ -40,6 +40,7 @@
   line-height: 1.4;
   resize: none;
   overflow: auto;
+  scroll-margin-block-end: 1rem;
 }
 
 .unified-input textarea:focus-visible {

@@ -3,6 +3,8 @@ import { WorkspaceContainer } from "@ui/workspace/container"
 import { workspaceBindingsReady } from "./bind-workspace"
 import "./workspace.css"
 
+let releaseFocusGuard: (() => void) | undefined
+
 const root = document.getElementById("root")
 if (root !== null) {
   void workspaceBindingsReady.then((workspaceBindings) => {
@@ -28,5 +30,9 @@ if (root !== null) {
       ),
       root,
     )
+    // The panel grid exists only after render. Attaching earlier misses
+    // pointer events and treats every iframe focus as a steal.
+    releaseFocusGuard?.()
+    releaseFocusGuard = workspaceBindings.mountFocusGuard()
   })
 }

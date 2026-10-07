@@ -14,6 +14,7 @@ import { subscribeWorkspacePanelHellos } from "@infrastructure/chrome/panel-fram
 import { workspaceLive } from "@infrastructure/layers"
 import { bindViewModel } from "@ui/common/viewmodel/bind-viewmodel"
 import { createPanelGridViewModel } from "@ui/workspace/panel-grid/view-model"
+import { setupFocusGuard } from "@ui/workspace/unified-input/focus-guard"
 import { createUnifiedInputViewModel } from "@ui/workspace/unified-input/view-model"
 
 const managedRuntime = ManagedRuntime.make(workspaceLive)
@@ -62,8 +63,14 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
       unifiedInput,
       newChatForAll: () => {
         unifiedInput.clearStatus()
-        return grid.newChatForAll()
+        grid.newChatForAll()
+        unifiedInput.focusPrompt()
       },
+      mountFocusGuard: () =>
+        setupFocusGuard(
+          unifiedInput.focusPrompt,
+          '[data-workspace="panel-grid"]',
+        ),
     }
   }).pipe(Effect.withLogSpan("workspace")),
 )

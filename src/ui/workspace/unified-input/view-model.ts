@@ -35,6 +35,8 @@ export type UnifiedInputViewModel = {
   readonly fill: () => Effect.Effect<void, never, Messaging>
   readonly sendAll: () => Effect.Effect<void, never, Messaging>
   readonly retryFailed: () => Effect.Effect<void, never, Messaging>
+  readonly registerTextarea: (el: HTMLTextAreaElement) => void
+  readonly focusPrompt: () => void
 }
 
 export const createUnifiedInputViewModel = <Requirements>(
@@ -62,7 +64,23 @@ export const createUnifiedInputViewModel = <Requirements>(
     setStatus(idleStatus)
   }
 
-  const sink = { draft, setDraft, setStatus, setLastBroadcast }
+  let textareaRef: HTMLTextAreaElement | null = null
+
+  const registerTextarea = (el: HTMLTextAreaElement): void => {
+    textareaRef = el
+  }
+
+  const focusPrompt = (): void => {
+    const textarea = textareaRef
+    if (textarea === null) {
+      return
+    }
+    const caret = draft().length
+    textarea.focus({ preventScroll: true })
+    textarea.setSelectionRange(caret, caret)
+  }
+
+  const sink = { draft, setDraft, setStatus, setLastBroadcast, focusPrompt }
   const fill = () => runBroadcast("fill", getPlan, sink)
   const sendAll = () => runBroadcast("send", getPlan, sink)
 
@@ -80,12 +98,14 @@ export const createUnifiedInputViewModel = <Requirements>(
         onFailure: () => {
           setStatus(idleStatus)
           setLastBroadcast(null)
+          focusPrompt()
         },
         onSuccess: (results) => {
           setStatus(statusFromResults(results))
           setLastBroadcast(
             rememberedBroadcast(previous.kind, previous.prompt, results),
           )
+          focusPrompt()
         },
       }),
     )
@@ -103,6 +123,8 @@ export const createUnifiedInputViewModel = <Requirements>(
     fill,
     sendAll,
     retryFailed,
+    registerTextarea,
+    focusPrompt,
   }
 }
 
@@ -113,6 +135,7 @@ type DraftSink = {
   readonly setDraft: (text: string) => void
   readonly setStatus: (status: BarStatus) => void
   readonly setLastBroadcast: (broadcast: LastBroadcast | null) => void
+  readonly focusPrompt: () => void
 }
 
 const broadcastProgram = (
@@ -142,6 +165,7 @@ const runBroadcast = (
       onFailure: () => {
         sink.setStatus(idleStatus)
         sink.setLastBroadcast(null)
+        sink.focusPrompt()
       },
       onSuccess: (results) => {
         sink.setDraft(
@@ -149,6 +173,7 @@ const runBroadcast = (
         )
         sink.setStatus(statusFromResults(results))
         sink.setLastBroadcast(rememberedBroadcast(kind, prompt, results))
+        sink.focusPrompt()
       },
     }),
   )

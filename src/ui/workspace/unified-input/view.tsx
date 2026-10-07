@@ -19,6 +19,8 @@ export type UnifiedInputViewProps = {
   readonly fill: () => void
   readonly sendAll: () => void
   readonly retryFailed: () => void
+  readonly registerTextarea: (el: HTMLTextAreaElement) => void
+  readonly focusPrompt: () => void
 }
 
 export const UnifiedInputView = (props: UnifiedInputViewProps) => (
@@ -30,6 +32,7 @@ export const UnifiedInputView = (props: UnifiedInputViewProps) => (
       <textarea
         id="unified-input-prompt"
         name="prompt"
+        ref={props.registerTextarea}
         autocomplete="off"
         placeholder={messagePlaceholder}
         value={props.draft()}
