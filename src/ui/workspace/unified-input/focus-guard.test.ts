@@ -1,6 +1,11 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { setupFocusGuard } from "./focus-guard"
+import {
+  focusGuardHeld,
+  holdFocusGuard,
+  releaseFocusGuard,
+  setupFocusGuard,
+} from "./focus-guard"
 
 const gridSelector = '[data-workspace="panel-grid"]'
 
@@ -14,6 +19,9 @@ describe("focus guard", () => {
     stops.length = 0
     document.body.replaceChildren()
     vi.useRealTimers()
+    while (focusGuardHeld()) {
+      releaseFocusGuard()
+    }
   })
 
   const mountGrid = () => {
@@ -68,6 +76,17 @@ describe("focus guard", () => {
     const focusPrompt = start()
     pointer(grid, "pointerdown")
     vi.advanceTimersByTime(500)
+    focusIn(iframe)
+    expect(focusPrompt).toHaveBeenCalledTimes(1)
+  })
+
+  it("ignores an iframe focus while a fill or send is in progress", () => {
+    const { iframe } = mountGrid()
+    const focusPrompt = start()
+    holdFocusGuard()
+    focusIn(iframe)
+    expect(focusPrompt).not.toHaveBeenCalled()
+    releaseFocusGuard()
     focusIn(iframe)
     expect(focusPrompt).toHaveBeenCalledTimes(1)
   })

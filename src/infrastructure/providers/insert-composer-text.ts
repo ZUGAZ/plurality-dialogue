@@ -44,15 +44,56 @@ const writePlainValue = (
 
 const writeContentEditable = (element: HTMLElement, text: string): void => {
   element.focus()
-  selectAllInside(element)
-  const inserted = execInsertText(element.ownerDocument, text)
-  if (!inserted) {
-    dispatchInsertEvents(element, text)
+  selectEditableText(element)
+  pastePlainText(element, text)
+  if (element.textContent !== text) {
+    const inserted = execInsertText(element.ownerDocument, text)
+    if (!inserted || element.textContent !== text) {
+      dispatchInsertEvents(element, text)
+    }
   }
   if (element.textContent !== text) {
-    element.textContent = text
+    writeEditableText(element, text)
     element.dispatchEvent(new Event("input", { bubbles: true }))
   }
+}
+
+const pastePlainText = (element: HTMLElement, text: string): void => {
+  if (typeof DataTransfer !== "function" || typeof ClipboardEvent !== "function") {
+    return
+  }
+  const data = new DataTransfer()
+  data.setData("text/plain", text)
+  element.dispatchEvent(
+    new ClipboardEvent("paste", {
+      bubbles: true,
+      cancelable: true,
+      clipboardData: data,
+    }),
+  )
+}
+
+const selectEditableText = (element: HTMLElement): void => {
+  const selection = element.ownerDocument.defaultView?.getSelection()
+  if (selection === undefined || selection === null) {
+    return
+  }
+  const range = element.ownerDocument.createRange()
+  range.selectNodeContents(editableTarget(element))
+  selection.removeAllRanges()
+  selection.addRange(range)
+}
+
+const writeEditableText = (element: HTMLElement, text: string): void => {
+  editableTarget(element).textContent = text
+}
+
+const editableTarget = (element: HTMLElement): HTMLElement => {
+  const paragraph = element.querySelector("p")
+  if (paragraph instanceof HTMLElement) {
+    return paragraph
+  }
+  return element
 }
 
 const execInsertText = (doc: Document, text: string): boolean => {
@@ -60,14 +101,6 @@ const execInsertText = (doc: Document, text: string): boolean => {
     return false
   }
   return doc.execCommand("insertText", false, text)
-}
-
-const selectAllInside = (element: HTMLElement): void => {
-  const selection = element.ownerDocument.defaultView?.getSelection()
-  if (selection === undefined || selection === null) {
-    return
-  }
-  selection.selectAllChildren(element)
 }
 
 const dispatchInsertEvents = (element: HTMLElement, text: string): void => {

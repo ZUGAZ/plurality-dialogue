@@ -3,6 +3,7 @@ import type { FillAndSubmit } from "./commands/fill-and-submit"
 import { isFillComposer } from "./commands/fill-composer"
 import type { FillComposer } from "./commands/fill-composer"
 import {
+  isPanelCommandErr,
   PanelCommandErr,
   type PanelCommandErrReason,
 } from "../messaging/panel-command-err"
@@ -40,6 +41,16 @@ export const executePanelCommand = Effect.fn("executePanelCommand")(function* (
     ),
     Effect.catchTag("SubmitControlDisabled", () =>
       commandErr(identity, "submit-disabled"),
+    ),
+    Effect.tap((response) =>
+      isPanelCommandErr(response)
+        ? Effect.logWarning(
+            "panel command failed",
+            response.reason,
+            identity.providerId,
+            identity.panelId,
+          )
+        : Effect.void,
     ),
   )
 })

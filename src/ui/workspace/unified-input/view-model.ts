@@ -13,6 +13,7 @@ import type {
 import type { Messaging } from "@domain/ports/messaging"
 import { getBuiltInProvider } from "@domain/provider/registry"
 import type { RunEffect } from "@ui/common/viewmodel/bind-viewmodel"
+import { holdFocusGuard, releaseFocusGuard } from "./focus-guard"
 import {
   draftAfterFillOrSend,
   failedPanelsFromResults,
@@ -147,9 +148,14 @@ const broadcastProgram = (
     kind === "fill"
       ? broadcastFill(prompt, plan.targets)
       : broadcastFillSend(prompt, plan.targets)
-  return Effect.log(kind, { targets: plan.targets.length }).pipe(
-    Effect.zipRight(program),
-    Effect.map((results) => [...plan.notReady, ...results]),
+  return Effect.sync(holdFocusGuard).pipe(
+    Effect.zipRight(
+      Effect.log(kind, { targets: plan.targets.length }).pipe(
+        Effect.zipRight(program),
+        Effect.map((results) => [...plan.notReady, ...results]),
+      ),
+    ),
+    Effect.ensuring(Effect.sync(releaseFocusGuard)),
   )
 }
 

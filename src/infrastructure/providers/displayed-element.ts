@@ -15,9 +15,11 @@ export const firstDisplayed = (
   selectors: readonly string[],
 ): HTMLElement | null => {
   for (const selector of selectors) {
-    const match = root.querySelector(selector)
-    if (match !== null && isDisplayedHtmlElement(match)) {
-      return match
+    const matches = root.querySelectorAll(selector)
+    for (const match of matches) {
+      if (isDisplayedHtmlElement(match)) {
+        return match
+      }
     }
   }
   return null

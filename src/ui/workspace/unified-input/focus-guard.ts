@@ -1,6 +1,22 @@
 // Vendor pages focus their composer after load. A pointer event in the grid
 // means the user wants that frame; only an unsolicited focusin returns here.
+// Fill and Send also focus that composer on purpose. holdFocusGuard covers
+// that window so the guard does not yank the caret mid-insert.
 const clickWindowMs = 500
+
+let holds = 0
+
+export const holdFocusGuard = (): void => {
+  holds += 1
+}
+
+export const releaseFocusGuard = (): void => {
+  if (holds > 0) {
+    holds -= 1
+  }
+}
+
+export const focusGuardHeld = (): boolean => holds > 0
 
 export const setupFocusGuard = (
   focusPrompt: () => void,
@@ -26,6 +42,9 @@ export const setupFocusGuard = (
   }
 
   const onFocusIn = (event: FocusEvent): void => {
+    if (focusGuardHeld()) {
+      return
+    }
     if (!userClicked && event.target instanceof HTMLIFrameElement) {
       focusPrompt()
     }

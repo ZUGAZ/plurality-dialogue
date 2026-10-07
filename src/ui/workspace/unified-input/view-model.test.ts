@@ -13,6 +13,8 @@ import type {
   VisiblePanel,
 } from "@domain/broadcast/resolve-targets"
 import { inMemoryMessagingLayer } from "@domain/ports/in-memory-messaging"
+import { Messaging } from "@domain/ports/messaging"
+import { focusGuardHeld } from "./focus-guard"
 import { createUnifiedInputViewModel } from "./view-model"
 
 const quiet = <Success, Error, Requirements>(
@@ -97,6 +99,40 @@ describe("unified input view-model", () => {
         expect(prompt.textarea.selectionStart).toBe("hi".length)
         expect(prompt.textarea.selectionEnd).toBe("hi".length)
         expect(session.vm.draft()).toBe("hi")
+        expect(focusGuardHeld()).toBe(false)
+        session.dispose()
+      }),
+    )
+
+    it.effect("holds the focus guard while the frame command runs", () =>
+      Effect.gen(function* () {
+        const session = openSession(() => ({
+          targets: [target],
+          notReady: [],
+        }))
+        session.vm.setDraft("hi")
+        let heldDuringSend = false
+        yield* session.vm.fill().pipe(
+          Effect.provide(
+            quiet(
+              Layer.succeed(Messaging, {
+                send: () => Effect.succeed({}),
+                sendToFrame: () => {
+                  heldDuringSend = focusGuardHeld()
+                  return Effect.succeed(
+                    PanelCommandOk.make({
+                      verb: "filled",
+                      providerId: "chatgpt",
+                      panelId: "panel-1",
+                    }),
+                  )
+                },
+              }),
+            ),
+          ),
+        )
+        expect(heldDuringSend).toBe(true)
+        expect(focusGuardHeld()).toBe(false)
         session.dispose()
       }),
     )

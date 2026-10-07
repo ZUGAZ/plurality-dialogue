@@ -27,4 +27,19 @@ describe("insertComposerText", () => {
       editor.remove()
     }),
   )
+
+  it.effect("writes into the paragraph and keeps it", () =>
+    Effect.gen(function* () {
+      const editor = document.createElement("div")
+      editor.contentEditable = "true"
+      const paragraph = document.createElement("p")
+      paragraph.textContent = "old"
+      editor.append(paragraph)
+      document.body.append(editor)
+      yield* insertComposerText(editor, "ZXQ-FILL-PROBE-9182")
+      expect(editor.querySelector("p")?.textContent).toBe("ZXQ-FILL-PROBE-9182")
+      expect(editor.querySelectorAll("p")).toHaveLength(1)
+      editor.remove()
+    }),
+  )
 })
