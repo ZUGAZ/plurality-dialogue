@@ -84,10 +84,30 @@
 }
 
 .unified-input-status {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
   min-block-size: 1.25rem;
   margin: 0.35rem 0 0;
   font-size: 0.875rem;
   line-height: 1.4;
+}
+
+.unified-input-status button {
+  margin: 0;
+  padding: 0 0.35rem;
+  border: 1px solid #5c5c5c;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  cursor: pointer;
+}
+
+.unified-input-status button:focus-visible {
+  outline: 3px solid #0b57d0;
+  outline-offset: 2px;
 }
 
 .visually-hidden:where(:not(:focus-within, :active)) {

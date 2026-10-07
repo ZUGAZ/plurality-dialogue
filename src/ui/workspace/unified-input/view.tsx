@@ -1,8 +1,10 @@
+import { Show } from "solid-js"
 import {
   clearLabel,
   fillLabel,
   messagePlaceholder,
   promptLabel,
+  retryLabel,
   sendAllLabel,
 } from "./model"
 import "./view.css"
@@ -11,10 +13,12 @@ export type UnifiedInputViewProps = {
   readonly draft: () => string
   readonly hasDraft: () => boolean
   readonly statusText: () => string
+  readonly canRetry: () => boolean
   readonly setDraft: (text: string) => void
   readonly clear: () => void
   readonly fill: () => void
   readonly sendAll: () => void
+  readonly retryFailed: () => void
 }
 
 export const UnifiedInputView = (props: UnifiedInputViewProps) => (
@@ -52,8 +56,13 @@ export const UnifiedInputView = (props: UnifiedInputViewProps) => (
         </button>
       </div>
     </div>
-    <p class="unified-input-status" role="status" aria-live="polite">
+    <div class="unified-input-status" role="status" aria-live="polite">
       {props.statusText()}
-    </p>
+      <Show when={props.canRetry()}>
+        <button type="button" disabled={false} onClick={props.retryFailed}>
+          {retryLabel}
+        </button>
+      </Show>
+    </div>
   </footer>
 )

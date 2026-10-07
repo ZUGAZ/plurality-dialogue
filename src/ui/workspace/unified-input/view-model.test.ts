@@ -6,7 +6,10 @@ import { PanelCommandErr } from "@domain/messaging/panel-command-err"
 import { PanelCommandOk } from "@domain/messaging/panel-command-ok"
 import { PanelFailed } from "@domain/broadcast/panel-failed"
 import { PanelTarget } from "@domain/broadcast/panel-target"
-import type { BroadcastPlan } from "@domain/broadcast/resolve-targets"
+import type {
+  BroadcastPlan,
+  VisiblePanel,
+} from "@domain/broadcast/resolve-targets"
 import { inMemoryMessagingLayer } from "@domain/ports/in-memory-messaging"
 import { createUnifiedInputViewModel } from "./view-model"
 
@@ -196,8 +199,17 @@ describe("unified input view-model", () => {
   })
 })
 
-const openSession = (getPlan: () => BroadcastPlan = () => emptyPlan) =>
+const openSession = (
+  getPlan: () => BroadcastPlan = () => emptyPlan,
+  resolveTargets: (
+    panels: ReadonlyArray<VisiblePanel>,
+  ) => BroadcastPlan = () => emptyPlan,
+) =>
   createRoot((dispose) => ({
-    vm: createUnifiedInputViewModel(() => undefined, getPlan),
+    vm: createUnifiedInputViewModel(
+      () => undefined,
+      getPlan,
+      resolveTargets,
+    ),
     dispose,
   }))

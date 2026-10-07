@@ -47,11 +47,14 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
       }),
     )
     const unifiedInput = bindViewModel(runtime, "unifiedInput", (runEffect) =>
-      createUnifiedInputViewModel(runEffect, () =>
-        resolveBroadcastTargets(
-          toVisiblePanels(grid.panels()),
-          frames.list(),
-        ),
+      createUnifiedInputViewModel(
+        runEffect,
+        () =>
+          resolveBroadcastTargets(
+            toVisiblePanels(grid.panels()),
+            frames.list(),
+          ),
+        (panels) => resolveBroadcastTargets(panels, frames.list()),
       ),
     )
     return {

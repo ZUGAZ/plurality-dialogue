@@ -1,8 +1,12 @@
 import { describe, expect, it } from "@effect/vitest"
+import { PanelFailed } from "@domain/broadcast/panel-failed"
+import { PanelSucceeded } from "@domain/broadcast/panel-succeeded"
 import {
   draftAfterFillOrSend,
+  failedPanelsFromResults,
   failureLine,
   isDraftEmpty,
+  retryLabel,
   statusText,
 } from "./model"
 
@@ -29,6 +33,41 @@ describe("draftAfterFillOrSend", () => {
     expect(draftAfterFillOrSend("send", "hi", "succeeded")).toBe("")
     expect(draftAfterFillOrSend("fill", "hi", "failed")).toBe("hi")
     expect(draftAfterFillOrSend("send", "hi", "failed")).toBe("hi")
+  })
+})
+
+describe("retryLabel", () => {
+  it("is non-empty", () => {
+    expect(retryLabel).toBe("Retry Failed")
+    expect(retryLabel.length).toBeGreaterThan(0)
+  })
+})
+
+describe("failedPanelsFromResults", () => {
+  it("extracts failures and is empty when every panel succeeds", () => {
+    expect(
+      failedPanelsFromResults([
+        PanelSucceeded.make({
+          panelId: "panel-1",
+          providerId: "chatgpt",
+          verb: "filled",
+        }),
+        PanelFailed.make({
+          panelId: "panel-2",
+          providerId: "claude",
+          reason: "composer-not-found",
+        }),
+      ]),
+    ).toEqual([{ panelId: "panel-2", providerId: "claude" }])
+    expect(
+      failedPanelsFromResults([
+        PanelSucceeded.make({
+          panelId: "panel-1",
+          providerId: "chatgpt",
+          verb: "submitted",
+        }),
+      ]),
+    ).toEqual([])
   })
 })
 
