@@ -1,5 +1,6 @@
 import { Option } from "effect"
 import { describe, expect, it } from "@effect/vitest"
+import type { SourceUrlPlacement } from "../settings/source-url-placement"
 import {
   contextMenuContexts,
   contextMenuDocumentUrlPatterns,
@@ -27,6 +28,7 @@ describe("draftTextFromContextMenu", () => {
         selectionText: "  hello  ",
         linkUrl: "https://example.com/link",
         pageUrl,
+        placement: "omit",
       }),
     ).toEqual(Option.some("hello"))
   })
@@ -37,6 +39,7 @@ describe("draftTextFromContextMenu", () => {
         selectionText: " \n\t ",
         linkUrl: " https://example.com/link ",
         pageUrl,
+        placement: "omit",
       }),
     ).toEqual(Option.some("https://example.com/link"))
   })
@@ -47,6 +50,7 @@ describe("draftTextFromContextMenu", () => {
         selectionText: undefined,
         linkUrl: "https://example.com/link",
         pageUrl,
+        placement: "omit",
       }),
     ).toEqual(Option.some("https://example.com/link"))
   })
@@ -57,6 +61,7 @@ describe("draftTextFromContextMenu", () => {
         selectionText: "   ",
         linkUrl: " ",
         pageUrl,
+        placement: "omit",
       }),
     ).toEqual(Option.none())
   })
@@ -67,7 +72,92 @@ describe("draftTextFromContextMenu", () => {
         selectionText: undefined,
         linkUrl: undefined,
         pageUrl,
+        placement: "omit",
       }),
     ).toEqual(Option.none())
+  })
+
+  it("keeps the base text when placement is omit or pageUrl is blank", () => {
+    expect(
+      draftTextFromContextMenu({
+        selectionText: "hello",
+        linkUrl: undefined,
+        pageUrl,
+        placement: "omit",
+      }),
+    ).toEqual(Option.some("hello"))
+    expect(
+      draftTextFromContextMenu({
+        selectionText: "hello",
+        linkUrl: undefined,
+        pageUrl: " \n ",
+        placement: "before",
+      }),
+    ).toEqual(Option.some("hello"))
+    expect(
+      draftTextFromContextMenu({
+        selectionText: "hello",
+        linkUrl: undefined,
+        pageUrl: undefined,
+        placement: "after",
+      }),
+    ).toEqual(Option.some("hello"))
+  })
+
+  it("puts the page url before or after the base text", () => {
+    expect(
+      draftTextFromContextMenu({
+        selectionText: "hello",
+        linkUrl: "https://example.com/link",
+        pageUrl,
+        placement: "before",
+      }),
+    ).toEqual(Option.some(`Source: ${pageUrl}\n\nhello`))
+    expect(
+      draftTextFromContextMenu({
+        selectionText: "hello",
+        linkUrl: "https://example.com/link",
+        pageUrl,
+        placement: "after",
+      }),
+    ).toEqual(Option.some(`hello\n\nSource: ${pageUrl}`))
+  })
+
+  it("wraps a link-url draft with the page url", () => {
+    const linkUrl = "https://example.com/link"
+    expect(
+      draftTextFromContextMenu({
+        selectionText: "   ",
+        linkUrl,
+        pageUrl,
+        placement: "before",
+      }),
+    ).toEqual(Option.some(`Source: ${pageUrl}\n\n${linkUrl}`))
+    expect(
+      draftTextFromContextMenu({
+        selectionText: undefined,
+        linkUrl,
+        pageUrl,
+        placement: "after",
+      }),
+    ).toEqual(Option.some(`${linkUrl}\n\nSource: ${pageUrl}`))
+  })
+
+  it("does not draft a source line without selection or link", () => {
+    const placements: readonly SourceUrlPlacement[] = [
+      "omit",
+      "before",
+      "after",
+    ]
+    for (const placement of placements) {
+      expect(
+        draftTextFromContextMenu({
+          selectionText: undefined,
+          linkUrl: " ",
+          pageUrl,
+          placement,
+        }),
+      ).toEqual(Option.none())
+    }
   })
 })

@@ -6,8 +6,7 @@ import { describe, expect, it } from "@effect/vitest"
 import { inMemoryStorageLayer } from "@domain/ports/in-memory-storage"
 import { Storage, StorageWriteError } from "@domain/ports/storage"
 import { workspaceSettingsStorageKey } from "@domain/settings/workspace-settings"
-import type { ThemePreference } from "@domain/settings/theme-preference"
-import { createThemePickerViewModel } from "./view-model"
+import { createSourceUrlPlacementViewModel } from "./view-model"
 
 const quiet = <Success, Error, Requirements>(
   layer: Layer.Layer<Success, Error, Requirements>,
@@ -24,62 +23,38 @@ const storedWorkspace = {
   layout: "1x2",
   panelProviders: ["claude", "gemini"],
   toolbarCollapsed: true,
+  theme: "dark",
+  sourceUrlPlacement: "after",
 }
 
-describe("theme picker view-model", () => {
-  it.layer(quiet(inMemoryStorageLayer()))("fresh settings", (it) => {
-    it.effect("starts on system and applies light dark", () =>
-      Effect.gen(function* () {
-        const session = yield* openSession()
-        expect(session.vm.selectedTheme()).toBe("system")
-        expect(session.vm.saveError()).toBeUndefined()
-        expect(document.documentElement.style.colorScheme).toBe("light dark")
-        session.dispose()
-      }),
-    )
-  })
-
+describe("source url placement view-model", () => {
   it.layer(
     quiet(
       inMemoryStorageLayer({
         [workspaceSettingsStorageKey]: storedWorkspace,
       }),
     ),
-  )("existing workspace", (it) => {
-    it.effect("persists light and keeps the other settings", () =>
+  )("stored placement", (it) => {
+    it.effect("loads the stored value", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
-        expect(session.vm.selectedTheme()).toBe("system")
-        yield* session.vm.setTheme("light")
-        expect(session.vm.selectedTheme()).toBe("light")
+        expect(session.vm.selectedPlacement()).toBe("after")
         expect(session.vm.saveError()).toBeUndefined()
-        expect(document.documentElement.style.colorScheme).toBe("light")
-        const storage = yield* Storage
-        expect(yield* storage.get(workspaceSettingsStorageKey)).toEqual(
-          Option.some({
-            ...storedWorkspace,
-            theme: "light",
-            sourceUrlPlacement: "omit",
-          }),
-        )
         session.dispose()
       }),
     )
 
-    it.effect("persists dark and system", () =>
+    it.effect("saves sourceUrlPlacement and keeps the other fields", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
-        const themes: readonly ThemePreference[] = ["dark", "system"]
-        for (const theme of themes) {
-          yield* session.vm.setTheme(theme)
-          expect(session.vm.selectedTheme()).toBe(theme)
-        }
+        yield* session.vm.setPlacement("before")
+        expect(session.vm.selectedPlacement()).toBe("before")
+        expect(session.vm.saveError()).toBeUndefined()
         const storage = yield* Storage
         expect(yield* storage.get(workspaceSettingsStorageKey)).toEqual(
           Option.some({
             ...storedWorkspace,
-            theme: "system",
-            sourceUrlPlacement: "omit",
+            sourceUrlPlacement: "before",
           }),
         )
         session.dispose()
@@ -88,13 +63,12 @@ describe("theme picker view-model", () => {
   })
 
   it.layer(quiet(failingWriteLayer))("failed persist", (it) => {
-    it.effect("sets Could not save. and leaves system selected", () =>
+    it.effect("sets Could not save. and leaves omit selected", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
-        yield* session.vm.setTheme("dark")
+        yield* session.vm.setPlacement("after")
         expect(session.vm.saveError()).toBe("Could not save.")
-        expect(session.vm.selectedTheme()).toBe("system")
-        expect(document.documentElement.style.colorScheme).toBe("light dark")
+        expect(session.vm.selectedPlacement()).toBe("omit")
         session.dispose()
       }),
     )
@@ -105,7 +79,7 @@ const openSession = () =>
   Effect.gen(function* () {
     const runtime = yield* Effect.runtime<Storage>()
     return createRoot((dispose) => ({
-      vm: createThemePickerViewModel((effect) => {
+      vm: createSourceUrlPlacementViewModel((effect) => {
         Runtime.runSync(runtime)(effect)
       }),
       dispose,

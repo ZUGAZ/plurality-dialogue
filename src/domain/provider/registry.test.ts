@@ -47,6 +47,7 @@ describe("provider registry", () => {
           layout: "1x3",
           toolbarCollapsed: false,
           theme: "system",
+          sourceUrlPlacement: "omit",
         })
         const enabled = yield* listEnabledProviders()
         expect(enabled.map((provider) => provider.id)).toEqual([
@@ -170,6 +171,7 @@ describe("provider registry", () => {
           layout: "1x3",
           toolbarCollapsed: false,
           theme: "system",
+          sourceUrlPlacement: "omit",
         })
       }),
     )

@@ -72,6 +72,7 @@ describe("shell toolbar collapse", () => {
           panelProviders: ["chatgpt", "claude"],
           toolbarCollapsed: true,
           theme: "system",
+          sourceUrlPlacement: "omit",
         })
       }),
     )

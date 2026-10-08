@@ -44,6 +44,7 @@ describe("workspace settings theme", () => {
         panelProviders: ["chatgpt", null],
         toolbarCollapsed: true,
         theme,
+        sourceUrlPlacement: "omit",
       }
       const encoded = Schema.encodeEither(WorkspaceSettings)(settings)
       expect(Either.isRight(encoded)).toBe(true)

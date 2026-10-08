@@ -55,6 +55,7 @@ describe("provider toggles view-model", () => {
             layout: "1x3",
             toolbarCollapsed: false,
             theme: "system",
+            sourceUrlPlacement: "omit",
           }),
         )
         session.dispose()

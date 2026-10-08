@@ -1,9 +1,28 @@
-import { Schema } from "effect"
+import { Either, Schema } from "effect"
 import { LayoutId, maxCellCount } from "@domain/layout/presets"
 import { ProviderId } from "@domain/provider/provider-id"
+import { SourceUrlPlacement } from "./source-url-placement"
 import { ThemePreference } from "./theme-preference"
 
 const defaultThemePreference: "system" = "system"
+
+const defaultSourceUrlPlacement: SourceUrlPlacement = "omit"
+
+const decodeSourceUrlPlacement = (input: unknown): SourceUrlPlacement =>
+  Either.getOrElse(Schema.decodeUnknownEither(SourceUrlPlacement)(input), () =>
+    defaultSourceUrlPlacement,
+  )
+
+// Invalid values stay inside this field. They must not fail the document.
+const lenientSourceUrlPlacement = Schema.transform(
+  Schema.Unknown,
+  SourceUrlPlacement,
+  {
+    strict: true,
+    decode: (input) => decodeSourceUrlPlacement(input),
+    encode: (placement) => placement,
+  },
+)
 
 export const WorkspaceSettings = Schema.Struct({
   enabledProviders: Schema.Array(ProviderId),
@@ -19,6 +38,9 @@ export const WorkspaceSettings = Schema.Struct({
   }),
   theme: Schema.optionalWith(ThemePreference, {
     default: () => defaultThemePreference,
+  }),
+  sourceUrlPlacement: Schema.optionalWith(lenientSourceUrlPlacement, {
+    default: () => defaultSourceUrlPlacement,
   }),
 })
 
@@ -36,4 +58,5 @@ export const defaultWorkspaceSettings: WorkspaceSettings = {
   layout: "1x3",
   toolbarCollapsed: false,
   theme: defaultThemePreference,
+  sourceUrlPlacement: defaultSourceUrlPlacement,
 }

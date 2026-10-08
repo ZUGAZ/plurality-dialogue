@@ -2,11 +2,16 @@ import {
   ProviderTogglesView,
   type ProviderTogglesViewProps,
 } from "./provider-toggles/view"
+import {
+  SourceUrlPlacementView,
+  type SourceUrlPlacementViewProps,
+} from "./source-url-placement/view"
 import { ThemePickerView, type ThemePickerViewProps } from "./theme-picker/view"
 
 export type OptionsViewProps = {
   readonly providers: ProviderTogglesViewProps
   readonly theme: ThemePickerViewProps
+  readonly sourceUrlPlacement: SourceUrlPlacementViewProps
 }
 
 export const OptionsView = (props: OptionsViewProps) => (
@@ -22,6 +27,11 @@ export const OptionsView = (props: OptionsViewProps) => (
       selectedTheme={props.theme.selectedTheme}
       saveError={props.theme.saveError}
       onThemeChange={props.theme.onThemeChange}
+    />
+    <SourceUrlPlacementView
+      selectedPlacement={props.sourceUrlPlacement.selectedPlacement}
+      saveError={props.sourceUrlPlacement.saveError}
+      onPlacementChange={props.sourceUrlPlacement.onPlacementChange}
     />
   </>
 )

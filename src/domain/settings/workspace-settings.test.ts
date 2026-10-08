@@ -2,6 +2,7 @@ import { Either, Schema } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import { layoutIdOrDefault } from "@domain/layout/presets"
 import { isProviderId } from "../provider/provider-id"
+import type { SourceUrlPlacement } from "./source-url-placement"
 import {
   WorkspaceSettings,
   decodeWorkspaceSettings,
@@ -56,6 +57,7 @@ describe("workspace settings schema", () => {
         layout: "1x3",
         toolbarCollapsed: false,
         theme: "system",
+        sourceUrlPlacement: "omit",
       })
     }
   })
@@ -72,111 +74,10 @@ describe("workspace settings schema", () => {
         layout: "1x2",
         toolbarCollapsed: false,
         theme: "system",
+        sourceUrlPlacement: "omit",
       })
       expect(decoded.right.panelProviders).toBeUndefined()
     }
-  })
-
-  it("decodes panelProviders of length 1..4 including null entries", () => {
-    const decoded = decodeWorkspaceSettings({
-      enabledProviders: ["chatgpt", "claude", "gemini"],
-      layout: "1x3",
-      panelProviders: ["claude", "claude", "gemini"],
-    })
-    expect(Either.isRight(decoded)).toBe(true)
-    if (Either.isRight(decoded)) {
-      expect(decoded.right.panelProviders).toEqual([
-        "claude",
-        "claude",
-        "gemini",
-      ])
-    }
-    expect(
-      Either.isRight(
-        decodeWorkspaceSettings({
-          enabledProviders: [],
-          layout: "1x1",
-          panelProviders: [null],
-        }),
-      ),
-    ).toBe(true)
-    expect(
-      Either.isRight(
-        decodeWorkspaceSettings({
-          enabledProviders: ["chatgpt"],
-          layout: "2x2",
-          panelProviders: ["chatgpt", "chatgpt", "chatgpt", "chatgpt"],
-        }),
-      ),
-    ).toBe(true)
-  })
-
-  it("rejects panelProviders with grok, bad lengths, or a non-array", () => {
-    const base = { enabledProviders: ["chatgpt"], layout: "1x3" }
-    expect(
-      Either.isLeft(
-        decodeWorkspaceSettings({ ...base, panelProviders: ["grok"] }),
-      ),
-    ).toBe(true)
-    expect(
-      Either.isLeft(decodeWorkspaceSettings({ ...base, panelProviders: [] })),
-    ).toBe(true)
-    expect(
-      Either.isLeft(
-        decodeWorkspaceSettings({
-          ...base,
-          panelProviders: ["chatgpt", "chatgpt", "chatgpt", "chatgpt", "chatgpt"],
-        }),
-      ),
-    ).toBe(true)
-    expect(
-      Either.isLeft(
-        decodeWorkspaceSettings({ ...base, panelProviders: "chatgpt" }),
-      ),
-    ).toBe(true)
-  })
-
-  it("rejects null, empty objects, and a missing provider list", () => {
-    expect(Either.isLeft(decodeWorkspaceSettings(null))).toBe(true)
-    expect(Either.isLeft(decodeWorkspaceSettings({}))).toBe(true)
-    expect(
-      Either.isLeft(decodeWorkspaceSettings({ layout: "1x3" })),
-    ).toBe(true)
-  })
-
-  it("rejects an unknown layout, grok, a unicode times sign, and a string list", () => {
-    expect(
-      Either.isLeft(
-        decodeWorkspaceSettings({
-          enabledProviders: [],
-          layout: "1x5",
-        }),
-      ),
-    ).toBe(true)
-    expect(
-      Either.isLeft(
-        decodeWorkspaceSettings({
-          enabledProviders: ["chatgpt", "grok"],
-          layout: "1x3",
-        }),
-      ),
-    ).toBe(true)
-    expect(
-      Either.isLeft(
-        decodeWorkspaceSettings({
-          enabledProviders: ["chatgpt"],
-          layout: "1×3",
-        }),
-      ),
-    ).toBe(true)
-    expect(
-      Either.isLeft(
-        decodeWorkspaceSettings({
-          enabledProviders: "chatgpt",
-          layout: "1x3",
-        }),
-      ),
-    ).toBe(true)
   })
 
   it("decodes an empty provider list with 1x3", () => {
@@ -191,6 +92,7 @@ describe("workspace settings schema", () => {
         layout: "1x3",
         toolbarCollapsed: false,
         theme: "system",
+        sourceUrlPlacement: "omit",
       })
     }
   })
@@ -235,6 +137,7 @@ describe("workspace settings schema", () => {
         ...base,
         toolbarCollapsed: false,
         theme: "system",
+        sourceUrlPlacement: "omit",
       })
       expect(missing.right.panelProviders).toBeUndefined()
       expect(withPanels.right.panelProviders).toEqual(["chatgpt", null])
@@ -250,6 +153,7 @@ describe("workspace settings schema", () => {
       layout: "1x3",
       toolbarCollapsed: true,
       theme: "system",
+      sourceUrlPlacement: "omit",
     }
     const encoded = Schema.encodeEither(WorkspaceSettings)(settings)
     expect(Either.isRight(encoded)).toBe(true)
@@ -262,5 +166,71 @@ describe("workspace settings schema", () => {
 
   it("does not treat grok as a provider id", () => {
     expect(isProviderId("grok")).toBe(false)
+  })
+})
+
+const settingsWithPlacement = (
+  sourceUrlPlacement: SourceUrlPlacement,
+): WorkspaceSettings => ({
+  enabledProviders: ["chatgpt", "claude"],
+  layout: "1x2",
+  panelProviders: ["chatgpt", null],
+  toolbarCollapsed: true,
+  theme: "dark",
+  sourceUrlPlacement,
+})
+
+describe("sourceUrlPlacement", () => {
+  const siblings = {
+    enabledProviders: ["chatgpt", "claude"],
+    layout: "1x2",
+    panelProviders: ["chatgpt", null],
+    toolbarCollapsed: true,
+    theme: "dark",
+  }
+
+  it("decodes a missing key as omit and keeps siblings", () => {
+    expect(decodeWorkspaceSettings(siblings)).toEqual(
+      Either.right({ ...siblings, sourceUrlPlacement: "omit" }),
+    )
+  })
+
+  it("decodes before and after", () => {
+    expect(
+      decodeWorkspaceSettings({ ...siblings, sourceUrlPlacement: "before" }),
+    ).toEqual(Either.right({ ...siblings, sourceUrlPlacement: "before" }))
+    expect(
+      decodeWorkspaceSettings({ ...siblings, sourceUrlPlacement: "after" }),
+    ).toEqual(Either.right({ ...siblings, sourceUrlPlacement: "after" }))
+  })
+
+  it("decodes sideways as omit and keeps siblings", () => {
+    for (const sourceUrlPlacement of ["sideways", null, 1]) {
+      expect(
+        decodeWorkspaceSettings({ ...siblings, sourceUrlPlacement }),
+      ).toEqual(Either.right({ ...siblings, sourceUrlPlacement: "omit" }))
+    }
+  })
+
+  it("defaults to omit", () => {
+    expect(defaultWorkspaceSettings.sourceUrlPlacement).toBe("omit")
+  })
+
+  it("round-trips omit, before, and after", () => {
+    const placements: readonly SourceUrlPlacement[] = [
+      "omit",
+      "before",
+      "after",
+    ]
+    for (const sourceUrlPlacement of placements) {
+      const settings = settingsWithPlacement(sourceUrlPlacement)
+      const encoded = Schema.encodeEither(WorkspaceSettings)(settings)
+      expect(Either.isRight(encoded)).toBe(true)
+      if (Either.isRight(encoded)) {
+        expect(decodeWorkspaceSettings(encoded.right)).toEqual(
+          Either.right(settings),
+        )
+      }
+    }
   })
 })

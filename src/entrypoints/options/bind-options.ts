@@ -4,6 +4,7 @@ import { themeToColorScheme } from "@domain/settings/theme-preference"
 import { loadWorkspaceSettings } from "@domain/settings/workspace-settings-storage"
 import { bindViewModel } from "@ui/common/viewmodel/bind-viewmodel"
 import { createProviderTogglesViewModel } from "@ui/options/provider-toggles/view-model"
+import { createSourceUrlPlacementViewModel } from "@ui/options/source-url-placement/view-model"
 import { createThemePickerViewModel } from "@ui/options/theme-picker/view-model"
 
 const managedRuntime = ManagedRuntime.make(optionsLive)
@@ -25,6 +26,11 @@ export const optionsBindingsReady = managedRuntime.runPromise(
         createProviderTogglesViewModel,
       ),
       theme: bindViewModel(runtime, "themePicker", createThemePickerViewModel),
+      sourceUrlPlacement: bindViewModel(
+        runtime,
+        "sourceUrlPlacement",
+        createSourceUrlPlacementViewModel,
+      ),
     }
   }).pipe(Effect.withLogSpan("options")),
 )

@@ -18,6 +18,7 @@ const geminiOnly: WorkspaceSettings = {
   layout: "2x2",
   toolbarCollapsed: false,
   theme: "system",
+  sourceUrlPlacement: "omit",
 }
 
 describe("workspace settings storage", () => {
@@ -105,6 +106,7 @@ describe("workspace settings storage", () => {
           layout: "2x2",
           toolbarCollapsed: false,
           theme: "system",
+          sourceUrlPlacement: "omit",
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* loadWorkspaceSettings()).toEqual(written)
@@ -121,6 +123,7 @@ describe("workspace settings storage", () => {
           panelProviders: ["claude", "claude", "gemini", "chatgpt"],
           toolbarCollapsed: false,
           theme: "system",
+          sourceUrlPlacement: "omit",
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* loadWorkspaceSettings()).toEqual(written)
@@ -144,6 +147,7 @@ describe("workspace settings storage", () => {
           layout: "1x2",
           toolbarCollapsed: false,
           theme: "system",
+          sourceUrlPlacement: "omit",
         })
         expect(settings).not.toHaveProperty("panelProviders")
       }),
@@ -177,6 +181,7 @@ describe("workspace settings storage", () => {
             panelProviders: ["claude", "gemini"],
             toolbarCollapsed: true,
             theme,
+            sourceUrlPlacement: "omit",
           }
           yield* persistWorkspaceSettings(written)
           expect(yield* loadWorkspaceSettings()).toEqual(written)
@@ -203,6 +208,7 @@ describe("workspace settings storage", () => {
           panelProviders: ["claude"],
           toolbarCollapsed: true,
           theme: "system",
+          sourceUrlPlacement: "omit",
         })
       }),
     )
@@ -221,6 +227,7 @@ describe("workspace settings storage", () => {
           layout: "1x1",
           toolbarCollapsed: false,
           theme: "system",
+          sourceUrlPlacement: "omit",
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* storage.get("other-key")).toEqual(Option.some("keep-me"))

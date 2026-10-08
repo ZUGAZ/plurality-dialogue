@@ -1,5 +1,6 @@
 import { Effect, Either, Option, Schema } from "effect"
 import { ApplyContextMenuDraft } from "../../domain/messaging/context-menu-draft"
+import { loadWorkspaceSettings } from "../../domain/settings/workspace-settings-storage"
 import {
   draftTextFromContextMenu,
   type ContextMenuDraftSource,
@@ -44,7 +45,15 @@ const sendApply = (tabId: number, slot: PendingContextMenuSlot) =>
 
 export const deliverContextMenuClick = Effect.fn("deliverContextMenuClick")(
   function* (workspaceUrl: string, source: ContextMenuDraftSource) {
-    const slot = slotFromDraft(draftTextFromContextMenu(source))
+    const settings = yield* loadWorkspaceSettings()
+    const slot = slotFromDraft(
+      draftTextFromContextMenu({
+        selectionText: source.selectionText,
+        linkUrl: source.linkUrl,
+        pageUrl: source.pageUrl,
+        placement: settings.sourceUrlPlacement,
+      }),
+    )
     // A newer click replaces the slot while this send is still in flight.
     replacePendingContextMenu(slot)
     const tab = yield* openWorkspace(workspaceUrl)

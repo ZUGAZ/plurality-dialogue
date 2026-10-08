@@ -19,6 +19,11 @@ if (root !== null) {
             saveError: bindings.theme.saveError,
             onThemeChange: bindings.theme.setTheme,
           }}
+          sourceUrlPlacement={{
+            selectedPlacement: bindings.sourceUrlPlacement.selectedPlacement,
+            saveError: bindings.sourceUrlPlacement.saveError,
+            onPlacementChange: bindings.sourceUrlPlacement.setPlacement,
+          }}
         />
       ),
       root,

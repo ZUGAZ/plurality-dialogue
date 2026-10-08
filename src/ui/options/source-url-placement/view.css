@@ -1,0 +1,50 @@
+.source-url-placement {
+  margin-block-start: 1rem;
+  font-family: system-ui, sans-serif;
+  color: CanvasText;
+  background: Canvas;
+}
+
+.source-url-placement fieldset {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0.5rem 1rem 1rem;
+  border: 1px solid currentColor;
+}
+
+.source-url-placement legend {
+  padding-inline: 0.35rem;
+}
+
+.source-url-placement-help {
+  margin-block: 0 0.5rem;
+  max-inline-size: 80ch;
+  line-height: 1.5;
+}
+
+.source-url-placement label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-block-size: 48px;
+  padding-block: 0.75rem;
+  padding-inline: 0.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.source-url-placement input[type="radio"] {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.source-url-placement input[type="radio"]:focus-visible {
+  outline: 3px solid CanvasText;
+  outline-offset: 2px;
+}
+
+.source-url-placement-alert {
+  margin-block-start: 0.75rem;
+  line-height: 1.5;
+}
