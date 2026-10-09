@@ -1,11 +1,20 @@
 import { describe, expect, it } from "@effect/vitest"
+import {
+  maxImageBytes,
+  maxPendingImages,
+  type ImageRejection,
+} from "@domain/broadcast/pending-image"
 import { PanelFailed } from "@domain/broadcast/panel-failed"
 import { PanelSucceeded } from "@domain/broadcast/panel-succeeded"
 import {
+  canClearBar,
   draftAfterFillOrSend,
   failedPanelsFromResults,
   failureLine,
+  imageDisplayName,
+  imageRejectionText,
   isDraftEmpty,
+  isImageNotice,
   retryLabel,
   statusText,
 } from "./model"
@@ -15,6 +24,68 @@ describe("isDraftEmpty", () => {
     expect(isDraftEmpty("")).toBe(true)
     expect(isDraftEmpty("  \n")).toBe(true)
     expect(isDraftEmpty("hi")).toBe(false)
+  })
+})
+
+describe("canClearBar", () => {
+  it("is true for text or at least one image", () => {
+    expect(canClearBar("", 0)).toBe(false)
+    expect(canClearBar("  \n", 0)).toBe(false)
+    expect(canClearBar("", 1)).toBe(true)
+    expect(canClearBar("hi", 0)).toBe(true)
+  })
+})
+
+describe("imageDisplayName", () => {
+  it("trims and replaces a blank name", () => {
+    expect(imageDisplayName("  ")).toBe("image")
+    expect(imageDisplayName("a.png")).toBe("a.png")
+  })
+})
+
+describe("imageRejectionText", () => {
+  const sentences: ReadonlyArray<{
+    readonly rejection: ImageRejection
+    readonly text: string
+  }> = [
+    {
+      rejection: { _tag: "UnsupportedImageType" },
+      text: "Only PNG, JPEG, WebP, and GIF images can be attached.",
+    },
+    {
+      rejection: { _tag: "ImageEmpty" },
+      text: "That image is empty.",
+    },
+    {
+      rejection: { _tag: "ImageTooLarge" },
+      text: `Each image must be ${maxImageBytes / (1024 * 1024)} MB or smaller.`,
+    },
+    {
+      rejection: { _tag: "TooManyImages" },
+      text: `Only ${maxPendingImages} images can be attached.`,
+    },
+    {
+      rejection: { _tag: "ImageUnreadable" },
+      text: "That image could not be read.",
+    },
+  ]
+
+  it("uses the cap constants in each sentence", () => {
+    for (const sentence of sentences) {
+      expect(imageRejectionText(sentence.rejection)).toBe(sentence.text)
+    }
+  })
+
+  it("treats those sentences as image notices", () => {
+    for (const sentence of sentences) {
+      expect(isImageNotice({ kind: "notice", text: sentence.text })).toBe(true)
+    }
+    expect(
+      isImageNotice({
+        kind: "notice",
+        text: "Failed: panel-1 (ChatGPT)",
+      }),
+    ).toBe(false)
   })
 })
 

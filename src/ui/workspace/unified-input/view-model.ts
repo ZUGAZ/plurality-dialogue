@@ -1,6 +1,7 @@
 import { Effect, Option } from "effect"
 import { createSignal } from "solid-js"
 import { broadcastFill, broadcastFillSend } from "@domain/broadcast/broadcast"
+import type { PendingImage } from "@domain/broadcast/pending-image"
 import {
   isPanelFailed,
   type PanelFailed,
@@ -14,19 +15,25 @@ import type { Messaging } from "@domain/ports/messaging"
 import { getBuiltInProvider } from "@domain/provider/registry"
 import type { RunEffect } from "@ui/common/viewmodel/bind-viewmodel"
 import { holdFocusGuard, releaseFocusGuard } from "./focus-guard"
+import { createImageAttachments } from "./image-attachments"
 import {
+  canClearBar,
   draftAfterFillOrSend,
   failedPanelsFromResults,
   failureLine,
   isDraftEmpty,
   statusText as barStatusCopy,
   type BarStatus,
+  type ImagePreview,
   type LastBroadcast,
 } from "./model"
 
 export type UnifiedInputViewModel = {
   readonly draft: () => string
   readonly hasDraft: () => boolean
+  readonly pendingImages: () => ReadonlyArray<PendingImage>
+  readonly imagePreviews: () => ReadonlyArray<ImagePreview>
+  readonly canClear: () => boolean
   readonly status: () => BarStatus
   readonly statusText: () => string
   readonly canRetry: () => boolean
@@ -36,6 +43,10 @@ export type UnifiedInputViewModel = {
   readonly fill: () => Effect.Effect<void, never, Messaging>
   readonly sendAll: () => Effect.Effect<void, never, Messaging>
   readonly retryFailed: () => Effect.Effect<void, never, Messaging>
+  readonly addImageFiles: (
+    files: ReadonlyArray<File>,
+  ) => Effect.Effect<void, never, never>
+  readonly removeImage: (id: string) => void
   readonly registerTextarea: (el: HTMLTextAreaElement) => void
   readonly focusPrompt: () => void
 }
@@ -50,8 +61,11 @@ export const createUnifiedInputViewModel = <Requirements>(
   const [lastBroadcast, setLastBroadcast] = createSignal<LastBroadcast | null>(
     null,
   )
+  const attachments = createImageAttachments({ status, setStatus })
 
   const hasDraft = () => !isDraftEmpty(draft())
+  const canClear = () =>
+    canClearBar(draft(), attachments.pendingImages().length)
   const statusText = () => barStatusCopy(status())
   const canRetry = () => lastBroadcast() !== null
 
@@ -59,6 +73,7 @@ export const createUnifiedInputViewModel = <Requirements>(
     setDraft("")
     setStatus(idleStatus)
     setLastBroadcast(null)
+    attachments.clearImages()
   }
 
   const clearStatus = (): void => {
@@ -115,6 +130,9 @@ export const createUnifiedInputViewModel = <Requirements>(
   return {
     draft,
     hasDraft,
+    pendingImages: attachments.pendingImages,
+    imagePreviews: attachments.imagePreviews,
+    canClear,
     status,
     statusText,
     canRetry,
@@ -124,6 +142,8 @@ export const createUnifiedInputViewModel = <Requirements>(
     fill,
     sendAll,
     retryFailed,
+    addImageFiles: attachments.addImageFiles,
+    removeImage: attachments.removeImage,
     registerTextarea,
     focusPrompt,
   }

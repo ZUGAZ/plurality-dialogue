@@ -14,6 +14,53 @@
   box-sizing: border-box;
 }
 
+.unified-input-dropping {
+  outline: 3px solid AccentColor;
+}
+
+.unified-input-images {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  overflow-x: auto;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.unified-input-images li {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.unified-input-images img {
+  inline-size: 3rem;
+  block-size: 3rem;
+  object-fit: cover;
+  background: Canvas;
+}
+
+.unified-input-images button {
+  min-block-size: 2.5rem;
+  min-inline-size: 2.5rem;
+  padding-inline: 0.85rem;
+  border: 1px solid light-dark(#5c5c5c, #888);
+  background: ButtonFace;
+  color: ButtonText;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.unified-input-images button:focus-visible {
+  outline: 3px solid AccentColor;
+  outline-offset: 2px;
+}
+
 .unified-input-row {
   display: flex;
   flex-direction: row;
