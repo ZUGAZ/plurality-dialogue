@@ -8,6 +8,8 @@ export const composerSelectors: readonly string[] = [
 
 export const primarySendSelector = 'button[data-testid="send-button"]'
 
+export const primaryFileInputSelector = 'input#upload-files[type="file"]'
+
 export const sendSelectors: readonly string[] = [
   primarySendSelector,
   "#composer-submit-button",

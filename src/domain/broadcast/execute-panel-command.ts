@@ -1,4 +1,5 @@
 import { Effect } from "effect"
+import type { PendingImage } from "./pending-image"
 import type { FillAndSubmit } from "./commands/fill-and-submit"
 import { isFillComposer } from "./commands/fill-composer"
 import type { FillComposer } from "./commands/fill-composer"
@@ -8,7 +9,7 @@ import {
   type PanelCommandErrReason,
 } from "../messaging/panel-command-err"
 import { PanelCommandOk } from "../messaging/panel-command-ok"
-import { ProviderPage } from "../ports/provider-page"
+import { ImageAttachFailed, ProviderPage } from "../ports/provider-page"
 import type { ProviderId } from "../provider/provider-id"
 
 export type PanelIdentity = {
@@ -26,6 +27,9 @@ export const executePanelCommand = Effect.fn("executePanelCommand")(function* (
         Effect.map(() => ok(identity, "filled")),
       )
     : page.fillComposer(command.prompt).pipe(
+        Effect.flatMap(() =>
+          attachIfPresent(page.attachImages, command.images),
+        ),
         Effect.flatMap(() => page.submit()),
         Effect.map(() => ok(identity, "submitted")),
       )
@@ -42,6 +46,9 @@ export const executePanelCommand = Effect.fn("executePanelCommand")(function* (
     Effect.catchTag("SubmitControlDisabled", () =>
       commandErr(identity, "submit-disabled"),
     ),
+    Effect.catchTag("ImageAttachFailed", () =>
+      commandErr(identity, "image-attach-failed"),
+    ),
     Effect.tap((response) =>
       isPanelCommandErr(response)
         ? Effect.logWarning(
@@ -54,6 +61,18 @@ export const executePanelCommand = Effect.fn("executePanelCommand")(function* (
     ),
   )
 })
+
+const attachIfPresent = (
+  attachImages: (
+    images: ReadonlyArray<PendingImage>,
+  ) => Effect.Effect<void, ImageAttachFailed>,
+  images: ReadonlyArray<PendingImage>,
+) => {
+  if (images.length === 0) {
+    return Effect.void
+  }
+  return Effect.log(images.length).pipe(Effect.zipRight(attachImages(images)))
+}
 
 const ok = (identity: PanelIdentity, verb: "filled" | "submitted") =>
   PanelCommandOk.make({

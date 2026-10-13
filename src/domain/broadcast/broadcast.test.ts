@@ -1,7 +1,8 @@
 import { Effect } from "effect"
 import { describe, expect, it } from "@effect/vitest"
+import type { PendingImage } from "./pending-image"
 import { broadcastFill, broadcastFillSend } from "./broadcast"
-import { isFillAndSubmit } from "./commands/fill-and-submit"
+import { FillAndSubmit, isFillAndSubmit } from "./commands/fill-and-submit"
 import { isFillComposer } from "./commands/fill-composer"
 import { ComposerEmpty } from "./errors"
 import { isPanelFailed } from "./panel-failed"
@@ -132,22 +133,69 @@ describe("broadcastFill", () => {
 })
 
 describe("broadcastFillSend", () => {
-  it.effect("sends FillAndSubmit not FillComposer", () =>
+  it.effect("sends FillAndSubmit carrying the image to every target", () =>
     Effect.gen(function* () {
+      const image = png("img-1")
       const session = recordingSession(okReplies("submitted"))
-      const results = yield* broadcastFillSend("hello", targets).pipe(
+      const results = yield* broadcastFillSend("hello", [image], targets).pipe(
         Effect.provide(session.layer),
       )
+      const sent = FillAndSubmit.make({ prompt: "hello", images: [image] })
       expect(results.every(isPanelSucceeded)).toBe(true)
       expect(session.sent).toHaveLength(3)
-      expect(session.sent.every((row) => isFillAndSubmit(row.message))).toBe(
-        true,
-      )
+      expect(session.sent.map((row) => row.message)).toEqual([
+        sent,
+        sent,
+        sent,
+      ])
       expect(session.sent.some((row) => isFillComposer(row.message))).toBe(
         false,
       )
+      expect(session.sent.every((row) => isFillAndSubmit(row.message))).toBe(
+        true,
+      )
     }),
   )
+
+  it.effect("one image-attach-failed reply is one failure and two successes", () =>
+    Effect.gen(function* () {
+      const image = png("img-1")
+      const replies = okReplies("submitted")
+      replies.set(
+        "panel-2",
+        PanelCommandErr.make({
+          providerId: "claude",
+          panelId: "panel-2",
+          reason: "image-attach-failed",
+        }),
+      )
+      const session = recordingSession(replies)
+      const results = yield* broadcastFillSend("hello", [image], targets).pipe(
+        Effect.provide(session.layer),
+      )
+      expect(results).toHaveLength(3)
+      expect(isPanelSucceeded(results[0])).toBe(true)
+      expect(isPanelFailed(results[1])).toBe(true)
+      expect(isPanelSucceeded(results[2])).toBe(true)
+      if (isPanelFailed(results[1])) {
+        expect(results[1].reason).toBe("image-attach-failed")
+        expect(results[1].panelId).toBe("panel-2")
+      }
+      const sent = FillAndSubmit.make({ prompt: "hello", images: [image] })
+      expect(session.sent.map((row) => row.message)).toEqual([
+        sent,
+        sent,
+        sent,
+      ])
+    }),
+  )
+})
+
+const png = (id: string): PendingImage => ({
+  id,
+  name: "a.png",
+  mediaType: "image/png",
+  bytes: Uint8Array.of(1, 2, 3),
 })
 
 const okReplies = (

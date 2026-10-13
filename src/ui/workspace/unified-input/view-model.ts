@@ -96,7 +96,15 @@ export const createUnifiedInputViewModel = <Requirements>(
     textarea.setSelectionRange(caret, caret)
   }
 
-  const sink = { draft, setDraft, setStatus, setLastBroadcast, focusPrompt }
+  const sink = {
+    draft,
+    setDraft,
+    setStatus,
+    setLastBroadcast,
+    focusPrompt,
+    pendingImages: attachments.pendingImages,
+    clearImages: attachments.clearImages,
+  }
   const fill = () => runBroadcast("fill", getPlan, sink)
   const sendAll = () => runBroadcast("send", getPlan, sink)
 
@@ -105,9 +113,13 @@ export const createUnifiedInputViewModel = <Requirements>(
     if (previous === null) {
       return Effect.void
     }
+    const request: BroadcastRequest = {
+      kind: previous.kind,
+      prompt: previous.prompt,
+      images: previous.images,
+    }
     return broadcastProgram(
-      previous.kind,
-      previous.prompt,
+      request,
       resolveTargets(previous.failedPanels),
     ).pipe(
       Effect.match({
@@ -118,9 +130,7 @@ export const createUnifiedInputViewModel = <Requirements>(
         },
         onSuccess: (results) => {
           setStatus(statusFromResults(results))
-          setLastBroadcast(
-            rememberedBroadcast(previous.kind, previous.prompt, results),
-          )
+          setLastBroadcast(rememberedBroadcast(request, results))
           focusPrompt()
         },
       }),
@@ -151,26 +161,33 @@ export const createUnifiedInputViewModel = <Requirements>(
 
 const idleStatus: BarStatus = { kind: "idle" }
 
+type BroadcastRequest = {
+  readonly kind: "fill" | "send"
+  readonly prompt: string
+  readonly images: ReadonlyArray<PendingImage>
+}
+
 type DraftSink = {
   readonly draft: () => string
   readonly setDraft: (text: string) => void
   readonly setStatus: (status: BarStatus) => void
   readonly setLastBroadcast: (broadcast: LastBroadcast | null) => void
   readonly focusPrompt: () => void
+  readonly pendingImages: () => ReadonlyArray<PendingImage>
+  readonly clearImages: () => void
 }
 
-const broadcastProgram = (
-  kind: "fill" | "send",
-  prompt: string,
-  plan: BroadcastPlan,
-) => {
+const broadcastProgram = (request: BroadcastRequest, plan: BroadcastPlan) => {
   const program =
-    kind === "fill"
-      ? broadcastFill(prompt, plan.targets)
-      : broadcastFillSend(prompt, plan.targets)
+    request.kind === "fill"
+      ? broadcastFill(request.prompt, plan.targets)
+      : broadcastFillSend(request.prompt, request.images, plan.targets)
   return Effect.sync(holdFocusGuard).pipe(
     Effect.zipRight(
-      Effect.log(kind, { targets: plan.targets.length }).pipe(
+      Effect.log(request.kind, {
+        targets: plan.targets.length,
+        images: request.images.length,
+      }).pipe(
         Effect.zipRight(program),
         Effect.map((results) => [...plan.notReady, ...results]),
       ),
@@ -184,9 +201,12 @@ const runBroadcast = (
   getPlan: () => BroadcastPlan,
   sink: DraftSink,
 ) => {
-  const plan = getPlan()
-  const prompt = sink.draft()
-  return broadcastProgram(kind, prompt, plan).pipe(
+  const request: BroadcastRequest = {
+    kind,
+    prompt: sink.draft(),
+    images: kind === "send" ? sink.pendingImages() : [],
+  }
+  return broadcastProgram(request, getPlan()).pipe(
     Effect.match({
       onFailure: () => {
         sink.setStatus(idleStatus)
@@ -194,11 +214,13 @@ const runBroadcast = (
         sink.focusPrompt()
       },
       onSuccess: (results) => {
-        sink.setDraft(
-          draftAfterFillOrSend(kind, sink.draft(), draftOutcome(results)),
-        )
+        const outcome = draftOutcome(results)
+        sink.setDraft(draftAfterFillOrSend(kind, sink.draft(), outcome))
+        if (kind === "send" && outcome === "succeeded") {
+          sink.clearImages()
+        }
         sink.setStatus(statusFromResults(results))
-        sink.setLastBroadcast(rememberedBroadcast(kind, prompt, results))
+        sink.setLastBroadcast(rememberedBroadcast(request, results))
         sink.focusPrompt()
       },
     }),
@@ -206,15 +228,19 @@ const runBroadcast = (
 }
 
 const rememberedBroadcast = (
-  kind: "fill" | "send",
-  prompt: string,
+  request: BroadcastRequest,
   results: ReadonlyArray<PanelResult>,
 ): LastBroadcast | null => {
   const failedPanels = failedPanelsFromResults(results)
   if (failedPanels.length === 0) {
     return null
   }
-  return { kind, prompt, failedPanels }
+  return {
+    kind: request.kind,
+    prompt: request.prompt,
+    images: request.images,
+    failedPanels,
+  }
 }
 
 const draftOutcome = (

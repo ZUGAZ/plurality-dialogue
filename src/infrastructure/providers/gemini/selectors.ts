@@ -4,6 +4,11 @@ export const composerSelectors: readonly string[] = [primaryComposerSelector]
 
 export const primarySendSelector = 'button[aria-label="Send message"]'
 
+export const primaryFileInputSelector =
+  'images-files-uploader input[name="Filedata"][type="file"]'
+
+export const uploadToolsSelector = 'button[aria-label="Upload and tools"]'
+
 export const sendSelectors: readonly string[] = [
   primarySendSelector,
   "button.send-button",

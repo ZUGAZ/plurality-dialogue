@@ -115,24 +115,54 @@ describe("pending images", () => {
   )
 
   it.layer(quiet(inMemoryMessagingLayer(() => Effect.succeed({}), sendFrames)))(
-    "send keeps images",
+    "send images",
     (it) => {
-      it.effect("sendAll clears text and keeps the image", () =>
+      it.effect("sendAll clears text, images, and the preview", () =>
         Effect.gen(function* () {
           sendFrames.sent.length = 0
           const session = openSession(() => ({
             targets: [target],
             notReady: [],
           }))
+          const revoke = vi.spyOn(URL, "revokeObjectURL")
           session.vm.setDraft("hi")
           yield* session.vm.addImageFiles([pngFile("a.png")])
-          const before = session.vm.pendingImages()
+          const image = session.vm.pendingImages()[0]
+          const preview = session.vm.imagePreviews()[0]
+          expect(image).toBeDefined()
+          expect(preview).toBeDefined()
           yield* session.vm.sendAll()
           expect(session.vm.draft()).toBe("")
-          expect(session.vm.pendingImages()).toEqual(before)
+          expect(session.vm.pendingImages()).toEqual([])
+          expect(session.vm.canRetry()).toBe(false)
+          if (preview !== undefined) {
+            expect(revoke).toHaveBeenCalledWith(preview.previewUrl)
+          }
           expect(sendFrames.sent.map((row) => row.message)).toEqual([
-            FillAndSubmit.make({ prompt: "hi" }),
+            FillAndSubmit.make({
+              prompt: "hi",
+              images: image === undefined ? [] : [image],
+            }),
           ])
+          revoke.mockRestore()
+          session.dispose()
+        }),
+      )
+
+      it.effect("whitespace send keeps the image and sends nothing", () =>
+        Effect.gen(function* () {
+          sendFrames.sent.length = 0
+          const session = openSession(() => ({
+            targets: [target],
+            notReady: [],
+          }))
+          session.vm.setDraft("  \n")
+          yield* session.vm.addImageFiles([pngFile("a.png")])
+          yield* session.vm.sendAll()
+          expect(sendFrames.sent).toHaveLength(0)
+          expect(session.vm.pendingImages()).toHaveLength(1)
+          expect(session.vm.draft()).toBe("  \n")
+          expect(session.vm.hasDraft()).toBe(false)
           session.dispose()
         }),
       )

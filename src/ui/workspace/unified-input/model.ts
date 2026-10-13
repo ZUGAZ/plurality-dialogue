@@ -3,6 +3,7 @@ import {
   maxPendingImages,
   pendingImageMediaTypes,
   type ImageRejection,
+  type PendingImage,
 } from "@domain/broadcast/pending-image"
 import { isPanelFailed } from "@domain/broadcast/panel-failed"
 import type { PanelResult } from "@domain/broadcast/panel-result"
@@ -23,6 +24,7 @@ export const removeImageLabel = "Remove"
 export type LastBroadcast = {
   readonly kind: "fill" | "send"
   readonly prompt: string
+  readonly images: ReadonlyArray<PendingImage>
   readonly failedPanels: ReadonlyArray<VisiblePanel>
 }
 

@@ -2,6 +2,8 @@
 import { Effect } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import { vi } from "vitest"
+import { FillAndSubmit } from "@domain/broadcast/commands/fill-and-submit"
+import { FillComposer } from "@domain/broadcast/commands/fill-composer"
 import {
   chatgpt,
   claude,
@@ -208,6 +210,96 @@ describe("unified input retry", () => {
       }),
   )
 
+  it.effect(
+    "retry after a failed send resends the original image to the failed panel",
+    () =>
+      Effect.gen(function* () {
+        const session = openRetrySession()
+        replyOk(session.replies, chatgpt, "submitted")
+        replyMiss(session.replies, claude)
+        session.vm.setDraft("hi")
+        yield* session.vm
+          .addImageFiles([pngFile("a.png")])
+          .pipe(Effect.provide(session.layer))
+        const image = session.vm.pendingImages()[0]
+        expect(image).toBeDefined()
+        yield* session.vm.sendAll().pipe(Effect.provide(session.layer))
+        expect(session.vm.canRetry()).toBe(true)
+        expect(session.vm.statusText()).toBe("Failed: panel-2 (Claude)")
+        expect(session.vm.draft()).toBe("hi")
+        expect(session.vm.pendingImages()).toHaveLength(1)
+        expect(session.frames.sent.map((row) => row.message)).toEqual([
+          FillAndSubmit.make({
+            prompt: "hi",
+            images: image === undefined ? [] : [image],
+          }),
+          FillAndSubmit.make({
+            prompt: "hi",
+            images: image === undefined ? [] : [image],
+          }),
+        ])
+        session.vm.setDraft("")
+        if (image !== undefined) {
+          session.vm.removeImage(image.id)
+        }
+        expect(session.vm.pendingImages()).toEqual([])
+        replyOk(session.replies, claude, "submitted")
+        const start = session.frames.sent.length
+        yield* session.vm.retryFailed().pipe(Effect.provide(session.layer))
+        const retried = session.frames.sent.slice(start)
+        expect(retried.map((row) => row.target.panelId)).toEqual(["panel-2"])
+        expect(retried.map((row) => row.message)).toEqual([
+          FillAndSubmit.make({
+            prompt: "hi",
+            images: image === undefined ? [] : [image],
+          }),
+        ])
+        expect(session.vm.pendingImages()).toEqual([])
+        expect(session.vm.draft()).toBe("")
+        expect(session.vm.canRetry()).toBe(false)
+        session.dispose()
+      }),
+  )
+
+  it.effect("a failed fill retries the prompt and does not attach images", () =>
+    Effect.gen(function* () {
+      const session = openRetrySession()
+      replyOk(session.replies, chatgpt, "filled")
+      replyMiss(session.replies, claude)
+      session.vm.setDraft("hi")
+      yield* session.vm
+        .addImageFiles([pngFile("a.png")])
+        .pipe(Effect.provide(session.layer))
+      yield* session.vm.fill().pipe(Effect.provide(session.layer))
+      const start = session.frames.sent.length
+      yield* session.vm.retryFailed().pipe(Effect.provide(session.layer))
+      const retried = session.frames.sent.slice(start)
+      expect(retried.map((row) => row.target.panelId)).toEqual(["panel-2"])
+      expect(retried.map((row) => row.message)).toEqual([
+        FillComposer.make({ prompt: "hi" }),
+      ])
+      expect(session.vm.pendingImages()).toHaveLength(1)
+      session.dispose()
+    }),
+  )
+
+  it.effect("a successful sendAll clears images and leaves canRetry false", () =>
+    Effect.gen(function* () {
+      const session = openRetrySession()
+      replyOk(session.replies, chatgpt, "submitted")
+      replyOk(session.replies, claude, "submitted")
+      session.vm.setDraft("hi")
+      yield* session.vm
+        .addImageFiles([pngFile("a.png")])
+        .pipe(Effect.provide(session.layer))
+      yield* session.vm.sendAll().pipe(Effect.provide(session.layer))
+      expect(session.vm.canRetry()).toBe(false)
+      expect(session.vm.pendingImages()).toEqual([])
+      expect(session.vm.draft()).toBe("")
+      session.dispose()
+    }),
+  )
+
   it.effect("a successful retry returns focus and keeps the draft", () =>
     Effect.gen(function* () {
       const session = openRetrySession()
@@ -243,6 +335,9 @@ describe("unified input retry", () => {
     }),
   )
 })
+
+const pngFile = (name: string): File =>
+  new File([Uint8Array.of(1)], name, { type: "image/png" })
 
 const watchPrompt = (
   vm: {

@@ -6,6 +6,7 @@ export const PanelCommandErrReason = Schema.Literal(
   "composer-not-writable",
   "submit-not-found",
   "submit-disabled",
+  "image-attach-failed",
   "timeout",
 )
 

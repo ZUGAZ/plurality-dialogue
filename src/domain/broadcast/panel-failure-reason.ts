@@ -3,6 +3,7 @@ import type { MessagingFault } from "../ports/messaging"
 import {
   ComposerNotFound,
   ComposerNotWritable,
+  ImageAttachFailed,
   SubmitControlDisabled,
   SubmitControlNotFound,
 } from "../ports/provider-page"
@@ -17,7 +18,8 @@ export const panelFailureReason = (
     | ComposerNotFound
     | ComposerNotWritable
     | SubmitControlNotFound
-    | SubmitControlDisabled,
+    | SubmitControlDisabled
+    | ImageAttachFailed,
 ): PanelFailedReason => {
   if (isPanelCommandErr(error)) {
     return error.reason
@@ -33,6 +35,9 @@ export const panelFailureReason = (
   }
   if (error instanceof SubmitControlDisabled) {
     return "submit-disabled"
+  }
+  if (error instanceof ImageAttachFailed) {
+    return "image-attach-failed"
   }
   return "messaging-failed"
 }

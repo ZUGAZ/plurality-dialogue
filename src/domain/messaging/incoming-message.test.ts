@@ -1,5 +1,7 @@
 import { Either, Schema } from "effect"
 import { describe, expect, it } from "@effect/vitest"
+import type { PendingImage } from "../broadcast/pending-image"
+import { isFillAndSubmit } from "../broadcast/commands/fill-and-submit"
 import { isFillComposer } from "../broadcast/commands/fill-composer"
 import {
   ApplyContextMenuDraft,
@@ -41,6 +43,47 @@ describe("incoming extension messages", () => {
     if (Either.isRight(decoded)) {
       expect(isEnsureFramingRulesRequest(decoded.right)).toBe(true)
     }
+  })
+
+  it("decodes FillAndSubmit with a PNG Uint8Array", () => {
+    const image: PendingImage = {
+      id: "img-1",
+      name: "a.png",
+      mediaType: "image/png",
+      bytes: Uint8Array.of(1, 2, 3),
+    }
+    const decoded = decodeIncomingMessage({
+      _tag: "FillAndSubmit",
+      prompt: "hi",
+      images: [image],
+    })
+    expect(Either.isRight(decoded)).toBe(true)
+    if (Either.isRight(decoded)) {
+      expect(isFillAndSubmit(decoded.right)).toBe(true)
+    }
+    if (Either.isRight(decoded) && isFillAndSubmit(decoded.right)) {
+      expect(decoded.right.images[0]?.bytes).toBeInstanceOf(Uint8Array)
+      expect(decoded.right.images).toEqual([image])
+    }
+  })
+
+  it("rejects FillAndSubmit when bytes are a number array", () => {
+    expect(
+      Either.isLeft(
+        decodeIncomingMessage({
+          _tag: "FillAndSubmit",
+          prompt: "hi",
+          images: [
+            {
+              id: "img-1",
+              name: "a.png",
+              mediaType: "image/png",
+              bytes: [1, 2, 3],
+            },
+          ],
+        }),
+      ),
+    ).toBe(true)
   })
 
   it("decodes FillComposer with a prompt and does not pong", () => {

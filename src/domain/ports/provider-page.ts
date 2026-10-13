@@ -1,5 +1,6 @@
 import type { Effect } from "effect"
 import { Context, Data } from "effect"
+import type { PendingImage } from "../broadcast/pending-image"
 
 export class ComposerNotFound extends Data.TaggedError("ComposerNotFound")<{
   readonly reason: string
@@ -23,6 +24,10 @@ export class SubmitControlDisabled extends Data.TaggedError(
   readonly reason: string
 }> {}
 
+export class ImageAttachFailed extends Data.TaggedError("ImageAttachFailed")<{
+  readonly reason: string
+}> {}
+
 export class ProviderPage extends Context.Tag("ProviderPage")<
   ProviderPage,
   {
@@ -33,5 +38,8 @@ export class ProviderPage extends Context.Tag("ProviderPage")<
       void,
       SubmitControlNotFound | SubmitControlDisabled
     >
+    readonly attachImages: (
+      images: ReadonlyArray<PendingImage>,
+    ) => Effect.Effect<void, ImageAttachFailed>
   }
 >() {}
