@@ -32,6 +32,7 @@ import {
   reconcileSlotsWithEnabled,
   staleLoadedPanelIds,
 } from "./slots"
+import { createTemporaryChatSession } from "./temporary-chat-session"
 
 export type PanelGridViewModel = {
   readonly layoutId: () => LayoutId
@@ -55,6 +56,8 @@ export type PanelGridViewModel = {
   ) => Effect.Effect<void, never, Storage>
   readonly refreshPanel: (panelId: string) => Effect.Effect<void>
   readonly newChatForAll: () => Effect.Effect<void>
+  readonly temporaryChat: () => boolean
+  readonly applyTemporaryChat: (enabled: boolean) => readonly string[]
 }
 
 export type PanelGridInitial = {
@@ -214,6 +217,15 @@ export const createPanelGridViewModel = (
       ),
     )
 
+  const session = createTemporaryChatSession({
+    slots,
+    loadedPanelIds,
+    commitSlots,
+    clearLoadedPanelIds: () => {
+      setLoadedPanelIds(new Set<string>())
+    },
+  })
+
   const tracks = () => layoutTrackCounts(layoutId())
 
   return {
@@ -231,6 +243,8 @@ export const createPanelGridViewModel = (
     setPanelProvider: persisted.setPanelProvider,
     refreshPanel,
     newChatForAll,
+    temporaryChat: session.temporaryChat,
+    applyTemporaryChat: session.applyTemporaryChat,
   }
 }
 

@@ -32,5 +32,14 @@ describe("in-memory provider page", () => {
         expect(yield* Ref.get(fake.attached)).toEqual([["img-1"], []])
       }),
     )
+
+    it.effect("increments temporaryChatCount", () =>
+      Effect.gen(function* () {
+        const page = yield* ProviderPage
+        yield* page.openTemporaryChat()
+        yield* page.openTemporaryChat()
+        expect(yield* Ref.get(fake.temporaryChatCount)).toBe(2)
+      }),
+    )
   })
 })

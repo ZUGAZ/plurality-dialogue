@@ -17,6 +17,7 @@ import { bindWorkspaceContextMenuDraft } from "@infrastructure/chrome/workspace-
 import { workspaceLive } from "@infrastructure/layers"
 import { bindViewModel } from "@ui/common/viewmodel/bind-viewmodel"
 import { createPanelGridViewModel } from "@ui/workspace/panel-grid/view-model"
+import { wireTemporaryChat } from "@ui/workspace/panel-grid/wire-temporary-chat"
 import { setupLibraryShortcut } from "@ui/workspace/prompt-library/library-shortcut"
 import { createPromptLibraryViewModel } from "@ui/workspace/prompt-library/view-model"
 import { createShellViewModel } from "@ui/workspace/shell/view-model"
@@ -38,20 +39,6 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
     const tabs = yield* Tabs
     const workspaceTabId = yield* tabs.currentTabId().pipe(Effect.option)
     const frames = createFrameList()
-    yield* Effect.sync(() => {
-      Option.match(workspaceTabId, {
-        onNone: () => undefined,
-        onSome: (tabId) => {
-          subscribeWorkspacePanelHellos<Storage | Tabs | Messaging>(
-            tabId,
-            (hello) => {
-              frames.upsert(hello)
-            },
-            (effect) => managedRuntime.runPromise(effect),
-          )
-        },
-      })
-    })
     const grid = bindViewModel(runtime, "panelGrid", (runEffect) =>
       createPanelGridViewModel(runEffect, {
         layoutId: layoutIdOrDefault(settings.layout),
@@ -86,6 +73,30 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
         focusPrompt: unifiedInput.focusPrompt,
       }),
     )
+    const temporaryChatWire = wireTemporaryChat({
+      temporaryChat: grid.temporaryChat,
+      applyTemporaryChat: grid.applyTemporaryChat,
+      panels: grid.panels,
+      frames: frames.list,
+      forgetFrames: frames.forget,
+      clearStatus: unifiedInput.clearStatus,
+      run: (effect) => managedRuntime.runPromise(effect),
+    })
+    yield* Effect.sync(() => {
+      Option.match(workspaceTabId, {
+        onNone: () => undefined,
+        onSome: (tabId) => {
+          subscribeWorkspacePanelHellos<Storage | Tabs | Messaging>(
+            tabId,
+            (hello) => {
+              frames.upsert(hello)
+              temporaryChatWire.onFrameHello(hello)
+            },
+            (effect) => managedRuntime.runPromise(effect),
+          )
+        },
+      })
+    })
     return {
       ...grid,
       collapsed: shell.collapsed,
@@ -100,6 +111,7 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
         grid.newChatForAll()
         unifiedInput.focusPrompt()
       },
+      onToggleTemporaryChat: temporaryChatWire.onToggle,
       mountFocusGuard: () =>
         setupFocusGuard(
           unifiedInput.focusPrompt,
@@ -134,6 +146,13 @@ const createFrameList = () => {
     list: (): readonly PanelTarget[] => rows,
     upsert: (incoming: PanelTarget): void => {
       rows = upsertFrameHello(rows, incoming)
+    },
+    forget: (panelIds: readonly string[]): void => {
+      if (panelIds.length === 0) {
+        return
+      }
+      const dropping = new Set(panelIds)
+      rows = rows.filter((row) => !dropping.has(row.panelId))
     },
   }
 }

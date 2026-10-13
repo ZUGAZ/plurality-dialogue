@@ -1,5 +1,8 @@
 import { Effect } from "effect"
-import { isPanelCommandOk } from "../messaging/panel-command-ok"
+import {
+  isPanelCommandOk,
+  type PanelCommandOk,
+} from "../messaging/panel-command-ok"
 import type { PanelCommandResponse } from "../messaging/panel-command-response"
 import { Messaging } from "../ports/messaging"
 import type { BroadcastCommand } from "./commands"
@@ -32,13 +35,26 @@ const resultFromResponse = (
   target: PanelTarget,
 ): PanelResult => {
   if (isPanelCommandOk(response)) {
-    return PanelSucceeded.make({
-      panelId: target.panelId,
-      providerId: target.providerId,
-      verb: response.verb,
-    })
+    return succeededPanel(response, target)
   }
   return failedPanel(target, panelFailureReason(response))
+}
+
+const succeededPanel = (
+  response: PanelCommandOk,
+  target: PanelTarget,
+): PanelResult => {
+  switch (response.verb) {
+    case "filled":
+    case "submitted":
+      return PanelSucceeded.make({
+        panelId: target.panelId,
+        providerId: target.providerId,
+        verb: response.verb,
+      })
+    case "temporary-chat":
+      return failedPanel(target, "messaging-failed")
+  }
 }
 
 const failedPanel = (target: PanelTarget, reason: PanelFailedReason) =>

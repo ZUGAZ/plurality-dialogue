@@ -3,6 +3,7 @@ import { describe, expect, it } from "@effect/vitest"
 import type { PendingImage } from "../broadcast/pending-image"
 import { isFillAndSubmit } from "../broadcast/commands/fill-and-submit"
 import { isFillComposer } from "../broadcast/commands/fill-composer"
+import { isOpenTemporaryChat } from "../broadcast/commands/open-temporary-chat"
 import {
   ApplyContextMenuDraft,
   isClaimPendingContextMenu,
@@ -92,6 +93,16 @@ describe("incoming extension messages", () => {
     expect(Either.isRight(decoded)).toBe(true)
     if (Either.isRight(decoded)) {
       expect(isFillComposer(decoded.right)).toBe(true)
+    }
+    expect(Either.isLeft(replyToWorkspacePing(payload))).toBe(true)
+  })
+
+  it("decodes OpenTemporaryChat and does not pong", () => {
+    const payload = { _tag: "OpenTemporaryChat" }
+    const decoded = decodeIncomingMessage(payload)
+    expect(Either.isRight(decoded)).toBe(true)
+    if (Either.isRight(decoded)) {
+      expect(isOpenTemporaryChat(decoded.right)).toBe(true)
     }
     expect(Either.isLeft(replyToWorkspacePing(payload))).toBe(true)
   })

@@ -9,6 +9,9 @@ export const primaryFileInputSelector =
 
 export const uploadToolsSelector = 'button[aria-label="Upload and tools"]'
 
+export const primaryTemporaryChatSelector =
+  'button[aria-label="Temporary chat"]'
+
 export const sendSelectors: readonly string[] = [
   primarySendSelector,
   "button.send-button",

@@ -1,7 +1,11 @@
 import { Schema } from "effect"
 import { ProviderId } from "../provider/provider-id"
 
-export const PanelVerb = Schema.Literal("filled", "submitted")
+export const PanelVerb = Schema.Literal(
+  "filled",
+  "submitted",
+  "temporary-chat",
+)
 
 export type PanelVerb = typeof PanelVerb.Type
 

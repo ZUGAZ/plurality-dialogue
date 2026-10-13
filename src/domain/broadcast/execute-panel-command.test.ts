@@ -67,6 +67,7 @@ describe("executePanelCommand", () => {
             `attach:${images.map((item) => item.id).join(",")}`,
           ]),
         submit: () => Ref.update(steps, (recorded) => [...recorded, "submit"]),
+        openTemporaryChat: () => Effect.void,
       })
       const response = yield* executePanelCommand(
         FillAndSubmit.make({ prompt: "hello", images: [image] }),
@@ -85,6 +86,7 @@ describe("executePanelCommand", () => {
         attachImages: () =>
           Effect.fail(new ImageAttachFailed({ reason: "missing" })),
         submit: () => Ref.update(submitCount, (count) => count + 1),
+        openTemporaryChat: () => Effect.void,
       })
       const response = yield* executePanelCommand(
         FillAndSubmit.make({ prompt: "hello", images: [png("img-1")] }),
@@ -107,6 +109,7 @@ describe("executePanelCommand", () => {
         attachImages: () =>
           Effect.fail(new ImageAttachFailed({ reason: "should not run" })),
         submit: () => Ref.update(submitCount, (count) => count + 1),
+        openTemporaryChat: () => Effect.void,
       })
       const response = yield* executePanelCommand(
         FillAndSubmit.make({ prompt: "hello" }),

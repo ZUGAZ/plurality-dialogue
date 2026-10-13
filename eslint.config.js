@@ -56,6 +56,14 @@ export default tseslint.config(
           category: "view-model",
         },
         {
+          pattern: "src/ui/workspace/panel-grid/temporary-chat-session.ts",
+          category: "view-model",
+        },
+        {
+          pattern: "src/ui/workspace/panel-grid/wire-temporary-chat.ts",
+          category: "view-model",
+        },
+        {
           pattern: "src/ui/workspace/prompt-library/fill-actions.ts",
           category: "view-model",
         },

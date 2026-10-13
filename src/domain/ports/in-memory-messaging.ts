@@ -1,6 +1,5 @@
 import { Effect, Layer } from "effect"
-import type { FillAndSubmit } from "../broadcast/commands/fill-and-submit"
-import type { FillComposer } from "../broadcast/commands/fill-composer"
+import type { BroadcastCommand } from "../broadcast/commands"
 import type { PanelTarget } from "../broadcast/panel-target"
 import type { PanelCommandResponse } from "../messaging/panel-command-response"
 import {
@@ -11,7 +10,7 @@ import {
 
 export type RecordedFrameSend = {
   readonly target: PanelTarget
-  readonly message: FillComposer | FillAndSubmit
+  readonly message: BroadcastCommand
 }
 
 export type InMemoryFrameMessaging = {

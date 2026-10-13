@@ -1,6 +1,8 @@
 import { Effect, Layer } from "effect"
 import { silentLoggerLayer } from "@test-support/silent-logger"
 import { createRoot } from "solid-js"
+import { isFillAndSubmit } from "@domain/broadcast/commands/fill-and-submit"
+import { isFillComposer } from "@domain/broadcast/commands/fill-composer"
 import { PanelFailed } from "@domain/broadcast/panel-failed"
 import { PanelTarget } from "@domain/broadcast/panel-target"
 import type {
@@ -42,6 +44,15 @@ export const frameNotReady = (panel: VisiblePanel) =>
     providerId: panel.providerId,
     reason: "frame-not-ready",
   })
+
+export const broadcastPrompt = (
+  message: RecordedFrameSend["message"],
+): string | undefined => {
+  if (isFillComposer(message) || isFillAndSubmit(message)) {
+    return message.prompt
+  }
+  return undefined
+}
 
 export const replyOk = (
   replies: Map<string, PanelCommandResponse>,

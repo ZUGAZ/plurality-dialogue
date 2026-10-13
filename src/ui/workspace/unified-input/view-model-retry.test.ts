@@ -5,6 +5,7 @@ import { vi } from "vitest"
 import { FillAndSubmit } from "@domain/broadcast/commands/fill-and-submit"
 import { FillComposer } from "@domain/broadcast/commands/fill-composer"
 import {
+  broadcastPrompt,
   chatgpt,
   claude,
   frameNotReady,
@@ -133,7 +134,9 @@ describe("unified input retry", () => {
       yield* session.vm.retryFailed().pipe(Effect.provide(session.layer))
       const retried = session.frames.sent.slice(start)
       expect(retried.map((row) => row.target.panelId)).toEqual(["panel-2"])
-      expect(retried.map((row) => row.message.prompt)).toEqual(["original"])
+      expect(retried.map((row) => broadcastPrompt(row.message))).toEqual([
+        "original",
+      ])
       expect(session.vm.draft()).toBe("")
       session.dispose()
     }),
@@ -174,7 +177,9 @@ describe("unified input retry", () => {
       yield* session.vm.retryFailed().pipe(Effect.provide(session.layer))
       const retried = session.frames.sent.slice(start)
       expect(retried.map((row) => row.target.panelId)).toEqual(["panel-3"])
-      expect(retried.map((row) => row.message.prompt)).toEqual(["second"])
+      expect(retried.map((row) => broadcastPrompt(row.message))).toEqual([
+        "second",
+      ])
       expect(session.vm.draft()).toBe("third")
       session.dispose()
     }),

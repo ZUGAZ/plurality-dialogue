@@ -8,6 +8,7 @@ import {
 } from "./prompt-library/dialog"
 import { AddPanelButton } from "./shell/add-panel-button"
 import { NewChatButton } from "./shell/new-chat-button"
+import { TemporaryChatToggle } from "./shell/temporary-chat-toggle"
 import { WorkspaceShell } from "./shell/view"
 import { UnifiedInputContainer } from "./unified-input/container"
 import type { UnifiedInputViewProps } from "./unified-input/view"
@@ -28,6 +29,8 @@ export type WorkspaceViewProps = {
   readonly setPanelProvider: (panelId: string, rawId: string) => void
   readonly refreshPanel: (panelId: string) => void
   readonly onNewChat: () => void
+  readonly temporaryChat: () => boolean
+  readonly onToggleTemporaryChat: () => void
   readonly collapsed: () => boolean
   readonly onToggleCollapse: () => void
   readonly unifiedInput: UnifiedInputViewProps
@@ -41,6 +44,10 @@ export const WorkspaceView = (props: WorkspaceViewProps) => (
       onToggleCollapse={props.onToggleCollapse}
     >
       <NewChatButton onClick={props.onNewChat} />
+      <TemporaryChatToggle
+        pressed={props.temporaryChat}
+        onToggle={props.onToggleTemporaryChat}
+      />
       <AddPanelButton canAdd={props.canAddPanel()} onAdd={props.addPanel} />
       <LayoutPresetsView
         items={layoutPickerItems}

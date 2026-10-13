@@ -4,6 +4,7 @@ import { ProviderPage } from "../../../domain/ports/provider-page"
 import { firstDisplayed } from "../displayed-element"
 import { makeFillSendPage } from "../make-fill-send-page"
 import { attachClaudeImages } from "./attach-images"
+import { openClaudeTemporaryChat } from "./open-temporary-chat"
 import { composerSelectors, sendSelectors } from "./selectors"
 
 export const makeClaudeProviderPage = (root: ParentNode) => ({
@@ -13,6 +14,7 @@ export const makeClaudeProviderPage = (root: ParentNode) => ({
   }),
   attachImages: (images: ReadonlyArray<PendingImage>) =>
     attachClaudeImages(root, images),
+  openTemporaryChat: () => openClaudeTemporaryChat(root),
 })
 
 export const claudeContentLayer = Layer.sync(ProviderPage, () =>

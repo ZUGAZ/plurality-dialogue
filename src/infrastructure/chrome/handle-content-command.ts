@@ -1,6 +1,8 @@
 import { Effect, Either, Schema, pipe } from "effect"
 import { isFillAndSubmit } from "../../domain/broadcast/commands/fill-and-submit"
 import { isFillComposer } from "../../domain/broadcast/commands/fill-composer"
+import { isOpenTemporaryChat } from "../../domain/broadcast/commands/open-temporary-chat"
+import { executeTemporaryChat } from "../../domain/broadcast/execute-temporary-chat"
 import {
   executePanelCommand,
   type PanelIdentity,
@@ -22,16 +24,30 @@ export const contentCommandEffect = (
     return undefined
   }
   const incoming = decoded.right
+  if (isOpenTemporaryChat(incoming)) {
+    return answered(incoming._tag, identity, executeTemporaryChat(identity))
+  }
   if (!isFillComposer(incoming) && !isFillAndSubmit(incoming)) {
     return undefined
   }
-  return Effect.log(
-    "panel command",
+  return answered(
     incoming._tag,
-    identity.providerId,
-    identity.panelId,
-  ).pipe(
-    Effect.zipRight(executePanelCommand(incoming, identity)),
+    identity,
+    executePanelCommand(incoming, identity),
+  )
+}
+
+const answered = (
+  tag: string,
+  identity: PanelIdentity,
+  command: Effect.Effect<
+    typeof PanelCommandResponse.Type,
+    never,
+    ProviderPage
+  >,
+) =>
+  Effect.log("panel command", tag, identity.providerId, identity.panelId).pipe(
+    Effect.zipRight(command),
     Effect.map((response) =>
       pipe(
         Schema.encodeUnknownEither(PanelCommandResponse)(response),
@@ -44,4 +60,3 @@ export const contentCommandEffect = (
     Effect.withLogSpan("contentCommand"),
     Effect.withLogSpan("content"),
   )
-}

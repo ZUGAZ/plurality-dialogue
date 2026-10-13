@@ -6,9 +6,11 @@ export const makeInMemoryProviderPage = (): {
   readonly fills: Ref.Ref<readonly string[]>
   readonly submitCount: Ref.Ref<number>
   readonly attached: Ref.Ref<ReadonlyArray<ReadonlyArray<string>>>
+  readonly temporaryChatCount: Ref.Ref<number>
 } => {
   const fills = Effect.runSync(Ref.make<readonly string[]>([]))
   const submitCount = Effect.runSync(Ref.make(0))
+  const temporaryChatCount = Effect.runSync(Ref.make(0))
   const attached = Effect.runSync(
     Ref.make<ReadonlyArray<ReadonlyArray<string>>>([]),
   )
@@ -22,9 +24,12 @@ export const makeInMemoryProviderPage = (): {
           ...recorded,
           images.map((image) => image.id),
         ]),
+      openTemporaryChat: () =>
+        Ref.update(temporaryChatCount, (count) => count + 1),
     }),
     fills,
     submitCount,
     attached,
+    temporaryChatCount,
   }
 }

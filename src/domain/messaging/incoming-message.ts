@@ -2,6 +2,7 @@ import { Either, Schema, pipe } from "effect"
 import type { ParseError } from "effect/ParseResult"
 import { FillAndSubmit } from "../broadcast/commands/fill-and-submit"
 import { FillComposer } from "../broadcast/commands/fill-composer"
+import { OpenTemporaryChat } from "../broadcast/commands/open-temporary-chat"
 import { ClaimPendingContextMenu } from "./context-menu-draft"
 import { EnsureFramingRulesRequest } from "./ensure-framing-rules"
 import { PanelFrameReady } from "./panel-frame-ready"
@@ -16,6 +17,7 @@ export const IncomingExtensionMessage = Schema.Union(
   ClaimPendingContextMenu,
   FillComposer,
   FillAndSubmit,
+  OpenTemporaryChat,
   PanelFrameReady,
 )
 

@@ -28,6 +28,12 @@ export class ImageAttachFailed extends Data.TaggedError("ImageAttachFailed")<{
   readonly reason: string
 }> {}
 
+export class TemporaryChatUnavailable extends Data.TaggedError(
+  "TemporaryChatUnavailable",
+)<{
+  readonly reason: string
+}> {}
+
 export class ProviderPage extends Context.Tag("ProviderPage")<
   ProviderPage,
   {
@@ -41,5 +47,6 @@ export class ProviderPage extends Context.Tag("ProviderPage")<
     readonly attachImages: (
       images: ReadonlyArray<PendingImage>,
     ) => Effect.Effect<void, ImageAttachFailed>
+    readonly openTemporaryChat: () => Effect.Effect<void, TemporaryChatUnavailable>
   }
 >() {}

@@ -16,6 +16,8 @@ export const WorkspaceContainer = (props: WorkspaceViewProps) => (
     setPanelProvider={props.setPanelProvider}
     refreshPanel={props.refreshPanel}
     onNewChat={props.onNewChat}
+    temporaryChat={props.temporaryChat}
+    onToggleTemporaryChat={props.onToggleTemporaryChat}
     collapsed={props.collapsed}
     onToggleCollapse={props.onToggleCollapse}
     unifiedInput={props.unifiedInput}
