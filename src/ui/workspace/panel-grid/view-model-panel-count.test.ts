@@ -8,6 +8,7 @@ import { inMemoryTabsLayer } from "@domain/ports/in-memory-tabs"
 import { Messaging } from "@domain/ports/messaging"
 import { Storage, StorageWriteError } from "@domain/ports/storage"
 import { Tabs } from "@domain/ports/tabs"
+import { defaultEnterKeyCustom } from "@domain/settings/enter-key-custom"
 import { workspaceSettingsStorageKey } from "@domain/settings/workspace-settings"
 import {
   createPanelGridViewModel,
@@ -79,6 +80,8 @@ describe("panel grid view-model panel count", () => {
           toolbarCollapsed: false,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         }),
       )
     }).pipe(Effect.provide(freshLayer)),
@@ -118,6 +121,8 @@ describe("panel grid view-model panel count", () => {
           toolbarCollapsed: false,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         }),
       )
     }).pipe(Effect.provide(freshLayer)),
@@ -202,6 +207,8 @@ describe("panel grid view-model panel count", () => {
           toolbarCollapsed: false,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         }),
       )
     }).pipe(Effect.provide(freshLayer)),
@@ -219,6 +226,8 @@ describe("panel grid view-model panel count", () => {
           toolbarCollapsed: false,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         }),
       )
     }).pipe(Effect.provide(freshLayer)),

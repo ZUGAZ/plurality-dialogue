@@ -10,6 +10,40 @@ export const isDisplayedHtmlElement = (el: Element): el is HTMLElement => {
   return style.display !== "none" && style.visibility !== "hidden"
 }
 
+export const composerContaining = (
+  root: ParentNode,
+  selectors: readonly string[],
+  target: EventTarget | null,
+): HTMLElement | null => {
+  if (!(target instanceof Node)) {
+    return null
+  }
+  for (const selector of selectors) {
+    const match = displayedContainer(root, selector, target)
+    if (match !== null) {
+      return match
+    }
+  }
+  return null
+}
+
+const displayedContainer = (
+  root: ParentNode,
+  selector: string,
+  target: Node,
+): HTMLElement | null => {
+  const matches = root.querySelectorAll(selector)
+  for (const match of matches) {
+    if (!isDisplayedHtmlElement(match)) {
+      continue
+    }
+    if (match === target || match.contains(target)) {
+      return match
+    }
+  }
+  return null
+}
+
 export const firstDisplayed = (
   root: ParentNode,
   selectors: readonly string[],

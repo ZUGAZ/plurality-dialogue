@@ -2,6 +2,8 @@ import { Either, Schema } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import { layoutIdOrDefault } from "@domain/layout/presets"
 import { isProviderId } from "../provider/provider-id"
+import { defaultEnterKeyCustom } from "./enter-key-custom"
+import type { EnterKeyPreset } from "./enter-key-preset"
 import type { SourceUrlPlacement } from "./source-url-placement"
 import {
   WorkspaceSettings,
@@ -58,6 +60,8 @@ describe("workspace settings schema", () => {
         toolbarCollapsed: false,
         theme: "system",
         sourceUrlPlacement: "omit",
+        enterKeyPreset: "default",
+        enterKeyCustom: defaultEnterKeyCustom,
       })
     }
   })
@@ -75,6 +79,8 @@ describe("workspace settings schema", () => {
         toolbarCollapsed: false,
         theme: "system",
         sourceUrlPlacement: "omit",
+        enterKeyPreset: "default",
+        enterKeyCustom: defaultEnterKeyCustom,
       })
       expect(decoded.right.panelProviders).toBeUndefined()
     }
@@ -93,6 +99,8 @@ describe("workspace settings schema", () => {
         toolbarCollapsed: false,
         theme: "system",
         sourceUrlPlacement: "omit",
+        enterKeyPreset: "default",
+        enterKeyCustom: defaultEnterKeyCustom,
       })
     }
   })
@@ -138,6 +146,8 @@ describe("workspace settings schema", () => {
         toolbarCollapsed: false,
         theme: "system",
         sourceUrlPlacement: "omit",
+        enterKeyPreset: "default",
+        enterKeyCustom: defaultEnterKeyCustom,
       })
       expect(missing.right.panelProviders).toBeUndefined()
       expect(withPanels.right.panelProviders).toEqual(["chatgpt", null])
@@ -154,6 +164,8 @@ describe("workspace settings schema", () => {
       toolbarCollapsed: true,
       theme: "system",
       sourceUrlPlacement: "omit",
+      enterKeyPreset: "default",
+      enterKeyCustom: defaultEnterKeyCustom,
     }
     const encoded = Schema.encodeEither(WorkspaceSettings)(settings)
     expect(Either.isRight(encoded)).toBe(true)
@@ -178,6 +190,8 @@ const settingsWithPlacement = (
   toolbarCollapsed: true,
   theme: "dark",
   sourceUrlPlacement,
+  enterKeyPreset: "default",
+  enterKeyCustom: defaultEnterKeyCustom,
 })
 
 describe("sourceUrlPlacement", () => {
@@ -189,26 +203,33 @@ describe("sourceUrlPlacement", () => {
     theme: "dark",
   }
 
+  const placed = (sourceUrlPlacement: SourceUrlPlacement) => ({
+    ...siblings,
+    sourceUrlPlacement,
+    enterKeyPreset: "default" satisfies EnterKeyPreset,
+    enterKeyCustom: defaultEnterKeyCustom,
+  })
+
   it("decodes a missing key as omit and keeps siblings", () => {
     expect(decodeWorkspaceSettings(siblings)).toEqual(
-      Either.right({ ...siblings, sourceUrlPlacement: "omit" }),
+      Either.right(placed("omit")),
     )
   })
 
   it("decodes before and after", () => {
     expect(
       decodeWorkspaceSettings({ ...siblings, sourceUrlPlacement: "before" }),
-    ).toEqual(Either.right({ ...siblings, sourceUrlPlacement: "before" }))
+    ).toEqual(Either.right(placed("before")))
     expect(
       decodeWorkspaceSettings({ ...siblings, sourceUrlPlacement: "after" }),
-    ).toEqual(Either.right({ ...siblings, sourceUrlPlacement: "after" }))
+    ).toEqual(Either.right(placed("after")))
   })
 
   it("decodes sideways as omit and keeps siblings", () => {
     for (const sourceUrlPlacement of ["sideways", null, 1]) {
       expect(
         decodeWorkspaceSettings({ ...siblings, sourceUrlPlacement }),
-      ).toEqual(Either.right({ ...siblings, sourceUrlPlacement: "omit" }))
+      ).toEqual(Either.right(placed("omit")))
     }
   })
 

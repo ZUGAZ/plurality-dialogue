@@ -2,6 +2,7 @@ import { Effect, Either, Option } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import { inMemoryStorageLayer } from "../ports/in-memory-storage"
 import { Storage } from "../ports/storage"
+import { defaultEnterKeyCustom } from "../settings/enter-key-custom"
 import { workspaceSettingsStorageKey } from "../settings/workspace-settings"
 import {
   loadWorkspaceSettings,
@@ -48,6 +49,8 @@ describe("provider registry", () => {
           toolbarCollapsed: false,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         })
         const enabled = yield* listEnabledProviders()
         expect(enabled.map((provider) => provider.id)).toEqual([
@@ -172,6 +175,8 @@ describe("provider registry", () => {
           toolbarCollapsed: false,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         })
       }),
     )

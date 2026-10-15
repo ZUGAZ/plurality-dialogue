@@ -7,10 +7,16 @@ import { attachClaudeImages } from "./attach-images"
 import { openClaudeTemporaryChat } from "./open-temporary-chat"
 import { composerSelectors, sendSelectors } from "./selectors"
 
+export const queryClaudeComposer = (root: ParentNode): HTMLElement | null =>
+  firstDisplayed(root, composerSelectors)
+
+export const queryClaudeSend = (root: ParentNode): HTMLElement | null =>
+  firstDisplayed(root, sendSelectors)
+
 export const makeClaudeProviderPage = (root: ParentNode) => ({
   ...makeFillSendPage({
-    queryComposer: () => firstDisplayed(root, composerSelectors),
-    querySend: () => firstDisplayed(root, sendSelectors),
+    queryComposer: () => queryClaudeComposer(root),
+    querySend: () => queryClaudeSend(root),
   }),
   attachImages: (images: ReadonlyArray<PendingImage>) =>
     attachClaudeImages(root, images),

@@ -1,4 +1,8 @@
 import {
+  EnterKeyPresetView,
+  type EnterKeyPresetViewProps,
+} from "./enter-key-preset/view"
+import {
   ProviderTogglesView,
   type ProviderTogglesViewProps,
 } from "./provider-toggles/view"
@@ -12,6 +16,7 @@ export type OptionsViewProps = {
   readonly providers: ProviderTogglesViewProps
   readonly theme: ThemePickerViewProps
   readonly sourceUrlPlacement: SourceUrlPlacementViewProps
+  readonly enterKey: EnterKeyPresetViewProps
 }
 
 export const OptionsView = (props: OptionsViewProps) => (
@@ -32,6 +37,13 @@ export const OptionsView = (props: OptionsViewProps) => (
       selectedPlacement={props.sourceUrlPlacement.selectedPlacement}
       saveError={props.sourceUrlPlacement.saveError}
       onPlacementChange={props.sourceUrlPlacement.onPlacementChange}
+    />
+    <EnterKeyPresetView
+      selectedPreset={props.enterKey.selectedPreset}
+      custom={props.enterKey.custom}
+      saveError={props.enterKey.saveError}
+      onPresetChange={props.enterKey.onPresetChange}
+      onCustomChoice={props.enterKey.onCustomChoice}
     />
   </>
 )

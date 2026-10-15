@@ -24,3 +24,26 @@ export const ChromeStorageLive = Layer.succeed(Storage, {
       catch: (cause) => new StorageWriteError({ key, cause }),
     }),
 })
+
+export const watchLocalKey = (
+  key: string,
+  onValue: (value: unknown) => void,
+): (() => void) => {
+  const onChanged = (
+    changes: { readonly [changedKey: string]: chrome.storage.StorageChange },
+    areaName: chrome.storage.AreaName,
+  ): void => {
+    if (areaName !== "local" || !Object.hasOwn(changes, key)) {
+      return
+    }
+    const change = changes[key]
+    if (change === undefined) {
+      return
+    }
+    onValue(change.newValue)
+  }
+  chrome.storage.onChanged.addListener(onChanged)
+  return () => {
+    chrome.storage.onChanged.removeListener(onChanged)
+  }
+}

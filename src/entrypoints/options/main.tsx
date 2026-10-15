@@ -24,6 +24,13 @@ if (root !== null) {
             saveError: bindings.sourceUrlPlacement.saveError,
             onPlacementChange: bindings.sourceUrlPlacement.setPlacement,
           }}
+          enterKey={{
+            selectedPreset: bindings.enterKey.selectedPreset,
+            custom: bindings.enterKey.custom,
+            saveError: bindings.enterKey.saveError,
+            onPresetChange: bindings.enterKey.setPreset,
+            onCustomChoice: bindings.enterKey.setCustomChoice,
+          }}
         />
       ),
       root,

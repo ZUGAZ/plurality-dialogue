@@ -5,6 +5,7 @@ import { createRoot } from "solid-js"
 import { describe, expect, it } from "@effect/vitest"
 import { inMemoryStorageLayer } from "@domain/ports/in-memory-storage"
 import { Storage, StorageWriteError } from "@domain/ports/storage"
+import { defaultEnterKeyCustom } from "@domain/settings/enter-key-custom"
 import { workspaceSettingsStorageKey } from "@domain/settings/workspace-settings"
 import { createSourceUrlPlacementViewModel } from "./view-model"
 
@@ -55,6 +56,8 @@ describe("source url placement view-model", () => {
           Option.some({
             ...storedWorkspace,
             sourceUrlPlacement: "before",
+            enterKeyPreset: "default",
+            enterKeyCustom: defaultEnterKeyCustom,
           }),
         )
         session.dispose()

@@ -7,10 +7,16 @@ import { attachChatgptImages } from "./attach-images"
 import { openChatgptTemporaryChat } from "./open-temporary-chat"
 import { composerSelectors, sendSelectors } from "./selectors"
 
+export const queryChatgptComposer = (root: ParentNode): HTMLElement | null =>
+  firstDisplayed(root, composerSelectors)
+
+export const queryChatgptSend = (root: ParentNode): HTMLElement | null =>
+  firstDisplayed(root, sendSelectors)
+
 export const makeChatgptProviderPage = (root: ParentNode) => ({
   ...makeFillSendPage({
-    queryComposer: () => firstDisplayed(root, composerSelectors),
-    querySend: () => firstDisplayed(root, sendSelectors),
+    queryComposer: () => queryChatgptComposer(root),
+    querySend: () => queryChatgptSend(root),
   }),
   attachImages: (images: ReadonlyArray<PendingImage>) =>
     attachChatgptImages(root, images),

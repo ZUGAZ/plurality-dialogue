@@ -2,6 +2,7 @@ import { Effect, Layer, Option } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import { inMemoryStorageLayer } from "@domain/ports/in-memory-storage"
 import { Storage, StorageWriteError } from "@domain/ports/storage"
+import { defaultEnterKeyCustom } from "@domain/settings/enter-key-custom"
 import { workspaceSettingsStorageKey } from "@domain/settings/workspace-settings"
 import { loadWorkspaceSettings } from "@domain/settings/workspace-settings-storage"
 import { createShellViewModel, persistToolbarCollapsed } from "./view-model"
@@ -73,6 +74,8 @@ describe("shell toolbar collapse", () => {
           toolbarCollapsed: true,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         })
       }),
     )

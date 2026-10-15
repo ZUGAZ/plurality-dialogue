@@ -47,7 +47,7 @@ const submitWith = (querySend: () => HTMLElement | null) =>
     }),
   )
 
-const enabledSend = (send: HTMLElement | null): HTMLElement | null => {
+export const enabledSend = (send: HTMLElement | null): HTMLElement | null => {
   if (send === null || isDisabledControl(send)) {
     return null
   }

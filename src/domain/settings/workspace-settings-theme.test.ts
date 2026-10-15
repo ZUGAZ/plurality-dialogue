@@ -1,5 +1,6 @@
 import { Either, Schema } from "effect"
 import { describe, expect, it } from "@effect/vitest"
+import { defaultEnterKeyCustom } from "./enter-key-custom"
 import type { ThemePreference } from "./theme-preference"
 import {
   WorkspaceSettings,
@@ -45,6 +46,8 @@ describe("workspace settings theme", () => {
         toolbarCollapsed: true,
         theme,
         sourceUrlPlacement: "omit",
+        enterKeyPreset: "default",
+        enterKeyCustom: defaultEnterKeyCustom,
       }
       const encoded = Schema.encodeEither(WorkspaceSettings)(settings)
       expect(Either.isRight(encoded)).toBe(true)

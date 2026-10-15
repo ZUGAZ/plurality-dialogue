@@ -1,6 +1,10 @@
 import { defineContentScript } from "#imports"
 import { runProviderContent } from "@infrastructure/chrome/run-provider-content"
-import { geminiContentLayer } from "@infrastructure/providers/gemini/fill-send"
+import {
+  geminiContentLayer,
+  queryGeminiSend,
+} from "@infrastructure/providers/gemini/fill-send"
+import { composerSelectors } from "@infrastructure/providers/gemini/selectors"
 
 export default defineContentScript({
   matches: ["https://gemini.google.com/*"],
@@ -9,6 +13,9 @@ export default defineContentScript({
   world: "ISOLATED",
   noScriptStartedPostMessage: true,
   main() {
-    runProviderContent("gemini", geminiContentLayer)
+    runProviderContent("gemini", geminiContentLayer, {
+      composerSelectors,
+      querySend: () => queryGeminiSend(document),
+    })
   },
 })

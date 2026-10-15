@@ -2,6 +2,7 @@ import { Effect, Option } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import { inMemoryStorageLayer } from "../ports/in-memory-storage"
 import { Storage } from "../ports/storage"
+import { defaultEnterKeyCustom } from "./enter-key-custom"
 import type { ThemePreference } from "./theme-preference"
 import type { WorkspaceSettings } from "./workspace-settings"
 import {
@@ -19,6 +20,8 @@ const geminiOnly: WorkspaceSettings = {
   toolbarCollapsed: false,
   theme: "system",
   sourceUrlPlacement: "omit",
+  enterKeyPreset: "default",
+  enterKeyCustom: defaultEnterKeyCustom,
 }
 
 describe("workspace settings storage", () => {
@@ -107,6 +110,8 @@ describe("workspace settings storage", () => {
           toolbarCollapsed: false,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* loadWorkspaceSettings()).toEqual(written)
@@ -124,6 +129,8 @@ describe("workspace settings storage", () => {
           toolbarCollapsed: false,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* loadWorkspaceSettings()).toEqual(written)
@@ -148,6 +155,8 @@ describe("workspace settings storage", () => {
           toolbarCollapsed: false,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         })
         expect(settings).not.toHaveProperty("panelProviders")
       }),
@@ -182,6 +191,8 @@ describe("workspace settings storage", () => {
             toolbarCollapsed: true,
             theme,
             sourceUrlPlacement: "omit",
+            enterKeyPreset: "default",
+            enterKeyCustom: defaultEnterKeyCustom,
           }
           yield* persistWorkspaceSettings(written)
           expect(yield* loadWorkspaceSettings()).toEqual(written)
@@ -209,6 +220,8 @@ describe("workspace settings storage", () => {
           toolbarCollapsed: true,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         })
       }),
     )
@@ -228,6 +241,8 @@ describe("workspace settings storage", () => {
           toolbarCollapsed: false,
           theme: "system",
           sourceUrlPlacement: "omit",
+          enterKeyPreset: "default",
+          enterKeyCustom: defaultEnterKeyCustom,
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* storage.get("other-key")).toEqual(Option.some("keep-me"))

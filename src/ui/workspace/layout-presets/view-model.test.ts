@@ -7,6 +7,7 @@ import { inMemoryTabsLayer } from "@domain/ports/in-memory-tabs"
 import { Messaging } from "@domain/ports/messaging"
 import { Storage, StorageWriteError } from "@domain/ports/storage"
 import { Tabs } from "@domain/ports/tabs"
+import { defaultEnterKeyCustom } from "@domain/settings/enter-key-custom"
 import { workspaceSettingsStorageKey } from "@domain/settings/workspace-settings"
 import { persistLayoutAndPanelProviders } from "./view-model"
 import { createPanelGridViewModel } from "../panel-grid/view-model"
@@ -52,6 +53,8 @@ describe("persistLayoutAndPanelProviders", () => {
             toolbarCollapsed: false,
             theme: "system",
             sourceUrlPlacement: "omit",
+            enterKeyPreset: "default",
+            enterKeyCustom: defaultEnterKeyCustom,
           }),
         )
         if (Option.isSome(stored)) {
@@ -83,6 +86,8 @@ describe("persistLayoutAndPanelProviders", () => {
             toolbarCollapsed: true,
             theme: "system",
             sourceUrlPlacement: "omit",
+            enterKeyPreset: "default",
+            enterKeyCustom: defaultEnterKeyCustom,
           }),
         )
       }),
@@ -125,6 +130,8 @@ describe("selectLayout", () => {
             toolbarCollapsed: false,
             theme: "system",
             sourceUrlPlacement: "omit",
+            enterKeyPreset: "default",
+            enterKeyCustom: defaultEnterKeyCustom,
           }),
         )
         if (Option.isSome(stored)) {
@@ -154,6 +161,8 @@ describe("selectLayout", () => {
             toolbarCollapsed: false,
             theme: "system",
             sourceUrlPlacement: "omit",
+            enterKeyPreset: "default",
+            enterKeyCustom: defaultEnterKeyCustom,
           }),
         )
       }),

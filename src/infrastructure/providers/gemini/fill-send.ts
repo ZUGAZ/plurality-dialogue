@@ -6,10 +6,16 @@ import { attachGeminiImages } from "./attach-images"
 import { openGeminiTemporaryChat } from "./open-temporary-chat"
 import { composerSelectors, sendSelectors } from "./selectors"
 
+export const queryGeminiComposer = (root: ParentNode): HTMLElement | null =>
+  firstDisplayed(root, composerSelectors)
+
+export const queryGeminiSend = (root: ParentNode): HTMLElement | null =>
+  firstDisplayed(root, sendSelectors)
+
 export const makeGeminiProviderPage = (root: ParentNode) => ({
   ...makeFillSendPage({
-    queryComposer: () => firstDisplayed(root, composerSelectors),
-    querySend: () => firstDisplayed(root, sendSelectors),
+    queryComposer: () => queryGeminiComposer(root),
+    querySend: () => queryGeminiSend(root),
   }),
   attachImages: attachGeminiImages,
   openTemporaryChat: openGeminiTemporaryChat,

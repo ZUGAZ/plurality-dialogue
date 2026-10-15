@@ -1,6 +1,11 @@
 import { Either, Schema } from "effect"
 import { LayoutId, maxCellCount } from "@domain/layout/presets"
 import { ProviderId } from "@domain/provider/provider-id"
+import {
+  defaultEnterKeyCustom,
+  lenientEnterKeyCustom,
+} from "./enter-key-custom"
+import { lenientEnterKeyPreset } from "./enter-key-preset"
 import { SourceUrlPlacement } from "./source-url-placement"
 import { ThemePreference } from "./theme-preference"
 
@@ -42,6 +47,12 @@ export const WorkspaceSettings = Schema.Struct({
   sourceUrlPlacement: Schema.optionalWith(lenientSourceUrlPlacement, {
     default: () => defaultSourceUrlPlacement,
   }),
+  enterKeyPreset: Schema.optionalWith(lenientEnterKeyPreset, {
+    default: () => "default",
+  }),
+  enterKeyCustom: Schema.optionalWith(lenientEnterKeyCustom, {
+    default: () => defaultEnterKeyCustom,
+  }),
 })
 
 export type WorkspaceSettings = typeof WorkspaceSettings.Type
@@ -59,4 +70,6 @@ export const defaultWorkspaceSettings: WorkspaceSettings = {
   toolbarCollapsed: false,
   theme: defaultThemePreference,
   sourceUrlPlacement: defaultSourceUrlPlacement,
+  enterKeyPreset: "default",
+  enterKeyCustom: defaultEnterKeyCustom,
 }

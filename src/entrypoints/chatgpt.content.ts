@@ -1,6 +1,10 @@
 import { defineContentScript } from "#imports"
 import { runProviderContent } from "@infrastructure/chrome/run-provider-content"
-import { chatgptContentLayer } from "@infrastructure/providers/chatgpt/fill-send"
+import {
+  chatgptContentLayer,
+  queryChatgptSend,
+} from "@infrastructure/providers/chatgpt/fill-send"
+import { composerSelectors } from "@infrastructure/providers/chatgpt/selectors"
 
 export default defineContentScript({
   matches: ["https://chatgpt.com/*"],
@@ -9,6 +13,9 @@ export default defineContentScript({
   world: "ISOLATED",
   noScriptStartedPostMessage: true,
   main() {
-    runProviderContent("chatgpt", chatgptContentLayer)
+    runProviderContent("chatgpt", chatgptContentLayer, {
+      composerSelectors,
+      querySend: () => queryChatgptSend(document),
+    })
   },
 })

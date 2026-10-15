@@ -1,6 +1,10 @@
 import { defineContentScript } from "#imports"
 import { runProviderContent } from "@infrastructure/chrome/run-provider-content"
-import { claudeContentLayer } from "@infrastructure/providers/claude/fill-send"
+import {
+  claudeContentLayer,
+  queryClaudeSend,
+} from "@infrastructure/providers/claude/fill-send"
+import { composerSelectors } from "@infrastructure/providers/claude/selectors"
 
 export default defineContentScript({
   matches: ["https://claude.ai/*"],
@@ -9,6 +13,9 @@ export default defineContentScript({
   world: "ISOLATED",
   noScriptStartedPostMessage: true,
   main() {
-    runProviderContent("claude", claudeContentLayer)
+    runProviderContent("claude", claudeContentLayer, {
+      composerSelectors,
+      querySend: () => queryClaudeSend(document),
+    })
   },
 })

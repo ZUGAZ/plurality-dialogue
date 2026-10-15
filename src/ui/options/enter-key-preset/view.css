@@ -1,0 +1,50 @@
+.enter-key-preset {
+  margin-block-start: 1rem;
+  font-family: system-ui, sans-serif;
+  color: CanvasText;
+  background: Canvas;
+}
+
+.enter-key-preset fieldset {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0.5rem 1rem 1rem;
+  border: 1px solid currentColor;
+}
+
+.enter-key-preset legend {
+  padding-inline: 0.35rem;
+}
+
+.enter-key-preset label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  min-block-size: 48px;
+  padding-block: 0.75rem;
+  padding-inline: 0.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.enter-key-preset-detail {
+  display: block;
+  flex-basis: 100%;
+}
+
+.enter-key-preset input[type="radio"] {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.enter-key-preset input[type="radio"]:focus-visible {
+  outline: 3px solid CanvasText;
+  outline-offset: 2px;
+}
+
+.enter-key-preset-alert {
+  margin-block-start: 0.75rem;
+  line-height: 1.5;
+}
