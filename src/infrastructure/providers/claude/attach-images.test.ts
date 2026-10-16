@@ -6,8 +6,9 @@ import { Effect, Either } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import type { PendingImage } from "../../../domain/broadcast/pending-image"
 import { ImageAttachFailed } from "../../../domain/ports/provider-page"
+import { installPageFileAssigner } from "../page-file-assign"
 import { attachClaudeImages } from "./attach-images"
-import { primaryFileInputSelector } from "./selectors"
+import { attachMenuSelector, primaryFileInputSelector } from "./selectors"
 
 const fixturePath = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -27,6 +28,7 @@ describe("claude attach images", () => {
   it.effect("assigns one png and does not click the attach menu", () =>
     Effect.gen(function* () {
       loadFixture()
+      installPageFileAssigner()
       const menu = watchClicks(
         document.querySelector('button[data-testid="chat-input-attach"]'),
       )
@@ -64,16 +66,65 @@ describe("claude attach images", () => {
     }),
   )
 
-  it.effect("a missing file input fails", () =>
+  it.effect("a missing file input fails after one attach click", () =>
     Effect.gen(function* () {
       loadFixture()
+      installPageFileAssigner()
       document.querySelector(primaryFileInputSelector)?.remove()
+      const menu = watchClicks(document.querySelector(attachMenuSelector))
       const result = yield* attachClaudeImages(document, [
         png("img-1", "a.png"),
       ]).pipe(Effect.either)
       expect(Either.isLeft(result)).toBe(true)
       if (Either.isLeft(result)) {
         expect(result.left).toBeInstanceOf(ImageAttachFailed)
+      }
+      expect(menu()).toBe(1)
+    }),
+  )
+
+  it.effect("a replacement file input is assigned without opening the menu", () =>
+    Effect.gen(function* () {
+      loadFixture()
+      installPageFileAssigner()
+      document.querySelector(primaryFileInputSelector)?.remove()
+      const input = document.createElement("input")
+      input.type = "file"
+      input.multiple = true
+      input.id = "chat-input-file-upload"
+      document.body.append(input)
+      const menu = watchClicks(document.querySelector(attachMenuSelector))
+      yield* attachClaudeImages(document, [png("img-2", "b.png")])
+      expect(menu()).toBe(0)
+      expect(input.files?.length).toBe(1)
+      expect(input.files?.[0]?.name).toBe("b.png")
+    }),
+  )
+
+  it.effect("one attach click reveals the next file input, then assigns", () =>
+    Effect.gen(function* () {
+      document.body.replaceChildren()
+      installPageFileAssigner()
+      const menu = document.createElement("button")
+      menu.type = "button"
+      menu.dataset.testid = "chat-input-attach"
+      let clicks = 0
+      menu.addEventListener("click", () => {
+        clicks += 1
+        const input = document.createElement("input")
+        input.type = "file"
+        input.multiple = true
+        input.id = "chat-input-file-upload"
+        document.body.append(input)
+      })
+      document.body.append(menu)
+      yield* attachClaudeImages(document, [png("img-2", "b.png")])
+      expect(clicks).toBe(1)
+      const input = document.getElementById("chat-input-file-upload")
+      expect(input).toBeInstanceOf(HTMLInputElement)
+      if (input instanceof HTMLInputElement) {
+        expect(input.files?.length).toBe(1)
+        expect(input.files?.[0]?.name).toBe("b.png")
       }
     }),
   )

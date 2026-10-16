@@ -29,8 +29,10 @@ describe("FillAndSubmit images", () => {
     const encoded = Schema.encodeUnknownSync(FillAndSubmit)(
       FillAndSubmit.make({ prompt: "hi", images: [image] }),
     )
-    expect(encoded.images?.[0]?.bytes).toBeInstanceOf(Uint8Array)
-    const decoded = Schema.decodeUnknownEither(FillAndSubmit)(encoded)
+    expect(encoded.images?.[0]?.bytes).toEqual([1, 2, 3])
+    const decoded = Schema.decodeUnknownEither(FillAndSubmit)(
+      JSON.parse(JSON.stringify(encoded)),
+    )
     expect(Either.isRight(decoded)).toBe(true)
     if (Either.isRight(decoded)) {
       expect(decoded.right.images[0]?.bytes).toBeInstanceOf(Uint8Array)
@@ -38,7 +40,7 @@ describe("FillAndSubmit images", () => {
     }
   })
 
-  it("rejects five images, empty bytes, oversize bytes, and a number array", () => {
+  it("rejects five images, empty bytes, and oversize bytes", () => {
     const five = [1, 2, 3, 4, 5].map((id) => png(String(id)))
     expect(leftCommand({ prompt: "hi", images: five })).toBe(true)
     expect(
@@ -58,12 +60,30 @@ describe("FillAndSubmit images", () => {
         ],
       }),
     ).toBe(true)
-    expect(
-      leftCommand({
-        prompt: "hi",
-        images: [{ ...png("nums"), bytes: [1, 2, 3] }],
-      }),
-    ).toBe(true)
+    const fromNumbers = Schema.decodeUnknownEither(FillAndSubmit)({
+      _tag: "FillAndSubmit",
+      prompt: "hi",
+      images: [{ ...png("nums"), bytes: [1, 2, 3] }],
+    })
+    expect(Either.isRight(fromNumbers)).toBe(true)
+    if (Either.isRight(fromNumbers)) {
+      expect(fromNumbers.right.images[0]?.bytes).toEqual(Uint8Array.of(1, 2, 3))
+    }
+    const fromJsonObject = Schema.decodeUnknownEither(FillAndSubmit)(
+      JSON.parse(
+        JSON.stringify({
+          _tag: "FillAndSubmit",
+          prompt: "hi",
+          images: [png("json")],
+        }),
+      ),
+    )
+    expect(Either.isRight(fromJsonObject)).toBe(true)
+    if (Either.isRight(fromJsonObject)) {
+      expect(fromJsonObject.right.images[0]?.bytes).toEqual(
+        Uint8Array.of(1, 2, 3),
+      )
+    }
   })
 
   it("rejects a whitespace prompt even with a valid image", () => {

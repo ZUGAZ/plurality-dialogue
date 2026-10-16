@@ -68,23 +68,35 @@ describe("incoming extension messages", () => {
     }
   })
 
-  it("rejects FillAndSubmit when bytes are a number array", () => {
-    expect(
-      Either.isLeft(
-        decodeIncomingMessage({
+  it("decodes FillAndSubmit bytes from a number array and from JSON", () => {
+    const image = {
+      id: "img-1",
+      name: "a.png",
+      mediaType: "image/png",
+      bytes: [1, 2, 3],
+    }
+    const fromNumbers = decodeIncomingMessage({
+      _tag: "FillAndSubmit",
+      prompt: "hi",
+      images: [image],
+    })
+    expect(Either.isRight(fromNumbers)).toBe(true)
+    if (Either.isRight(fromNumbers) && isFillAndSubmit(fromNumbers.right)) {
+      expect(fromNumbers.right.images[0]?.bytes).toEqual(Uint8Array.of(1, 2, 3))
+    }
+    const fromJson = decodeIncomingMessage(
+      JSON.parse(
+        JSON.stringify({
           _tag: "FillAndSubmit",
           prompt: "hi",
-          images: [
-            {
-              id: "img-1",
-              name: "a.png",
-              mediaType: "image/png",
-              bytes: [1, 2, 3],
-            },
-          ],
+          images: [{ ...image, bytes: Uint8Array.of(1, 2, 3) }],
         }),
       ),
-    ).toBe(true)
+    )
+    expect(Either.isRight(fromJson)).toBe(true)
+    if (Either.isRight(fromJson) && isFillAndSubmit(fromJson.right)) {
+      expect(fromJson.right.images[0]?.bytes).toEqual(Uint8Array.of(1, 2, 3))
+    }
   })
 
   it("decodes FillComposer with a prompt and does not pong", () => {

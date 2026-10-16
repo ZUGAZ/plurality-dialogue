@@ -6,6 +6,7 @@ import { Effect, Either } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import type { PendingImage } from "../../../domain/broadcast/pending-image"
 import { ImageAttachFailed } from "../../../domain/ports/provider-page"
+import { installPageFileAssigner } from "../page-file-assign"
 import { attachGeminiImages } from "./attach-images"
 import {
   primaryFileInputSelector,
@@ -36,6 +37,7 @@ describe("gemini attach images", () => {
   it.effect("assigns one png and does not click Files, Drive, or Photos", () =>
     Effect.gen(function* () {
       loadFixture("attach-2026-10-10.html")
+      installPageFileAssigner()
       const files = watchClicks(buttonWithText("Files"))
       const drive = watchClicks(buttonWithText("Drive"))
       const photos = watchClicks(buttonWithText("Google Photos"))
@@ -61,6 +63,7 @@ describe("gemini attach images", () => {
   it.effect("idle composer clicks Upload and tools once, then fails", () =>
     Effect.gen(function* () {
       loadFixture("composer-2026-08-31.html")
+      installPageFileAssigner()
       const upload = watchClicks(document.querySelector(uploadToolsSelector))
       const send = watchClicks(document.querySelector(primarySendSelector))
       const result = yield* attachGeminiImages([png("img-1", "a.png")]).pipe(
@@ -78,6 +81,7 @@ describe("gemini attach images", () => {
   it.effect("one Upload and tools click reveals Filedata, then assigns", () =>
     Effect.gen(function* () {
       document.body.replaceChildren()
+      installPageFileAssigner()
       const upload = document.createElement("button")
       upload.type = "button"
       upload.setAttribute("aria-label", "Upload and tools")

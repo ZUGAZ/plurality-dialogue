@@ -21,7 +21,7 @@ export const contentCommandEffect = (
   }
   const decoded = decodeIncomingMessage(message)
   if (Either.isLeft(decoded)) {
-    return undefined
+    return Effect.logWarning("panel command rejected", messageTag(message))
   }
   const incoming = decoded.right
   if (isOpenTemporaryChat(incoming)) {
@@ -35,6 +35,14 @@ export const contentCommandEffect = (
     identity,
     executePanelCommand(incoming, identity),
   )
+}
+
+const messageTag = (message: unknown): string => {
+  if (typeof message !== "object" || message === null || !("_tag" in message)) {
+    return "unknown"
+  }
+  const tag = message._tag
+  return typeof tag === "string" ? tag : "unknown"
 }
 
 const answered = (

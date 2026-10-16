@@ -43,11 +43,19 @@ export const subscribeRuntimeMessageEffects = <Requirements>(
   ) => Effect.Effect<unknown | undefined, never, Requirements> | undefined,
   run: RunPromise<Requirements>,
 ): void => {
-  chrome.runtime.onMessage.addListener((message, sender) => {
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const effect = handle(message, sender)
     if (effect === undefined) {
       return undefined
     }
-    return run(effect)
+    void run(effect).then(
+      (response) => {
+        sendResponse(response)
+      },
+      () => {
+        sendResponse(undefined)
+      },
+    )
+    return true
   })
 }

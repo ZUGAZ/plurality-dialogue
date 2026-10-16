@@ -10,6 +10,8 @@ export const primarySendSelector = 'button[data-testid="send-button"]'
 
 export const primaryFileInputSelector = 'input#upload-files[type="file"]'
 
+export const composerPlusSelector = "button#composer-plus-btn"
+
 export const primaryTemporaryChatSelector =
   'button[aria-label="Temporary chat"]'
 

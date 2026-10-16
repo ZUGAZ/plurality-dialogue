@@ -1,6 +1,7 @@
 import { Effect } from "effect"
 import type { PendingImage } from "../../domain/broadcast/pending-image"
 import { ImageAttachFailed } from "../../domain/ports/provider-page"
+import { writeAssignedFiles } from "./write-assigned-files"
 
 export const assignFileInput = (
   input: HTMLInputElement,
@@ -12,7 +13,7 @@ export const assignFileInput = (
     )
   }
   return Effect.try({
-    try: () => writeFiles(input, images),
+    try: () => writeAssignedFiles(input, images),
     catch: () => new ImageAttachFailed({ reason: "file assignment failed" }),
   }).pipe(
     Effect.flatMap((assigned) =>
@@ -23,24 +24,4 @@ export const assignFileInput = (
           ),
     ),
   )
-}
-
-const writeFiles = (
-  input: HTMLInputElement,
-  images: ReadonlyArray<PendingImage>,
-): boolean => {
-  const transfer = new DataTransfer()
-  for (const image of images) {
-    const bytes = new Uint8Array(image.bytes.length)
-    bytes.set(image.bytes)
-    transfer.items.add(
-      new File([bytes], image.name, { type: image.mediaType }),
-    )
-  }
-  input.files = transfer.files
-  if (input.files === null || input.files.length !== images.length) {
-    return false
-  }
-  input.dispatchEvent(new Event("change", { bubbles: true }))
-  return true
 }

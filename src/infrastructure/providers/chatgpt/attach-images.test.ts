@@ -6,6 +6,7 @@ import { Effect, Either } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import type { PendingImage } from "../../../domain/broadcast/pending-image"
 import { ImageAttachFailed } from "../../../domain/ports/provider-page"
+import { installPageFileAssigner } from "../page-file-assign"
 import { attachChatgptImages } from "./attach-images"
 import { primaryFileInputSelector } from "./selectors"
 
@@ -27,6 +28,7 @@ describe("chatgpt attach images", () => {
   it.effect("assigns one png and does not click the plus button", () =>
     Effect.gen(function* () {
       loadFixture()
+      installPageFileAssigner()
       const plus = watchClicks(document.querySelector("button#composer-plus-btn"))
       const input = document.querySelector(primaryFileInputSelector)
       expect(input).toBeInstanceOf(HTMLInputElement)
