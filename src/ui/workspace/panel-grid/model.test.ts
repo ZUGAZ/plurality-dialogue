@@ -32,6 +32,7 @@ describe("panel grid model", () => {
   it("decodeProviderId rejects unknown, empty, and disabled ids", () => {
     const enabled: readonly ProviderId[] = ["chatgpt", "claude"]
     expect(decodeProviderId("grok", enabled)).toBeNull()
+    expect(decodeProviderId("deepseek", ["chatgpt", "claude", "gemini"])).toBeNull()
     expect(decodeProviderId("not-a-provider", enabled)).toBeNull()
     expect(decodeProviderId("not-a-provider", ["chatgpt", "claude", "grok"])).toBeNull()
     expect(decodeProviderId("", enabled)).toBeNull()
@@ -45,9 +46,21 @@ describe("panel grid model", () => {
     expect(labelForProvider("claude")).toBe("Claude")
     expect(labelForProvider("gemini")).toBe("Gemini")
     expect(labelForProvider("grok")).toBe("Grok")
+    expect(labelForProvider("deepseek")).toBe("DeepSeek")
+    expect(labelForProvider("kimi")).toBe("Kimi")
+    expect(labelForProvider("doubao")).toBe("Doubao")
     expect(
       selectOptions(["chatgpt", "claude", "gemini"]).map((option) => option.id),
     ).toEqual(["chatgpt", "claude", "gemini"])
+    expect(
+      selectOptions(["chatgpt", "kimi"]).map((option) => option.id),
+    ).toEqual(["chatgpt", "kimi"])
+    expect(
+      selectOptions(["chatgpt", "kimi"]).map((option) => option.label),
+    ).toEqual(["ChatGPT", "Kimi"])
+    expect(
+      selectOptions(["gemini", "doubao", "deepseek"]).map((option) => option.id),
+    ).toEqual(["gemini", "deepseek", "doubao"])
     expect(
       selectOptions(["chatgpt", "claude", "gemini", "grok"]).map(
         (option) => option.id,

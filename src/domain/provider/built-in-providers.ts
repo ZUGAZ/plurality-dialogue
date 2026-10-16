@@ -29,4 +29,25 @@ export const builtInProviders: readonly ProviderDefinition[] = [
     url: "https://grok.com/",
     iconId: "grok",
   },
+  {
+    id: "deepseek",
+    displayName: "DeepSeek",
+    host: "chat.deepseek.com",
+    url: "https://chat.deepseek.com/",
+    iconId: "deepseek",
+  },
+  {
+    id: "kimi",
+    displayName: "Kimi",
+    host: "www.kimi.com",
+    url: "https://www.kimi.com/",
+    iconId: "kimi",
+  },
+  {
+    id: "doubao",
+    displayName: "Doubao",
+    host: "www.doubao.com",
+    url: "https://www.doubao.com/chat/",
+    iconId: "doubao",
+  },
 ]

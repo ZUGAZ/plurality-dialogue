@@ -15,6 +15,9 @@ describe("framing policy", () => {
       "claude.ai",
       "gemini.google.com",
       "grok.com",
+      "chat.deepseek.com",
+      "www.kimi.com",
+      "www.doubao.com",
     ])
   })
 
@@ -35,6 +38,9 @@ describe("framing policy", () => {
       "https://claude.ai/*",
       "https://gemini.google.com/*",
       "https://grok.com/*",
+      "https://chat.deepseek.com/*",
+      "https://www.kimi.com/*",
+      "https://www.doubao.com/*",
     ])
   })
 
@@ -44,6 +50,9 @@ describe("framing policy", () => {
       "||claude.ai/",
       "||gemini.google.com/",
       "||grok.com/",
+      "||chat.deepseek.com/",
+      "||www.kimi.com/",
+      "||www.doubao.com/",
     ])
   })
 

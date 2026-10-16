@@ -20,7 +20,7 @@ const failingWriteLayer = Layer.succeed(Storage, {
 
 describe("provider toggles view-model", () => {
   it.layer(quiet(inMemoryStorageLayer()))("fresh settings", (it) => {
-    it.effect("loads four rows with Grok off", () =>
+    it.effect("loads seven rows with Grok and the new vendors off", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
         expect(session.vm.rows().map((row) => row.id)).toEqual([
@@ -28,11 +28,17 @@ describe("provider toggles view-model", () => {
           "claude",
           "gemini",
           "grok",
+          "deepseek",
+          "kimi",
+          "doubao",
         ])
         expect(session.vm.rows().map((row) => row.isEnabled)).toEqual([
           true,
           true,
           true,
+          false,
+          false,
+          false,
           false,
         ])
         expect(session.vm.rows().every((row) => row.isLastEnabled === false)).toBe(
@@ -52,6 +58,9 @@ describe("provider toggles view-model", () => {
         expect(session.vm.rows().map((row) => row.isEnabled)).toEqual([
           true,
           true,
+          false,
+          false,
+          false,
           false,
           false,
         ])
@@ -84,6 +93,9 @@ describe("provider toggles view-model", () => {
           false,
           false,
           false,
+          false,
+          false,
+          false,
         ])
         session.dispose()
       }),
@@ -109,6 +121,9 @@ describe("provider toggles view-model", () => {
           false,
           true,
           false,
+          false,
+          false,
+          false,
         ])
         yield* session.vm.setEnabled("gemini", false)
         expect(session.vm.rows()).toEqual(before)
@@ -127,6 +142,9 @@ describe("provider toggles view-model", () => {
           true,
           true,
           false,
+          false,
+          false,
+          false,
         ])
         yield* session.vm.setEnabled("gemini", false)
         expect(session.vm.saveError()).toBe("Could not save.")
@@ -134,6 +152,9 @@ describe("provider toggles view-model", () => {
           true,
           true,
           true,
+          false,
+          false,
+          false,
           false,
         ])
         session.dispose()
@@ -163,6 +184,9 @@ describe("provider toggles view-model", () => {
         yield* session.vm.setEnabled("chatgpt", true)
         expect(session.vm.rows().map((row) => row.isEnabled)).toEqual([
           true,
+          false,
+          false,
+          false,
           false,
           false,
           false,

@@ -3,7 +3,7 @@ import { builtInProviders } from "@domain/provider/built-in-providers"
 import { toToggleRows } from "./model"
 
 describe("toToggleRows", () => {
-  it("returns four rows and leaves Grok off by default", () => {
+  it("returns seven rows and leaves Grok and the new vendors off", () => {
     const rows = toToggleRows(builtInProviders, [
       "chatgpt",
       "claude",
@@ -14,17 +14,26 @@ describe("toToggleRows", () => {
       "claude",
       "gemini",
       "grok",
+      "deepseek",
+      "kimi",
+      "doubao",
     ])
     expect(rows.map((row) => row.label)).toEqual([
       "ChatGPT",
       "Claude",
       "Gemini",
       "Grok",
+      "DeepSeek",
+      "Kimi",
+      "Doubao",
     ])
     expect(rows.map((row) => row.isEnabled)).toEqual([
       true,
       true,
       true,
+      false,
+      false,
+      false,
       false,
     ])
   })
@@ -35,6 +44,9 @@ describe("toToggleRows", () => {
       "claude",
       "gemini",
       "grok",
+      "deepseek",
+      "kimi",
+      "doubao",
     ])
     expect(rows.every((row) => row.isEnabled)).toBe(true)
     expect(rows.every((row) => row.isLastEnabled === false)).toBe(true)
@@ -47,10 +59,16 @@ describe("toToggleRows", () => {
       true,
       false,
       false,
+      false,
+      false,
+      false,
     ])
     expect(rows.map((row) => row.isLastEnabled)).toEqual([
       false,
       true,
+      false,
+      false,
+      false,
       false,
       false,
     ])

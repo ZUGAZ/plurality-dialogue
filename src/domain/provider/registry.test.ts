@@ -8,6 +8,7 @@ import {
   loadWorkspaceSettings,
   persistWorkspaceSettings,
 } from "../settings/workspace-settings-storage"
+import { providerIds } from "./provider-id"
 import {
   LastProviderDisabled,
   getBuiltInProvider,
@@ -19,19 +20,17 @@ import {
 
 describe("provider registry", () => {
   it.layer(inMemoryStorageLayer())("missing settings key", (it) => {
-    it.effect("lists four rows and enables the original three", () =>
+    it.effect("lists seven rows and enables the original three", () =>
       Effect.gen(function* () {
         const listed = yield* listProviders()
-        expect(listed.map((provider) => provider.id)).toEqual([
-          "chatgpt",
-          "claude",
-          "gemini",
-          "grok",
-        ])
+        expect(listed.map((provider) => provider.id)).toEqual(providerIds)
         expect(listed.map((provider) => provider.enabled)).toEqual([
           true,
           true,
           true,
+          false,
+          false,
+          false,
           false,
         ])
         const enabled = yield* listEnabledProviders()
@@ -80,7 +79,7 @@ describe("provider registry", () => {
         const enabled = yield* listEnabledProviders()
         expect(enabled).toEqual([])
         const listed = yield* listProviders()
-        expect(listed).toHaveLength(4)
+        expect(listed).toHaveLength(7)
         expect(listed.every((provider) => provider.enabled === false)).toBe(
           true,
         )
@@ -99,15 +98,13 @@ describe("provider registry", () => {
     it.effect("returns one row per catalog id", () =>
       Effect.gen(function* () {
         const listed = yield* listProviders()
-        expect(listed.map((provider) => provider.id)).toEqual([
-          "chatgpt",
-          "claude",
-          "gemini",
-          "grok",
-        ])
+        expect(listed.map((provider) => provider.id)).toEqual(providerIds)
         expect(listed.map((provider) => provider.enabled)).toEqual([
           true,
           true,
+          false,
+          false,
+          false,
           false,
           false,
         ])
@@ -126,17 +123,15 @@ describe("provider registry", () => {
     it.effect("loads with only Grok enabled", () =>
       Effect.gen(function* () {
         const listed = yield* listProviders()
-        expect(listed.map((provider) => provider.id)).toEqual([
-          "chatgpt",
-          "claude",
-          "gemini",
-          "grok",
-        ])
+        expect(listed.map((provider) => provider.id)).toEqual(providerIds)
         expect(listed.map((provider) => provider.enabled)).toEqual([
           false,
           false,
           false,
           true,
+          false,
+          false,
+          false,
         ])
       }),
     )
@@ -153,16 +148,14 @@ describe("provider registry", () => {
     it.effect("falls back to defaults with Grok disabled", () =>
       Effect.gen(function* () {
         const listed = yield* listProviders()
-        expect(listed.map((provider) => provider.id)).toEqual([
-          "chatgpt",
-          "claude",
-          "gemini",
-          "grok",
-        ])
+        expect(listed.map((provider) => provider.id)).toEqual(providerIds)
         expect(listed.map((provider) => provider.enabled)).toEqual([
           true,
           true,
           true,
+          false,
+          false,
+          false,
           false,
         ])
       }),
@@ -177,15 +170,19 @@ describe("provider registry", () => {
       },
     }),
   )("claude only document", (it) => {
-    it.effect("lists four rows with only claude enabled", () =>
+    it.effect("lists seven rows with only claude enabled", () =>
       Effect.gen(function* () {
         const settings = yield* loadWorkspaceSettings()
         expect(settings.enabledProviders).toEqual(["claude"])
         expect(settings.layout).toBe("1x2")
         const listed = yield* listProviders()
+        expect(listed).toHaveLength(7)
         expect(listed.map((provider) => provider.enabled)).toEqual([
           false,
           true,
+          false,
+          false,
+          false,
           false,
           false,
         ])
@@ -198,6 +195,15 @@ describe("provider registry", () => {
     expect(
       Option.map(found, (provider) => provider.url),
     ).toEqual(Option.some("https://claude.ai/new"))
+  })
+
+  it.layer(inMemoryStorageLayer())("enable deepseek from defaults", (it) => {
+    it.effect("persists deepseek in catalog order and skips grok", () =>
+      Effect.gen(function* () {
+        const next = yield* setProviderEnabled("deepseek", true)
+        expect(next).toEqual(["chatgpt", "claude", "gemini", "deepseek"])
+      }),
+    )
   })
 
   it.layer(inMemoryStorageLayer())("enable grok from defaults", (it) => {

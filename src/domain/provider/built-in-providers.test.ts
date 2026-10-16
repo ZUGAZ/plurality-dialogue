@@ -13,6 +13,9 @@ describe("built-in providers", () => {
       "claude",
       "gemini",
       "grok",
+      "deepseek",
+      "kimi",
+      "doubao",
     ])
     expect(builtInProviders.map((provider) => provider.id)).toEqual(providerIds)
     expect(isProviderId("grok")).toBe(true)
@@ -28,6 +31,9 @@ describe("built-in providers", () => {
       "https://claude.ai/*",
       "https://gemini.google.com/*",
       "https://grok.com/*",
+      "https://chat.deepseek.com/*",
+      "https://www.kimi.com/*",
+      "https://www.doubao.com/*",
     ])
   })
 
@@ -45,6 +51,9 @@ describe("built-in providers", () => {
       "https://claude.ai/new",
       "https://gemini.google.com/app",
       "https://grok.com/",
+      "https://chat.deepseek.com/",
+      "https://www.kimi.com/",
+      "https://www.doubao.com/chat/",
     ])
   })
 
@@ -57,6 +66,9 @@ describe("built-in providers", () => {
       "Claude",
       "Gemini",
       "Grok",
+      "DeepSeek",
+      "Kimi",
+      "Doubao",
     ])
   })
 })

@@ -5,6 +5,9 @@ export const ProviderId = Schema.Literal(
   "claude",
   "gemini",
   "grok",
+  "deepseek",
+  "kimi",
+  "doubao",
 )
 
 export type ProviderId = typeof ProviderId.Type
@@ -16,4 +19,7 @@ export const providerIds: readonly ProviderId[] = [
   "claude",
   "gemini",
   "grok",
+  "deepseek",
+  "kimi",
+  "doubao",
 ]
