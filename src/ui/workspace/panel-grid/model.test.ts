@@ -31,6 +31,7 @@ describe("panel grid model", () => {
 
   it("decodeProviderId rejects unknown, empty, and disabled ids", () => {
     const enabled: readonly ProviderId[] = ["chatgpt", "claude"]
+    expect(decodeProviderId("qwen-china", ["chatgpt", "claude", "gemini"])).toBeNull()
     expect(decodeProviderId("grok", enabled)).toBeNull()
     expect(decodeProviderId("google", ["chatgpt", "claude"])).toBeNull()
     expect(decodeProviderId("google", ["google"])).toBe("google")
@@ -52,6 +53,10 @@ describe("panel grid model", () => {
     expect(labelForProvider("kimi")).toBe("Kimi")
     expect(labelForProvider("doubao")).toBe("Doubao")
     expect(labelForProvider("google")).toBe("Google AI Mode")
+    expect(labelForProvider("qwen-china")).toBe("Qwen China")
+    expect(labelForProvider("qwen-global")).toBe("Qwen Global")
+    expect(labelForProvider("zhipu")).toBe("Zhipu")
+    expect(labelForProvider("zai")).toBe("Z.ai")
     expect(
       selectOptions(["chatgpt", "claude", "gemini"]).map((option) => option.id),
     ).toEqual(["chatgpt", "claude", "gemini"])
@@ -82,6 +87,12 @@ describe("panel grid model", () => {
     expect(selectOptions(providerIds).map((option) => option.id)).toEqual(
       providerIds,
     )
+    expect(
+      selectOptions(["zai", "qwen-china", "gemini"]).map((option) => option.id),
+    ).toEqual(["gemini", "qwen-china", "zai"])
+    expect(
+      selectOptions(["zai", "qwen-china", "gemini"]).map((option) => option.label),
+    ).toEqual(["Gemini", "Qwen China", "Z.ai"])
     expect(
       selectOptions(["gemini", "chatgpt"]).map((option) => option.id),
     ).toEqual(["chatgpt", "gemini"])

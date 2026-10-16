@@ -57,4 +57,32 @@ export const builtInProviders: readonly ProviderDefinition[] = [
     url: "https://www.google.com/search?udm=50",
     iconId: "google",
   },
+  {
+    id: "qwen-china",
+    displayName: "Qwen China",
+    host: "www.qianwen.com",
+    url: "https://www.qianwen.com/",
+    iconId: "qwen-china",
+  },
+  {
+    id: "qwen-global",
+    displayName: "Qwen Global",
+    host: "chat.qwen.ai",
+    url: "https://chat.qwen.ai/",
+    iconId: "qwen-global",
+  },
+  {
+    id: "zhipu",
+    displayName: "Zhipu",
+    host: "chatglm.cn",
+    url: "https://chatglm.cn/",
+    iconId: "zhipu",
+  },
+  {
+    id: "zai",
+    displayName: "Z.ai",
+    host: "chat.z.ai",
+    url: "https://chat.z.ai/",
+    iconId: "zai",
+  },
 ]

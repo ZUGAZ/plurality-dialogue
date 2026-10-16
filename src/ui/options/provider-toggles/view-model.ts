@@ -3,10 +3,13 @@ import { createSignal } from "solid-js"
 import type { Storage } from "@domain/ports/storage"
 import { builtInProviders } from "@domain/provider/built-in-providers"
 import type { ProviderId } from "@domain/provider/provider-id"
-import { listProviders, setProviderEnabled } from "@domain/provider/registry"
+import { commitProviderEnabled } from "@domain/provider/commit-provider-enabled"
+import type { OptionalHostAccess } from "@domain/provider/optional-host-access"
+import { listProviders } from "@domain/provider/registry"
 import type { RunEffect } from "@ui/common/viewmodel/bind-viewmodel"
 import {
   loadSettingsErrorText,
+  permissionDeniedText,
   saveSettingsErrorText,
   toToggleRows,
   type ProviderToggleRow,
@@ -24,6 +27,7 @@ export type ProviderTogglesViewModel = {
 
 export const createProviderTogglesViewModel = (
   runEffect: RunEffect<Storage>,
+  access: OptionalHostAccess,
 ): ProviderTogglesViewModel => {
   const [rows, setRows] = createSignal<readonly ProviderToggleRow[]>(emptyRows)
   const [loadError, setLoadError] = createSignal<string | undefined>(undefined)
@@ -53,13 +57,33 @@ export const createProviderTogglesViewModel = (
     ),
   )
 
+  const rowsFromCurrent = (): readonly ProviderToggleRow[] =>
+    toToggleRows(
+      builtInProviders,
+      rows()
+        .filter((row) => row.isEnabled)
+        .map((row) => row.id),
+    )
+
   const setEnabled = (id: ProviderId, enabled: boolean) =>
     Effect.log("set enabled", id, enabled).pipe(
-      Effect.zipRight(setProviderEnabled(id, enabled)),
+      Effect.zipRight(commitProviderEnabled(id, enabled, access)),
       Effect.tap((enabledIds) =>
         Effect.sync(() => {
           setRows(toToggleRows(builtInProviders, enabledIds))
           setSaveError(undefined)
+        }),
+      ),
+      Effect.catchTag("OptionalHostPermissionDenied", () =>
+        Effect.sync(() => {
+          setRows(rowsFromCurrent())
+          setSaveError(permissionDeniedText)
+        }),
+      ),
+      Effect.catchTag("OptionalHostPermissionRequestFailed", () =>
+        Effect.sync(() => {
+          setRows(rowsFromCurrent())
+          setSaveError(saveSettingsErrorText)
         }),
       ),
       Effect.catchTag("LastProviderDisabled", () => Effect.void),

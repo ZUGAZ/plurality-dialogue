@@ -20,7 +20,7 @@ import {
 
 describe("provider registry", () => {
   it.layer(inMemoryStorageLayer())("missing settings key", (it) => {
-    it.effect("lists eight rows and enables the original three", () =>
+    it.effect("lists twelve rows and enables the original three", () =>
       Effect.gen(function* () {
         const listed = yield* listProviders()
         expect(listed.map((provider) => provider.id)).toEqual(providerIds)
@@ -28,6 +28,10 @@ describe("provider registry", () => {
           true,
           true,
           true,
+          false,
+          false,
+          false,
+          false,
           false,
           false,
           false,
@@ -80,7 +84,7 @@ describe("provider registry", () => {
         const enabled = yield* listEnabledProviders()
         expect(enabled).toEqual([])
         const listed = yield* listProviders()
-        expect(listed).toHaveLength(8)
+        expect(listed).toHaveLength(12)
         expect(listed.every((provider) => provider.enabled === false)).toBe(
           true,
         )
@@ -103,6 +107,10 @@ describe("provider registry", () => {
         expect(listed.map((provider) => provider.enabled)).toEqual([
           true,
           true,
+          false,
+          false,
+          false,
+          false,
           false,
           false,
           false,
@@ -135,6 +143,10 @@ describe("provider registry", () => {
           false,
           false,
           false,
+          false,
+          false,
+          false,
+          false,
         ])
       }),
     )
@@ -161,6 +173,10 @@ describe("provider registry", () => {
           false,
           false,
           false,
+          false,
+          false,
+          false,
+          false,
         ])
       }),
     )
@@ -174,16 +190,20 @@ describe("provider registry", () => {
       },
     }),
   )("claude only document", (it) => {
-    it.effect("lists eight rows with only claude enabled", () =>
+    it.effect("lists twelve rows with only claude enabled", () =>
       Effect.gen(function* () {
         const settings = yield* loadWorkspaceSettings()
         expect(settings.enabledProviders).toEqual(["claude"])
         expect(settings.layout).toBe("1x2")
         const listed = yield* listProviders()
-        expect(listed).toHaveLength(8)
+        expect(listed).toHaveLength(12)
         expect(listed.map((provider) => provider.enabled)).toEqual([
           false,
           true,
+          false,
+          false,
+          false,
+          false,
           false,
           false,
           false,

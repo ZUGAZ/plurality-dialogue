@@ -1,4 +1,5 @@
 import { Effect, ManagedRuntime } from "effect"
+import { chromeOptionalHostAccess } from "@infrastructure/chrome/optional-host-access"
 import { optionsLive } from "@infrastructure/layers"
 import { themeToColorScheme } from "@domain/settings/theme-preference"
 import { loadWorkspaceSettings } from "@domain/settings/workspace-settings-storage"
@@ -21,10 +22,8 @@ export const optionsBindingsReady = managedRuntime.runPromise(
       )
     })
     return {
-      providers: bindViewModel(
-        runtime,
-        "providerToggles",
-        createProviderTogglesViewModel,
+      providers: bindViewModel(runtime, "providerToggles", (runEffect) =>
+        createProviderTogglesViewModel(runEffect, chromeOptionalHostAccess),
       ),
       theme: bindViewModel(runtime, "themePicker", createThemePickerViewModel),
       sourceUrlPlacement: bindViewModel(

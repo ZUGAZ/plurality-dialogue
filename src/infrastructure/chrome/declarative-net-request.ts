@@ -1,9 +1,13 @@
 import { Data, Effect } from "effect"
+import { loadWorkspaceSettings } from "../../domain/settings/workspace-settings-storage"
 import {
+  enabledOptionalHosts,
   framingRuleIdsForTab,
   framingSessionRulesForTab,
   type FramingSessionRuleSpec,
 } from "../../domain/workspace/framing-session-rules"
+import type { OptionalHost } from "../../domain/workspace/framing-policy"
+import { ChromeStorageLive } from "./storage"
 
 export class FramingSessionRulesUpdateFailed extends Data.TaggedError(
   "FramingSessionRulesUpdateFailed",
@@ -46,13 +50,27 @@ const toChromeRule = (
   }
 }
 
-export const applyFramingSessionRules = (
+const noOptionalHosts: readonly OptionalHost[] = []
+
+const enabledOptionalForTab = () =>
+  loadWorkspaceSettings().pipe(
+    Effect.map((settings) => enabledOptionalHosts(settings.enabledProviders)),
+    Effect.provide(ChromeStorageLive),
+    Effect.catchAllCause((cause) =>
+      Effect.logWarning("optional framing hosts unavailable", cause).pipe(
+        Effect.as(noOptionalHosts),
+      ),
+    ),
+  )
+
+const replaceFramingSessionRules = (
   tabId: number,
+  hosts: readonly OptionalHost[],
 ): Effect.Effect<void, FramingSessionRulesUpdateFailed> =>
   Effect.tryPromise({
     try: () => {
       const addRules: chrome.declarativeNetRequest.Rule[] = []
-      for (const spec of framingSessionRulesForTab(tabId)) {
+      for (const spec of framingSessionRulesForTab(tabId, hosts)) {
         addRules.push(toChromeRule(spec))
       }
       if (typeof chrome.declarativeNetRequest?.updateSessionRules !== "function") {
@@ -67,6 +85,13 @@ export const applyFramingSessionRules = (
     },
     catch: (cause) => new FramingSessionRulesUpdateFailed({ cause }),
   })
+
+export const applyFramingSessionRules = (
+  tabId: number,
+): Effect.Effect<void, FramingSessionRulesUpdateFailed> =>
+  enabledOptionalForTab().pipe(
+    Effect.flatMap((hosts) => replaceFramingSessionRules(tabId, hosts)),
+  )
 
 export const removeFramingSessionRules = (
   tabId: number,

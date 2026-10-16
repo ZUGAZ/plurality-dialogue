@@ -104,6 +104,30 @@ describe("panel grid slots", () => {
     ])
   })
 
+  it("createDefaultSlots of three catalog ids stays chatgpt, claude, gemini", () => {
+    const slots = createDefaultSlots(providerIds, 3)
+    expect(slots.map((slot) => slot.providerId)).toEqual([
+      "chatgpt",
+      "claude",
+      "gemini",
+    ])
+  })
+
+  it("reconcileSlotsWithEnabled reassigns qwen-china when it is off", () => {
+    const slots = slotsFromPanelProviders(["qwen-china", "claude", "gemini"])
+    const next = reconcileSlotsWithEnabled(slots, [
+      "chatgpt",
+      "claude",
+      "gemini",
+    ])
+    expect(next.map((slot) => slot.providerId)).toEqual([
+      "chatgpt",
+      "claude",
+      "gemini",
+    ])
+    expect(next[0]?.reloadGeneration).toBe(1)
+  })
+
   it("createDefaultSlots of the catalog makes the fourth slot grok", () => {
     const slots = createDefaultSlots(providerIds, 4)
     expect(slots.map((slot) => slot.providerId)).toEqual([

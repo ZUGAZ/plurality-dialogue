@@ -6,6 +6,11 @@ import { inMemoryStorageLayer } from "@domain/ports/in-memory-storage"
 import { Storage, StorageWriteError } from "@domain/ports/storage"
 import { defaultEnterKeyCustom } from "@domain/settings/enter-key-custom"
 import { workspaceSettingsStorageKey } from "@domain/settings/workspace-settings"
+import {
+  OptionalHostPermissionRequestFailed,
+  type OptionalHostAccess,
+} from "@domain/provider/optional-host-access"
+import type { ProviderId } from "@domain/provider/provider-id"
 import { createProviderTogglesViewModel } from "./view-model"
 
 const quiet = <Success, Error, Requirements>(
@@ -20,7 +25,7 @@ const failingWriteLayer = Layer.succeed(Storage, {
 
 describe("provider toggles view-model", () => {
   it.layer(quiet(inMemoryStorageLayer()))("fresh settings", (it) => {
-    it.effect("loads eight rows with the later vendors off", () =>
+    it.effect("loads twelve rows with the later vendors off", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
         expect(session.vm.rows().map((row) => row.id)).toEqual([
@@ -32,11 +37,19 @@ describe("provider toggles view-model", () => {
           "kimi",
           "doubao",
           "google",
+          "qwen-china",
+          "qwen-global",
+          "zhipu",
+          "zai",
         ])
         expect(session.vm.rows().map((row) => row.isEnabled)).toEqual([
           true,
           true,
           true,
+          false,
+          false,
+          false,
+          false,
           false,
           false,
           false,
@@ -60,6 +73,10 @@ describe("provider toggles view-model", () => {
         expect(session.vm.rows().map((row) => row.isEnabled)).toEqual([
           true,
           true,
+          false,
+          false,
+          false,
+          false,
           false,
           false,
           false,
@@ -100,6 +117,10 @@ describe("provider toggles view-model", () => {
           false,
           false,
           false,
+          false,
+          false,
+          false,
+          false,
         ])
         session.dispose()
       }),
@@ -129,6 +150,10 @@ describe("provider toggles view-model", () => {
           false,
           false,
           false,
+          false,
+          false,
+          false,
+          false,
         ])
         yield* session.vm.setEnabled("gemini", false)
         expect(session.vm.rows()).toEqual(before)
@@ -151,6 +176,10 @@ describe("provider toggles view-model", () => {
           false,
           false,
           false,
+          false,
+          false,
+          false,
+          false,
         ])
         yield* session.vm.setEnabled("gemini", false)
         expect(session.vm.saveError()).toBe("Could not save.")
@@ -158,6 +187,10 @@ describe("provider toggles view-model", () => {
           true,
           true,
           true,
+          false,
+          false,
+          false,
+          false,
           false,
           false,
           false,
@@ -198,20 +231,125 @@ describe("provider toggles view-model", () => {
           false,
           false,
           false,
+          false,
+          false,
+          false,
+          false,
         ])
+        session.dispose()
+      }),
+    )
+  })
+
+  it.layer(quiet(inMemoryStorageLayer()))("optional permission denied", (it) => {
+    it.effect("leaves rows off and does not write storage", () =>
+      Effect.gen(function* () {
+        const fake = recordingAccess(false)
+        const session = yield* openSession(fake.access)
+        const before = session.vm.rows().map((row) => row.isEnabled)
+        yield* session.vm.setEnabled("qwen-china", true)
+        expect(session.vm.rows().map((row) => row.isEnabled)).toEqual(before)
+        expect(session.vm.saveError()).toBe("Host permission was not granted.")
+        expect(fake.requested).toEqual(["qwen-china"])
+        expect(fake.synced).toEqual([])
+        const storage = yield* Storage
+        expect(yield* storage.get(workspaceSettingsStorageKey)).toEqual(
+          Option.none(),
+        )
+        session.dispose()
+      }),
+    )
+  })
+
+  it.layer(quiet(inMemoryStorageLayer()))("optional permission granted", (it) => {
+    it.effect("persists the optional id", () =>
+      Effect.gen(function* () {
+        const fake = recordingAccess(true)
+        const session = yield* openSession(fake.access)
+        yield* session.vm.setEnabled("qwen-global", true)
+        expect(session.vm.saveError()).toBeUndefined()
+        expect(fake.synced).toEqual([{ id: "qwen-global", enabled: true }])
+        const storage = yield* Storage
+        expect(yield* storage.get(workspaceSettingsStorageKey)).toEqual(
+          Option.some({
+            enabledProviders: ["chatgpt", "claude", "gemini", "qwen-global"],
+            layout: "1x3",
+            toolbarCollapsed: false,
+            theme: "system",
+            sourceUrlPlacement: "omit",
+            enterKeyPreset: "default",
+            enterKeyCustom: defaultEnterKeyCustom,
+          }),
+        )
+        session.dispose()
+      }),
+    )
+  })
+
+  it.layer(quiet(inMemoryStorageLayer()))("optional request throws", (it) => {
+    it.effect("sets Could not save. and does not write storage", () =>
+      Effect.gen(function* () {
+        const session = yield* openSession(throwingAccess())
+        yield* session.vm.setEnabled("zai", true)
+        expect(session.vm.saveError()).toBe("Could not save.")
+        const storage = yield* Storage
+        expect(yield* storage.get(workspaceSettingsStorageKey)).toEqual(
+          Option.none(),
+        )
         session.dispose()
       }),
     )
   })
 })
 
-const openSession = () =>
+const openSession = (access: OptionalHostAccess = unusedAccess) =>
   Effect.gen(function* () {
     const runtime = yield* Effect.runtime<Storage>()
     return createRoot((dispose) => ({
       vm: createProviderTogglesViewModel((effect) => {
         Runtime.runSync(runtime)(effect)
-      }),
+      }, access),
       dispose,
     }))
   })
+
+const unusedAccess: OptionalHostAccess = {
+  request: () => Effect.die("request should not run"),
+  sync: () => Effect.die("sync should not run"),
+}
+
+const recordingAccess = (
+  granted: boolean,
+): {
+  readonly access: OptionalHostAccess
+  readonly requested: ProviderId[]
+  readonly synced: { readonly id: ProviderId; readonly enabled: boolean }[]
+} => {
+  const requested: ProviderId[] = []
+  const synced: { readonly id: ProviderId; readonly enabled: boolean }[] = []
+  return {
+    requested,
+    synced,
+    access: {
+      request: (id) => {
+        requested.push(id)
+        return Effect.succeed(granted)
+      },
+      sync: (id, enabled) => {
+        synced.push({ id, enabled })
+        return Effect.void
+      },
+    },
+  }
+}
+
+const throwingAccess = (): OptionalHostAccess => ({
+  request: (id) =>
+    Effect.fail(
+      new OptionalHostPermissionRequestFailed({
+        providerId: id,
+        cause: "prompt failed",
+      }),
+    ),
+  sync: () => Effect.die("sync should not run"),
+})

@@ -1,10 +1,14 @@
 import { describe, expect, it } from "@effect/vitest"
 import {
+  dnrUrlFilters,
   embeddableHosts,
   hostPermissionPatterns,
+  optionalDnrUrlFilters,
+  optionalHostPermissionPatterns,
+  optionalHosts,
 } from "@domain/workspace/framing-policy"
 import { builtInProviders } from "./built-in-providers"
-import { isProviderId, providerIds } from "./provider-id"
+import { isProviderId, optionalProviderIds, providerIds } from "./provider-id"
 
 describe("built-in providers", () => {
   it("lists the catalog vendors in order", () => {
@@ -17,17 +21,42 @@ describe("built-in providers", () => {
       "kimi",
       "doubao",
       "google",
+      "qwen-china",
+      "qwen-global",
+      "zhipu",
+      "zai",
     ])
+    expect(providerIds.slice(-4)).toEqual(optionalProviderIds)
     expect(builtInProviders.map((provider) => provider.id)).toEqual(providerIds)
     expect(isProviderId("google")).toBe(true)
     expect(isProviderId("grok")).toBe(true)
     expect(isProviderId("not-a-provider")).toBe(false)
   })
 
-  it("hosts match embeddableHosts and host permission patterns", () => {
-    expect(builtInProviders.map((provider) => provider.host)).toEqual([
+  it("keeps optional hosts out of embeddable host permissions", () => {
+    expect(builtInProviders.slice(0, embeddableHosts.length).map((provider) => provider.host)).toEqual([
       ...embeddableHosts,
     ])
+    const embeddable: readonly string[] = embeddableHosts
+    const patterns: readonly string[] = hostPermissionPatterns
+    for (const host of optionalHosts) {
+      expect(embeddable.includes(host)).toBe(false)
+      expect(patterns.includes(`https://${host}/*`)).toBe(false)
+    }
+    expect(optionalHostPermissionPatterns).toEqual([
+      "https://www.qianwen.com/*",
+      "https://chat.qwen.ai/*",
+      "https://chatglm.cn/*",
+      "https://chat.z.ai/*",
+    ])
+    expect(optionalDnrUrlFilters).toEqual([
+      "||www.qianwen.com/",
+      "||chat.qwen.ai/",
+      "||chatglm.cn/",
+      "||chat.z.ai/",
+    ])
+    const filters: readonly string[] = dnrUrlFilters
+    expect(filters.includes("||www.qianwen.com/")).toBe(false)
     expect(hostPermissionPatterns).toEqual([
       "https://chatgpt.com/*",
       "https://claude.ai/*",
@@ -38,7 +67,6 @@ describe("built-in providers", () => {
       "https://www.doubao.com/*",
       "https://www.google.com/*",
     ])
-    const patterns: readonly string[] = hostPermissionPatterns
     expect(patterns.includes("https://google.com/*")).toBe(false)
   })
 
@@ -60,6 +88,10 @@ describe("built-in providers", () => {
       "https://www.kimi.com/",
       "https://www.doubao.com/chat/",
       "https://www.google.com/search?udm=50",
+      "https://www.qianwen.com/",
+      "https://chat.qwen.ai/",
+      "https://chatglm.cn/",
+      "https://chat.z.ai/",
     ])
     const google = builtInProviders.find((provider) => provider.id === "google")
     expect(google).toBeDefined()
@@ -89,6 +121,10 @@ describe("built-in providers", () => {
       "Kimi",
       "Doubao",
       "Google AI Mode",
+      "Qwen China",
+      "Qwen Global",
+      "Zhipu",
+      "Z.ai",
     ])
   })
 })

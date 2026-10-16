@@ -14,6 +14,7 @@ export type ProviderToggleSource = {
 
 export const loadSettingsErrorText = "Could not load settings."
 export const saveSettingsErrorText = "Could not save."
+export const permissionDeniedText = "Host permission was not granted."
 
 export const toToggleRows = (
   providers: readonly ProviderToggleSource[],

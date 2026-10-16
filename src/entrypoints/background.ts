@@ -10,6 +10,10 @@ import { subscribeActionClicked } from "@infrastructure/chrome/action"
 import { subscribeNamedCommand } from "@infrastructure/chrome/commands"
 import { registerSendToPluralityDialogueMenu } from "@infrastructure/chrome/context-menus"
 import { removeFramingSessionRules } from "@infrastructure/chrome/declarative-net-request"
+import {
+  reconcileOptionalContentScripts,
+  subscribeOptionalHostPermissionsRemoved,
+} from "@infrastructure/chrome/optional-host-access"
 import { deliverContextMenuClick } from "@infrastructure/chrome/deliver-context-menu"
 import { extensionPageUrl } from "@infrastructure/chrome/extension-page-url"
 import { handleBackgroundMessage } from "@infrastructure/chrome/handle-background-message"
@@ -26,6 +30,10 @@ export default defineBackground(() => {
     Effect.log("runtime initialized").pipe(Effect.withLogSpan("background")),
   )
   subscribeRuntimeMessages(handleBackgroundMessage, run)
+  subscribeOptionalHostPermissionsRemoved(() => {
+    void run(reconcileOptionalHosts())
+  })
+  void run(reconcileOptionalHosts())
   subscribeTabRemoved((tabId) => {
     void run(removeFramingRules(tabId))
   })
@@ -60,6 +68,12 @@ const deliverContextMenuToWorkspace = (
     ),
     Effect.ignore,
     Effect.withLogSpan("deliverContextMenu"),
+    Effect.withLogSpan("background"),
+  )
+
+const reconcileOptionalHosts = () =>
+  reconcileOptionalContentScripts.pipe(
+    Effect.withLogSpan("reconcileOptionalHosts"),
     Effect.withLogSpan("background"),
   )
 

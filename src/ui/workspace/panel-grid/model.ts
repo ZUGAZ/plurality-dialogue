@@ -101,6 +101,14 @@ export const labelForProvider = (id: ProviderId): string => {
       return "Doubao"
     case "google":
       return "Google AI Mode"
+    case "qwen-china":
+      return "Qwen China"
+    case "qwen-global":
+      return "Qwen Global"
+    case "zhipu":
+      return "Zhipu"
+    case "zai":
+      return "Z.ai"
   }
 }
 

@@ -6,6 +6,9 @@ import {
   framingResourceTypes,
   framingRuleLifetime,
   hostPermissionPatterns,
+  optionalDnrUrlFilters,
+  optionalHostPermissionPatterns,
+  optionalHosts,
 } from "./framing-policy"
 
 describe("framing policy", () => {
@@ -23,6 +26,25 @@ describe("framing policy", () => {
     const hosts: readonly string[] = embeddableHosts
     expect(hosts.includes("grok.com")).toBe(true)
     expect(hosts.includes("google.com")).toBe(false)
+    for (const host of optionalHosts) {
+      expect(hosts.includes(host)).toBe(false)
+    }
+    expect(optionalHostPermissionPatterns).toEqual([
+      "https://www.qianwen.com/*",
+      "https://chat.qwen.ai/*",
+      "https://chatglm.cn/*",
+      "https://chat.z.ai/*",
+    ])
+    expect(optionalDnrUrlFilters).toEqual([
+      "||www.qianwen.com/",
+      "||chat.qwen.ai/",
+      "||chatglm.cn/",
+      "||chat.z.ai/",
+    ])
+    const filters: readonly string[] = dnrUrlFilters
+    for (const filter of optionalDnrUrlFilters) {
+      expect(filters.includes(filter)).toBe(false)
+    }
   })
 
   it("lists both framing headers", () => {
