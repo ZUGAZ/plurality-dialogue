@@ -18,7 +18,11 @@ describe("framing policy", () => {
       "chat.deepseek.com",
       "www.kimi.com",
       "www.doubao.com",
+      "www.google.com",
     ])
+    const hosts: readonly string[] = embeddableHosts
+    expect(hosts.includes("grok.com")).toBe(true)
+    expect(hosts.includes("google.com")).toBe(false)
   })
 
   it("lists both framing headers", () => {
@@ -41,6 +45,7 @@ describe("framing policy", () => {
       "https://chat.deepseek.com/*",
       "https://www.kimi.com/*",
       "https://www.doubao.com/*",
+      "https://www.google.com/*",
     ])
   })
 
@@ -53,6 +58,7 @@ describe("framing policy", () => {
       "||chat.deepseek.com/",
       "||www.kimi.com/",
       "||www.doubao.com/",
+      "||www.google.com/",
     ])
   })
 

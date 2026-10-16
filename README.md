@@ -1,6 +1,6 @@
 # Plurality Dialogue
 
-Compare ChatGPT, Claude, Gemini, Grok, DeepSeek, Kimi, and Doubao in one workspace using the browser logins you already have. One prompt can reach all of them; you read the answers side by side without API keys.
+Compare ChatGPT, Claude, Gemini, Grok, DeepSeek, Kimi, Doubao, and Google in one workspace using the browser logins you already have. One prompt can reach all of them; you read the answers side by side without API keys.
 
 ## Development
 

@@ -99,6 +99,8 @@ export const labelForProvider = (id: ProviderId): string => {
       return "Kimi"
     case "doubao":
       return "Doubao"
+    case "google":
+      return "Google AI Mode"
   }
 }
 

@@ -18,17 +18,22 @@ import {
 describe("framing session rules", () => {
   it("maps one sub_frame spec per embeddable host", () => {
     const specs = framingSessionRulesForTab(1)
-    expect(specs).toHaveLength(7)
+    expect(specs).toHaveLength(8)
     expect(specs.map((spec) => spec.condition.urlFilter)).toEqual(
       dnrUrlFilters,
     )
-    expect(specs.map((spec) => spec.id)).toEqual([9, 10, 11, 12, 13, 14, 15])
+    expect(specs.map((spec) => spec.id)).toEqual([
+      10, 11, 12, 13, 14, 15, 16, 17,
+    ])
     expect(
       specs.some((spec) => spec.condition.urlFilter === "||grok.com/"),
     ).toBe(true)
-    expect(framingRuleId(1, 0)).toBe(9)
-    expect(framingRuleId(1, 6)).toBe(15)
-    expect(framingRuleId(2, 0)).toBe(17)
+    expect(specs.map((spec) => spec.condition.urlFilter).at(-1)).toBe(
+      "||www.google.com/",
+    )
+    expect(framingRuleId(1, 0)).toBe(10)
+    expect(framingRuleId(1, 7)).toBe(17)
+    expect(framingRuleId(2, 0)).toBe(19)
     for (const spec of specs) {
       expect(spec.condition.tabIds).toEqual([1])
       expect(spec.condition.resourceTypes).toEqual(framingResourceTypes)
@@ -46,7 +51,7 @@ describe("framing session rules", () => {
 
   it("keeps rule ids inside signed 32-bit for a large tab id", () => {
     const ids = framingRuleIdsForTab(1_173_892_741)
-    expect(new Set(ids).size).toBe(7)
+    expect(new Set(ids).size).toBe(8)
     for (const id of ids) {
       expect(Number.isInteger(id)).toBe(true)
       expect(id).toBeGreaterThanOrEqual(1)
@@ -57,12 +62,12 @@ describe("framing session rules", () => {
   it("assigns disjoint rule ids for different tabs", () => {
     const first = framingRuleIdsForTab(1)
     const second = framingRuleIdsForTab(2)
-    expect(first).toHaveLength(7)
-    expect(second).toHaveLength(7)
+    expect(first).toHaveLength(8)
+    expect(second).toHaveLength(8)
     const ids = [...first, ...second]
-    expect(new Set(ids).size).toBe(14)
+    expect(new Set(ids).size).toBe(16)
     for (const id of ids) {
-      expect(id % 8).not.toBe(0)
+      expect(id % 9).not.toBe(0)
     }
   })
 

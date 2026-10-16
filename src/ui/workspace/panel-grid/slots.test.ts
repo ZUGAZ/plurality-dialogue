@@ -131,6 +131,21 @@ describe("panel grid slots", () => {
     expect(next[2]?.reloadGeneration).toBe(0)
   })
 
+  it("reconcileSlotsWithEnabled reassigns a google slot when google is off", () => {
+    const slots = slotsFromPanelProviders(["google", "claude", "gemini"])
+    const next = reconcileSlotsWithEnabled(slots, [
+      "chatgpt",
+      "claude",
+      "gemini",
+    ])
+    expect(next.map((slot) => slot.providerId)).toEqual([
+      "chatgpt",
+      "claude",
+      "gemini",
+    ])
+    expect(next[0]?.reloadGeneration).toBe(1)
+  })
+
   it("reconcileSlotsWithEnabled drops a disabled id and does not invent grok", () => {
     const slots = createDefaultSlots(providerIds, WORKSPACE_DEFAULT_SLOT_COUNT)
     const next = reconcileSlotsWithEnabled(slots, ["chatgpt", "claude"])

@@ -50,4 +50,11 @@ export const builtInProviders: readonly ProviderDefinition[] = [
     url: "https://www.doubao.com/chat/",
     iconId: "doubao",
   },
+  {
+    id: "google",
+    displayName: "Google AI Mode",
+    host: "www.google.com",
+    url: "https://www.google.com/search?udm=50",
+    iconId: "google",
+  },
 ]

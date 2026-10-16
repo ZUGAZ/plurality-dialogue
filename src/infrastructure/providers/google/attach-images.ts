@@ -1,0 +1,21 @@
+import { Effect } from "effect"
+import type { PendingImage } from "../../../domain/broadcast/pending-image"
+import { ImageAttachFailed } from "../../../domain/ports/provider-page"
+import { requestPageFileAssign } from "../request-page-file-assign"
+import {
+  primaryFileInputSelector,
+  uploadToolsSelector,
+} from "./selectors"
+
+export const attachGoogleImages = (
+  images: ReadonlyArray<PendingImage>,
+): Effect.Effect<void, ImageAttachFailed> => {
+  if (images.length === 0) {
+    return Effect.void
+  }
+  return requestPageFileAssign({
+    selector: primaryFileInputSelector,
+    revealSelector: uploadToolsSelector,
+    images,
+  })
+}

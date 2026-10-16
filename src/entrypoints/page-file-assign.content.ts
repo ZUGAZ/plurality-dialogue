@@ -10,6 +10,7 @@ export default defineContentScript({
     "https://chat.deepseek.com/*",
     "https://www.kimi.com/*",
     "https://www.doubao.com/*",
+    "https://www.google.com/*",
   ],
   allFrames: true,
   runAt: "document_start",

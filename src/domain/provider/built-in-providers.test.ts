@@ -16,8 +16,10 @@ describe("built-in providers", () => {
       "deepseek",
       "kimi",
       "doubao",
+      "google",
     ])
     expect(builtInProviders.map((provider) => provider.id)).toEqual(providerIds)
+    expect(isProviderId("google")).toBe(true)
     expect(isProviderId("grok")).toBe(true)
     expect(isProviderId("not-a-provider")).toBe(false)
   })
@@ -34,7 +36,10 @@ describe("built-in providers", () => {
       "https://chat.deepseek.com/*",
       "https://www.kimi.com/*",
       "https://www.doubao.com/*",
+      "https://www.google.com/*",
     ])
+    const patterns: readonly string[] = hostPermissionPatterns
+    expect(patterns.includes("https://google.com/*")).toBe(false)
   })
 
   it("uses https urls whose hostname equals host", () => {
@@ -54,7 +59,21 @@ describe("built-in providers", () => {
       "https://chat.deepseek.com/",
       "https://www.kimi.com/",
       "https://www.doubao.com/chat/",
+      "https://www.google.com/search?udm=50",
     ])
+    const google = builtInProviders.find((provider) => provider.id === "google")
+    expect(google).toBeDefined()
+    if (google !== undefined) {
+      const parsed = new URL(google.url)
+      expect(parsed.protocol).toBe("https:")
+      expect(parsed.hostname).toBe("www.google.com")
+      expect(parsed.pathname).toBe("/search")
+      expect(parsed.searchParams.get("udm")).toBe("50")
+      expect(parsed.searchParams.has("q")).toBe(false)
+      expect(parsed.searchParams.has("hl")).toBe(false)
+      expect(parsed.searchParams.has("gl")).toBe(false)
+      expect(parsed.searchParams.has("aep")).toBe(false)
+    }
   })
 
   it("sets iconId to id and English display names", () => {
@@ -69,6 +88,7 @@ describe("built-in providers", () => {
       "DeepSeek",
       "Kimi",
       "Doubao",
+      "Google AI Mode",
     ])
   })
 })
