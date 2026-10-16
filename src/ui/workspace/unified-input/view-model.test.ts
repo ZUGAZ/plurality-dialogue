@@ -11,7 +11,7 @@ import type {
   VisiblePanel,
 } from "@domain/broadcast/resolve-targets"
 import { inMemoryMessagingLayer } from "@domain/ports/in-memory-messaging"
-import { Messaging } from "@domain/ports/messaging"
+import { Messaging, MessagingFault } from "@domain/ports/messaging"
 import { focusGuardHeld } from "./focus-guard"
 import { createUnifiedInputViewModel } from "./view-model"
 
@@ -134,6 +134,8 @@ describe("unified input view-model", () => {
                     }),
                   )
                 },
+                readFrameLocation: () =>
+                  Effect.fail(new MessagingFault({ cause: "unused" })),
               }),
             ),
           ),

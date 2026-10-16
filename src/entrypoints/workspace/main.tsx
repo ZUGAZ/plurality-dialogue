@@ -25,6 +25,7 @@ if (root !== null) {
           canRemovePanel={workspaceBindings.canRemovePanel}
           setPanelProvider={workspaceBindings.setPanelProvider}
           refreshPanel={workspaceBindings.refreshPanel}
+          openPanelInTab={workspaceBindings.openPanelInTab}
           onNewChat={workspaceBindings.newChatForAll}
           temporaryChat={workspaceBindings.temporaryChat}
           onToggleTemporaryChat={workspaceBindings.onToggleTemporaryChat}

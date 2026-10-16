@@ -1,5 +1,6 @@
 import { Effect, Option } from "effect"
 import { batch, createSignal } from "solid-js"
+import type { PanelTarget } from "@domain/broadcast/panel-target"
 import { defaultLayoutId, type LayoutId } from "@domain/layout/presets"
 import type { Messaging } from "@domain/ports/messaging"
 import type { Storage } from "@domain/ports/storage"
@@ -21,6 +22,7 @@ import {
   type PanelViewState,
   type ProviderOption,
 } from "./model"
+import { openPanelInTab as openPanelInTabEffect } from "./open-panel-in-tab"
 import { createPersistedGridActions } from "./persisted-grid-actions"
 import {
   bumpAllLoadedPanels,
@@ -55,6 +57,9 @@ export type PanelGridViewModel = {
     rawId: string,
   ) => Effect.Effect<void, never, Storage>
   readonly refreshPanel: (panelId: string) => Effect.Effect<void>
+  readonly openPanelInTab: (
+    panelId: string,
+  ) => Effect.Effect<void, never, Tabs | Messaging>
   readonly newChatForAll: () => Effect.Effect<void>
   readonly temporaryChat: () => boolean
   readonly applyTemporaryChat: (enabled: boolean) => readonly string[]
@@ -68,6 +73,7 @@ export type PanelGridInitial = {
 export const createPanelGridViewModel = (
   runEffect: RunEffect<Storage | Tabs | Messaging>,
   initial: PanelGridInitial = { layoutId: defaultLayoutId },
+  frames: () => readonly PanelTarget[] = () => [],
 ): PanelGridViewModel => {
   const start = initialPanelGrid(initial.layoutId, initial.panelProviders)
   const [providers, setProviders] =
@@ -192,6 +198,14 @@ export const createPanelGridViewModel = (
       ),
     )
 
+  const openPanelInTab = (panelId: string) =>
+    openPanelInTabEffect({
+      panelId,
+      slots: slots(),
+      panels: panels(),
+      frames: frames(),
+    })
+
   const persisted = createPersistedGridActions({
     slots,
     layoutId,
@@ -242,6 +256,7 @@ export const createPanelGridViewModel = (
     canRemovePanel: () => canRemovePanel(slots()),
     setPanelProvider: persisted.setPanelProvider,
     refreshPanel,
+    openPanelInTab,
     newChatForAll,
     temporaryChat: session.temporaryChat,
     applyTemporaryChat: session.applyTemporaryChat,

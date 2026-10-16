@@ -7,8 +7,10 @@ import {
   executePanelCommand,
   type PanelIdentity,
 } from "../../domain/broadcast/execute-panel-command"
+import { FrameLocation } from "../../domain/messaging/frame-location"
 import { decodeIncomingMessage } from "../../domain/messaging/incoming-message"
 import { PanelCommandResponse } from "../../domain/messaging/panel-command-response"
+import { isReadFrameLocation } from "../../domain/messaging/read-frame-location"
 import type { ProviderPage } from "../../domain/ports/provider-page"
 
 export const contentCommandEffect = (
@@ -24,6 +26,9 @@ export const contentCommandEffect = (
     return Effect.logWarning("panel command rejected", messageTag(message))
   }
   const incoming = decoded.right
+  if (isReadFrameLocation(incoming)) {
+    return replyWithFrameLocation()
+  }
   if (isOpenTemporaryChat(incoming)) {
     return answered(incoming._tag, identity, executeTemporaryChat(identity))
   }
@@ -36,6 +41,17 @@ export const contentCommandEffect = (
     executePanelCommand(incoming, identity),
   )
 }
+
+const replyWithFrameLocation = () =>
+  pipe(
+    Schema.encodeUnknownEither(FrameLocation)(
+      FrameLocation.make({ href: location.href }),
+    ),
+    Either.match({
+      onLeft: () => undefined,
+      onRight: (encoded) => Effect.succeed(encoded),
+    }),
+  )
 
 const messageTag = (message: unknown): string => {
   if (typeof message !== "object" || message === null || !("_tag" in message)) {

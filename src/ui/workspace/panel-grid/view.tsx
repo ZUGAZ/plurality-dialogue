@@ -13,6 +13,7 @@ export const PanelGridView = (props: {
   onPanelLoad: (id: string) => void
   setPanelProvider: (panelId: string, rawId: string) => void
   refreshPanel: (panelId: string) => void
+  openPanelInTab: (panelId: string) => void
   removePanel: (panelId: string) => void
 }) => {
   // Keyed by panel id so removing one panel never remounts its neighbours.
@@ -45,6 +46,7 @@ export const PanelGridView = (props: {
                     props.setPanelProvider(id, rawId)
                   }
                   onRefresh={() => props.refreshPanel(id)}
+                  onOpenInTab={() => props.openPanelInTab(id)}
                   onRemove={() => props.removePanel(id)}
                 />
               )}

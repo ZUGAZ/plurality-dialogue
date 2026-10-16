@@ -125,6 +125,9 @@ export const selectOptions = (
 export const isRefreshEnabled = (slot: PanelSlot): boolean =>
   slot.providerId !== null
 
+export const isOpenInTabEnabled = (slot: PanelSlot): boolean =>
+  slot.providerId !== null
+
 export const toPanelViewState = (
   slot: PanelSlot,
   embedUrl: string | undefined,

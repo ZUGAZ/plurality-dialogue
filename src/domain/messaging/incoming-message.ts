@@ -6,6 +6,7 @@ import { OpenTemporaryChat } from "../broadcast/commands/open-temporary-chat"
 import { ClaimPendingContextMenu } from "./context-menu-draft"
 import { EnsureFramingRulesRequest } from "./ensure-framing-rules"
 import { PanelFrameReady } from "./panel-frame-ready"
+import { ReadFrameLocation } from "./read-frame-location"
 import {
   WorkspacePingRequest,
   WorkspacePingResponse,
@@ -18,6 +19,7 @@ export const IncomingExtensionMessage = Schema.Union(
   FillComposer,
   FillAndSubmit,
   OpenTemporaryChat,
+  ReadFrameLocation,
   PanelFrameReady,
 )
 

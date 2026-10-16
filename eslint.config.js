@@ -64,6 +64,10 @@ export default tseslint.config(
           category: "view-model",
         },
         {
+          pattern: "src/ui/workspace/panel-grid/open-panel-in-tab.ts",
+          category: "view-model",
+        },
+        {
           pattern: "src/ui/workspace/prompt-library/fill-actions.ts",
           category: "view-model",
         },

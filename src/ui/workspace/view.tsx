@@ -28,6 +28,7 @@ export type WorkspaceViewProps = {
   readonly canRemovePanel: () => boolean
   readonly setPanelProvider: (panelId: string, rawId: string) => void
   readonly refreshPanel: (panelId: string) => void
+  readonly openPanelInTab: (panelId: string) => void
   readonly onNewChat: () => void
   readonly temporaryChat: () => boolean
   readonly onToggleTemporaryChat: () => void
@@ -65,6 +66,7 @@ export const WorkspaceView = (props: WorkspaceViewProps) => (
       onPanelLoad={props.onPanelLoad}
       setPanelProvider={props.setPanelProvider}
       refreshPanel={props.refreshPanel}
+      openPanelInTab={props.openPanelInTab}
       removePanel={props.removePanel}
     />
     <UnifiedInputContainer {...props.unifiedInput} />

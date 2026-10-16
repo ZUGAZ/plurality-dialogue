@@ -1,6 +1,7 @@
-import { Effect, Layer } from "effect"
+import { Effect, Either, Layer, pipe } from "effect"
 import type { BroadcastCommand } from "../broadcast/commands"
 import type { PanelTarget } from "../broadcast/panel-target"
+import { FrameLocation } from "../messaging/frame-location"
 import type { PanelCommandResponse } from "../messaging/panel-command-response"
 import {
   Messaging,
@@ -16,6 +17,7 @@ export type RecordedFrameSend = {
 export type InMemoryFrameMessaging = {
   readonly replies: ReadonlyMap<string, PanelCommandResponse>
   readonly sent: RecordedFrameSend[]
+  readonly locations?: ReadonlyMap<string, string>
 }
 
 export const inMemoryMessagingLayer = (
@@ -38,5 +40,21 @@ export const inMemoryMessagingLayer = (
         return Effect.fail(new MessagingFault({ cause: "no reply" }))
       }
       return Effect.succeed(reply)
+    },
+    readFrameLocation: (target) => {
+      const href = frames?.locations?.get(target.panelId)
+      if (href === undefined) {
+        return Effect.fail(new MessagingFault({ cause: "no location" }))
+      }
+      return pipe(
+        Either.try({
+          try: () => FrameLocation.make({ href }),
+          catch: (cause) => new MessagingFault({ cause }),
+        }),
+        Either.match({
+          onLeft: (error) => Effect.fail(error),
+          onRight: (location) => Effect.succeed(location),
+        }),
+      )
     },
   })

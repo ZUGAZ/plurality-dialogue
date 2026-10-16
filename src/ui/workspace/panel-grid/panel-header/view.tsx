@@ -13,6 +13,8 @@ export const PanelHeaderView = (props: {
   onProviderChange: (rawId: string) => void
   onRefresh: () => void
   isRefreshEnabled: boolean
+  onOpenInTab: () => void
+  isOpenInTabEnabled: boolean
   onRemove: () => void
   canRemove: boolean
 }) => (
@@ -34,6 +36,14 @@ export const PanelHeaderView = (props: {
       onClick={() => props.onRefresh()}
     >
       Refresh
+    </button>
+    <button
+      type="button"
+      aria-label={`Open panel ${props.panelIndex} in a tab`}
+      disabled={!props.isOpenInTabEnabled}
+      onClick={() => props.onOpenInTab()}
+    >
+      Open in tab
     </button>
     <button
       type="button"

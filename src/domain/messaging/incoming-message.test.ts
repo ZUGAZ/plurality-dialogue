@@ -3,6 +3,7 @@ import { describe, expect, it } from "@effect/vitest"
 import type { PendingImage } from "../broadcast/pending-image"
 import { isFillAndSubmit } from "../broadcast/commands/fill-and-submit"
 import { isFillComposer } from "../broadcast/commands/fill-composer"
+import { BroadcastCommand } from "../broadcast/commands"
 import { isOpenTemporaryChat } from "../broadcast/commands/open-temporary-chat"
 import {
   ApplyContextMenuDraft,
@@ -14,6 +15,11 @@ import {
   replyToWorkspacePing,
 } from "./incoming-message"
 import { isPanelFrameReady } from "./panel-frame-ready"
+import { FrameLocation } from "./frame-location"
+import {
+  ReadFrameLocation,
+  isReadFrameLocation,
+} from "./read-frame-location"
 import {
   WorkspacePingRequest,
   isWorkspacePingResponse,
@@ -117,6 +123,29 @@ describe("incoming extension messages", () => {
       expect(isOpenTemporaryChat(decoded.right)).toBe(true)
     }
     expect(Either.isLeft(replyToWorkspacePing(payload))).toBe(true)
+  })
+
+  it("decodes ReadFrameLocation and rejects FrameLocation and BroadcastCommand", () => {
+    const payload = { _tag: "ReadFrameLocation" }
+    const decoded = decodeIncomingMessage(payload)
+    expect(Either.isRight(decoded)).toBe(true)
+    if (Either.isRight(decoded)) {
+      expect(isReadFrameLocation(decoded.right)).toBe(true)
+    }
+    expect(
+      Either.isLeft(
+        decodeIncomingMessage({
+          _tag: "FrameLocation",
+          href: "https://chatgpt.com/c/x",
+        }),
+      ),
+    ).toBe(true)
+    expect(Either.isLeft(decodeIncomingMessage(FrameLocation.make({
+      href: "https://chatgpt.com/c/x",
+    })))).toBe(true)
+    expect(
+      Schema.is(BroadcastCommand)(ReadFrameLocation.make({})),
+    ).toBe(false)
   })
 
   it("decodes PanelFrameReady and does not pong", () => {

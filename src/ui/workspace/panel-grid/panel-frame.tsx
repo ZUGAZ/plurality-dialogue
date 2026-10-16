@@ -1,6 +1,7 @@
 import { For, Show } from "solid-js"
 import {
   isHttpsIframeSrc,
+  isOpenInTabEnabled,
   isRefreshEnabled,
   type PanelViewState,
 } from "./model"
@@ -17,6 +18,7 @@ export const PanelFrame = (props: {
   onLoad: (id: string) => void
   onProviderChange: (rawId: string) => void
   onRefresh: () => void
+  onOpenInTab: () => void
   onRemove: () => void
   canRemove: boolean
 }) => (
@@ -32,6 +34,8 @@ export const PanelFrame = (props: {
       onProviderChange={props.onProviderChange}
       onRefresh={props.onRefresh}
       isRefreshEnabled={isRefreshEnabled(props.panel)}
+      onOpenInTab={props.onOpenInTab}
+      isOpenInTabEnabled={isOpenInTabEnabled(props.panel)}
       onRemove={props.onRemove}
       canRemove={props.canRemove}
     />

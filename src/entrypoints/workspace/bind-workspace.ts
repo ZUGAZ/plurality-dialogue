@@ -40,10 +40,14 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
     const workspaceTabId = yield* tabs.currentTabId().pipe(Effect.option)
     const frames = createFrameList()
     const grid = bindViewModel(runtime, "panelGrid", (runEffect) =>
-      createPanelGridViewModel(runEffect, {
-        layoutId: layoutIdOrDefault(settings.layout),
-        panelProviders: settings.panelProviders,
-      }),
+      createPanelGridViewModel(
+        runEffect,
+        {
+          layoutId: layoutIdOrDefault(settings.layout),
+          panelProviders: settings.panelProviders,
+        },
+        frames.list,
+      ),
     )
     const shell = bindViewModel(runtime, "shell", () =>
       createShellViewModel(settings.toolbarCollapsed),
