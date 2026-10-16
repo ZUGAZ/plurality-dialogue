@@ -37,11 +37,34 @@ describe("workspace settings document", () => {
     ).toBe(true)
   })
 
-  it("rejects panelProviders with grok, bad lengths, or a non-array", () => {
+  it("decodes panelProviders and enabledProviders that name grok", () => {
+    const panel = decodeWorkspaceSettings({
+      enabledProviders: ["chatgpt"],
+      layout: "1x3",
+      panelProviders: ["grok"],
+    })
+    expect(Either.isRight(panel)).toBe(true)
+    if (Either.isRight(panel)) {
+      expect(panel.right.panelProviders).toEqual(["grok"])
+    }
+    const enabled = decodeWorkspaceSettings({
+      enabledProviders: ["chatgpt", "grok"],
+      layout: "1x3",
+    })
+    expect(Either.isRight(enabled)).toBe(true)
+    if (Either.isRight(enabled)) {
+      expect(enabled.right.enabledProviders).toEqual(["chatgpt", "grok"])
+    }
+  })
+
+  it("rejects panelProviders with not-a-provider, bad lengths, or a non-array", () => {
     const base = { enabledProviders: ["chatgpt"], layout: "1x3" }
     expect(
       Either.isLeft(
-        decodeWorkspaceSettings({ ...base, panelProviders: ["grok"] }),
+        decodeWorkspaceSettings({
+          ...base,
+          panelProviders: ["not-a-provider"],
+        }),
       ),
     ).toBe(true)
     expect(
@@ -70,7 +93,7 @@ describe("workspace settings document", () => {
     ).toBe(true)
   })
 
-  it("rejects an unknown layout, grok, a unicode times sign, and a string list", () => {
+  it("rejects an unknown layout, not-a-provider, a unicode times sign, and a string list", () => {
     expect(
       Either.isLeft(
         decodeWorkspaceSettings({
@@ -82,7 +105,7 @@ describe("workspace settings document", () => {
     expect(
       Either.isLeft(
         decodeWorkspaceSettings({
-          enabledProviders: ["chatgpt", "grok"],
+          enabledProviders: ["chatgpt", "not-a-provider"],
           layout: "1x3",
         }),
       ),

@@ -16,7 +16,7 @@ export default defineConfig({
     name: "Plurality Dialogue",
     version: "0.2.0",
     description:
-      "Compare ChatGPT, Claude, and Gemini in one workspace using the chats you already have.",
+      "Compare ChatGPT, Claude, Gemini, and Grok in one workspace using the chats you already have.",
     permissions: [
       "storage",
       "declarativeNetRequestWithHostAccess",

@@ -176,8 +176,9 @@ describe("workspace settings schema", () => {
     }
   })
 
-  it("does not treat grok as a provider id", () => {
-    expect(isProviderId("grok")).toBe(false)
+  it("treats grok as a provider id and rejects the unknown sentinel", () => {
+    expect(isProviderId("grok")).toBe(true)
+    expect(isProviderId("not-a-provider")).toBe(false)
   })
 })
 

@@ -9,14 +9,13 @@ import {
 } from "./framing-policy"
 
 describe("framing policy", () => {
-  it("names exactly the three embeddable hosts", () => {
+  it("names the embeddable hosts in catalog order", () => {
     expect(embeddableHosts).toEqual([
       "chatgpt.com",
       "claude.ai",
       "gemini.google.com",
+      "grok.com",
     ])
-    expect(embeddableHosts).toHaveLength(3)
-    expect(embeddableHosts).not.toContain("grok.com")
   })
 
   it("lists both framing headers", () => {
@@ -35,6 +34,7 @@ describe("framing policy", () => {
       "https://chatgpt.com/*",
       "https://claude.ai/*",
       "https://gemini.google.com/*",
+      "https://grok.com/*",
     ])
   })
 
@@ -43,6 +43,7 @@ describe("framing policy", () => {
       "||chatgpt.com/",
       "||claude.ai/",
       "||gemini.google.com/",
+      "||grok.com/",
     ])
   })
 

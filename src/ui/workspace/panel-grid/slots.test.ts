@@ -94,6 +94,43 @@ describe("panel grid slots", () => {
     expect(bumpPanelGeneration(slots, "panel-9")).toBe(slots)
   })
 
+  it("a fourth slot from the default enabled three stays chatgpt", () => {
+    const slots = createDefaultSlots(["chatgpt", "claude", "gemini"], 4)
+    expect(slots.map((slot) => slot.providerId)).toEqual([
+      "chatgpt",
+      "claude",
+      "gemini",
+      "chatgpt",
+    ])
+  })
+
+  it("createDefaultSlots of the catalog makes the fourth slot grok", () => {
+    const slots = createDefaultSlots(providerIds, 4)
+    expect(slots.map((slot) => slot.providerId)).toEqual([
+      "chatgpt",
+      "claude",
+      "gemini",
+      "grok",
+    ])
+  })
+
+  it("reconcileSlotsWithEnabled reassigns a grok slot when grok is off", () => {
+    const slots = slotsFromPanelProviders(["grok", "claude", "gemini"])
+    const next = reconcileSlotsWithEnabled(slots, [
+      "chatgpt",
+      "claude",
+      "gemini",
+    ])
+    expect(next.map((slot) => slot.providerId)).toEqual([
+      "chatgpt",
+      "claude",
+      "gemini",
+    ])
+    expect(next[0]?.reloadGeneration).toBe(1)
+    expect(next[1]?.reloadGeneration).toBe(0)
+    expect(next[2]?.reloadGeneration).toBe(0)
+  })
+
   it("reconcileSlotsWithEnabled drops a disabled id and does not invent grok", () => {
     const slots = createDefaultSlots(providerIds, WORKSPACE_DEFAULT_SLOT_COUNT)
     const next = reconcileSlotsWithEnabled(slots, ["chatgpt", "claude"])
@@ -125,7 +162,7 @@ describe("panel grid slots", () => {
       "chatgpt",
       "chatgpt",
       "gemini",
-      "chatgpt",
+      "grok",
     ])
     expect(next[0]).toBe(slots[0])
     expect(next[1]).toBe(slots[1])
@@ -179,7 +216,7 @@ describe("panel grid slots", () => {
       "chatgpt",
       "chatgpt",
       "gemini",
-      "chatgpt",
+      "grok",
     ])
     expect(next[0]).toBe(slots[0])
     expect(next[1]).toBe(slots[1])

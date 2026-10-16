@@ -7,14 +7,16 @@ import { builtInProviders } from "./built-in-providers"
 import { isProviderId, providerIds } from "./provider-id"
 
 describe("built-in providers", () => {
-  it("lists exactly three vendors in catalog order", () => {
-    expect(builtInProviders).toHaveLength(3)
+  it("lists the catalog vendors in order", () => {
+    expect(builtInProviders.map((provider) => provider.id)).toEqual([
+      "chatgpt",
+      "claude",
+      "gemini",
+      "grok",
+    ])
     expect(builtInProviders.map((provider) => provider.id)).toEqual(providerIds)
-  })
-
-  it("does not include grok", () => {
-    expect(isProviderId("grok")).toBe(false)
-    expect(JSON.stringify(builtInProviders)).not.toContain("grok")
+    expect(isProviderId("grok")).toBe(true)
+    expect(isProviderId("not-a-provider")).toBe(false)
   })
 
   it("hosts match embeddableHosts and host permission patterns", () => {
@@ -25,6 +27,7 @@ describe("built-in providers", () => {
       "https://chatgpt.com/*",
       "https://claude.ai/*",
       "https://gemini.google.com/*",
+      "https://grok.com/*",
     ])
   })
 
@@ -41,6 +44,7 @@ describe("built-in providers", () => {
       "https://chatgpt.com/",
       "https://claude.ai/new",
       "https://gemini.google.com/app",
+      "https://grok.com/",
     ])
   })
 
@@ -52,6 +56,7 @@ describe("built-in providers", () => {
       "ChatGPT",
       "Claude",
       "Gemini",
+      "Grok",
     ])
   })
 })

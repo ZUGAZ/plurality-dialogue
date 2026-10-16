@@ -27,10 +27,10 @@ export type FramingSessionRuleSpec = {
 }
 
 const signedIntegerMax = 2_147_483_647
-const ruleIdStride = 4
+const ruleIdStride = embeddableHosts.length + 1
 
 // Chrome rule ids are signed 32-bit. tabId * stride overflows once the tab
-// id passes ~5.3e8, and Chrome then rejects the whole updateSessionRules call.
+// id passes ~4.3e8, and Chrome then rejects the whole updateSessionRules call.
 const maxTabSlot = Math.floor(
   (signedIntegerMax - (ruleIdStride - 1)) / ruleIdStride,
 )

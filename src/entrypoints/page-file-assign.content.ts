@@ -6,6 +6,7 @@ export default defineContentScript({
     "https://chatgpt.com/*",
     "https://claude.ai/*",
     "https://gemini.google.com/*",
+    "https://grok.com/*",
   ],
   allFrames: true,
   runAt: "document_start",

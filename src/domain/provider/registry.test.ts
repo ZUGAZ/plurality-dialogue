@@ -19,15 +19,21 @@ import {
 
 describe("provider registry", () => {
   it.layer(inMemoryStorageLayer())("missing settings key", (it) => {
-    it.effect("lists three enabled providers in catalog order", () =>
+    it.effect("lists four rows and enables the original three", () =>
       Effect.gen(function* () {
         const listed = yield* listProviders()
         expect(listed.map((provider) => provider.id)).toEqual([
           "chatgpt",
           "claude",
           "gemini",
+          "grok",
         ])
-        expect(listed.every((provider) => provider.enabled)).toBe(true)
+        expect(listed.map((provider) => provider.enabled)).toEqual([
+          true,
+          true,
+          true,
+          false,
+        ])
         const enabled = yield* listEnabledProviders()
         expect(enabled.map((provider) => provider.id)).toEqual([
           "chatgpt",
@@ -74,7 +80,7 @@ describe("provider registry", () => {
         const enabled = yield* listEnabledProviders()
         expect(enabled).toEqual([])
         const listed = yield* listProviders()
-        expect(listed).toHaveLength(3)
+        expect(listed).toHaveLength(4)
         expect(listed.every((provider) => provider.enabled === false)).toBe(
           true,
         )
@@ -97,10 +103,12 @@ describe("provider registry", () => {
           "chatgpt",
           "claude",
           "gemini",
+          "grok",
         ])
         expect(listed.map((provider) => provider.enabled)).toEqual([
           true,
           true,
+          false,
           false,
         ])
       }),
@@ -114,16 +122,73 @@ describe("provider registry", () => {
         layout: "1x3",
       },
     }),
-  )("unknown provider id in storage", (it) => {
-    it.effect("falls back to defaults and never returns grok", () =>
+  )("stored grok id", (it) => {
+    it.effect("loads with only Grok enabled", () =>
       Effect.gen(function* () {
         const listed = yield* listProviders()
         expect(listed.map((provider) => provider.id)).toEqual([
           "chatgpt",
           "claude",
           "gemini",
+          "grok",
         ])
-        expect(listed.every((provider) => provider.enabled)).toBe(true)
+        expect(listed.map((provider) => provider.enabled)).toEqual([
+          false,
+          false,
+          false,
+          true,
+        ])
+      }),
+    )
+  })
+
+  it.layer(
+    inMemoryStorageLayer({
+      [workspaceSettingsStorageKey]: {
+        enabledProviders: ["not-a-provider"],
+        layout: "1x3",
+      },
+    }),
+  )("unknown provider id in storage", (it) => {
+    it.effect("falls back to defaults with Grok disabled", () =>
+      Effect.gen(function* () {
+        const listed = yield* listProviders()
+        expect(listed.map((provider) => provider.id)).toEqual([
+          "chatgpt",
+          "claude",
+          "gemini",
+          "grok",
+        ])
+        expect(listed.map((provider) => provider.enabled)).toEqual([
+          true,
+          true,
+          true,
+          false,
+        ])
+      }),
+    )
+  })
+
+  it.layer(
+    inMemoryStorageLayer({
+      [workspaceSettingsStorageKey]: {
+        enabledProviders: ["claude"],
+        layout: "1x2",
+      },
+    }),
+  )("claude only document", (it) => {
+    it.effect("lists four rows with only claude enabled", () =>
+      Effect.gen(function* () {
+        const settings = yield* loadWorkspaceSettings()
+        expect(settings.enabledProviders).toEqual(["claude"])
+        expect(settings.layout).toBe("1x2")
+        const listed = yield* listProviders()
+        expect(listed.map((provider) => provider.enabled)).toEqual([
+          false,
+          true,
+          false,
+          false,
+        ])
       }),
     )
   })
@@ -133,6 +198,22 @@ describe("provider registry", () => {
     expect(
       Option.map(found, (provider) => provider.url),
     ).toEqual(Option.some("https://claude.ai/new"))
+  })
+
+  it.layer(inMemoryStorageLayer())("enable grok from defaults", (it) => {
+    it.effect("persists grok after the original three", () =>
+      Effect.gen(function* () {
+        const next = yield* setProviderEnabled("grok", true)
+        expect(next).toEqual(["chatgpt", "claude", "gemini", "grok"])
+        const enabled = yield* listEnabledProviders()
+        expect(enabled.map((provider) => provider.id)).toEqual([
+          "chatgpt",
+          "claude",
+          "gemini",
+          "grok",
+        ])
+      }),
+    )
   })
 
   it.layer(inMemoryStorageLayer())("disable gemini from defaults", (it) => {

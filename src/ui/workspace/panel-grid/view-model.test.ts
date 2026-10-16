@@ -55,6 +55,18 @@ const zeroEnabledLayer = Layer.mergeAll(
   silentLoggerLayer,
 )
 
+const grokEnabledLayer = Layer.mergeAll(
+  inMemoryStorageLayer({
+    [workspaceSettingsStorageKey]: {
+      enabledProviders: ["chatgpt", "claude", "gemini", "grok"],
+      layout: "1x3",
+    },
+  }),
+  inMemoryTabsLayer(1),
+  inMemoryMessagingLayer(() => Effect.succeed(FramingRulesReady.make({}))),
+  silentLoggerLayer,
+)
+
 const chatgptUrl = builtInProviders.find(
   (provider) => provider.id === "chatgpt",
 )?.url
@@ -133,7 +145,7 @@ describe("panel grid view-model", () => {
           Runtime.runSync(runtime)(effect)
         })
         yield* vm.setPanelProvider("panel-1", "grok")
-        yield* vm.setPanelProvider("panel-1", "unknown")
+        yield* vm.setPanelProvider("panel-1", "not-a-provider")
         const panels = vm.panels()
         expect(panels.map((panel) => panel.providerId)).toEqual([
           "chatgpt",
@@ -201,6 +213,28 @@ describe("panel grid view-model", () => {
           "claude",
         ])
         expect(panels[2]?.src).toBe(chatgptUrl)
+      }),
+    )
+  })
+
+  it.layer(grokEnabledLayer)("grok enabled", (it) => {
+    it.effect("setPanelProvider assigns grok and bumps that panel", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        })
+        yield* vm.setPanelProvider("panel-1", "grok")
+        const panels = vm.panels()
+        expect(panels.map((panel) => panel.providerId)).toEqual([
+          "grok",
+          "claude",
+          "gemini",
+        ])
+        expect(panels[0]?.reloadGeneration).toBe(1)
+        expect(panels[0]?.src).toBe("https://grok.com/")
+        expect(panels[1]?.reloadGeneration).toBe(0)
+        expect(panels[2]?.reloadGeneration).toBe(0)
       }),
     )
   })

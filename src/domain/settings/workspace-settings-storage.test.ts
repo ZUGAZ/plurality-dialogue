@@ -66,6 +66,23 @@ describe("workspace settings storage", () => {
         layout: "1x3",
       },
     }),
+  )("stored grok id", (it) => {
+    it.effect("loads grok and does not fall back to defaults", () =>
+      Effect.gen(function* () {
+        const settings = yield* loadWorkspaceSettings()
+        expect(settings.enabledProviders).toEqual(["grok"])
+        expect(settings).not.toEqual(defaultWorkspaceSettings)
+      }),
+    )
+  })
+
+  it.layer(
+    inMemoryStorageLayer({
+      [workspaceSettingsStorageKey]: {
+        enabledProviders: ["not-a-provider"],
+        layout: "1x3",
+      },
+    }),
   )("unknown provider id", (it) => {
     it.effect("loads defaults", () =>
       Effect.gen(function* () {

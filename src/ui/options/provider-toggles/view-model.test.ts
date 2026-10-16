@@ -20,15 +20,21 @@ const failingWriteLayer = Layer.succeed(Storage, {
 
 describe("provider toggles view-model", () => {
   it.layer(quiet(inMemoryStorageLayer()))("fresh settings", (it) => {
-    it.effect("loads three enabled rows", () =>
+    it.effect("loads four rows with Grok off", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
         expect(session.vm.rows().map((row) => row.id)).toEqual([
           "chatgpt",
           "claude",
           "gemini",
+          "grok",
         ])
-        expect(session.vm.rows().every((row) => row.isEnabled)).toBe(true)
+        expect(session.vm.rows().map((row) => row.isEnabled)).toEqual([
+          true,
+          true,
+          true,
+          false,
+        ])
         expect(session.vm.rows().every((row) => row.isLastEnabled === false)).toBe(
           true,
         )
@@ -46,6 +52,7 @@ describe("provider toggles view-model", () => {
         expect(session.vm.rows().map((row) => row.isEnabled)).toEqual([
           true,
           true,
+          false,
           false,
         ])
         expect(session.vm.saveError()).toBeUndefined()
@@ -76,6 +83,7 @@ describe("provider toggles view-model", () => {
           true,
           false,
           false,
+          false,
         ])
         session.dispose()
       }),
@@ -100,6 +108,7 @@ describe("provider toggles view-model", () => {
           false,
           false,
           true,
+          false,
         ])
         yield* session.vm.setEnabled("gemini", false)
         expect(session.vm.rows()).toEqual(before)
@@ -113,10 +122,20 @@ describe("provider toggles view-model", () => {
     it.effect("sets Could not save. and does not flip rows", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
-        expect(session.vm.rows().every((row) => row.isEnabled)).toBe(true)
+        expect(session.vm.rows().map((row) => row.isEnabled)).toEqual([
+          true,
+          true,
+          true,
+          false,
+        ])
         yield* session.vm.setEnabled("gemini", false)
         expect(session.vm.saveError()).toBe("Could not save.")
-        expect(session.vm.rows().every((row) => row.isEnabled)).toBe(true)
+        expect(session.vm.rows().map((row) => row.isEnabled)).toEqual([
+          true,
+          true,
+          true,
+          false,
+        ])
         session.dispose()
       }),
     )
@@ -132,7 +151,7 @@ describe("provider toggles view-model", () => {
       }),
     ),
   )("empty enabled list", (it) => {
-    it.effect("shows three off rows and allows turning one on", () =>
+    it.effect("shows off rows and allows turning one on", () =>
       Effect.gen(function* () {
         const session = yield* openSession()
         expect(session.vm.rows().every((row) => row.isEnabled === false)).toBe(
@@ -144,6 +163,7 @@ describe("provider toggles view-model", () => {
         yield* session.vm.setEnabled("chatgpt", true)
         expect(session.vm.rows().map((row) => row.isEnabled)).toEqual([
           true,
+          false,
           false,
           false,
         ])

@@ -1,6 +1,6 @@
 # Plurality Dialogue
 
-Compare ChatGPT, Claude, and Gemini in one workspace using the browser logins you already have. One prompt can reach all three; you read the answers side by side without API keys.
+Compare ChatGPT, Claude, Gemini, and Grok in one workspace using the browser logins you already have. One prompt can reach all four; you read the answers side by side without API keys.
 
 ## Development
 

@@ -22,4 +22,11 @@ export const builtInProviders: readonly ProviderDefinition[] = [
     url: "https://gemini.google.com/app",
     iconId: "gemini",
   },
+  {
+    id: "grok",
+    displayName: "Grok",
+    host: "grok.com",
+    url: "https://grok.com/",
+    iconId: "grok",
+  },
 ]

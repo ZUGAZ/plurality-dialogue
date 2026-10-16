@@ -91,6 +91,8 @@ export const labelForProvider = (id: ProviderId): string => {
       return "Claude"
     case "gemini":
       return "Gemini"
+    case "grok":
+      return "Grok"
   }
 }
 

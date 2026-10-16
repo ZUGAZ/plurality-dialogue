@@ -2,7 +2,8 @@ export const embeddableHosts: readonly [
   "chatgpt.com",
   "claude.ai",
   "gemini.google.com",
-] = ["chatgpt.com", "claude.ai", "gemini.google.com"]
+  "grok.com",
+] = ["chatgpt.com", "claude.ai", "gemini.google.com", "grok.com"]
 
 export type EmbeddableHost = (typeof embeddableHosts)[number]
 

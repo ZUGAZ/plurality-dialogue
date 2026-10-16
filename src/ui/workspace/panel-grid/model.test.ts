@@ -29,25 +29,38 @@ describe("panel grid model", () => {
     )
   })
 
-  it("decodeProviderId rejects grok, empty, and disabled ids", () => {
+  it("decodeProviderId rejects unknown, empty, and disabled ids", () => {
     const enabled: readonly ProviderId[] = ["chatgpt", "claude"]
     expect(decodeProviderId("grok", enabled)).toBeNull()
+    expect(decodeProviderId("not-a-provider", enabled)).toBeNull()
+    expect(decodeProviderId("not-a-provider", ["chatgpt", "claude", "grok"])).toBeNull()
     expect(decodeProviderId("", enabled)).toBeNull()
     expect(decodeProviderId("gemini", enabled)).toBeNull()
     expect(decodeProviderId("chatgpt", enabled)).toBe("chatgpt")
+    expect(decodeProviderId("grok", ["chatgpt", "claude", "grok"])).toBe("grok")
   })
 
-  it("labelForProvider and selectOptions use English labels without grok", () => {
+  it("labelForProvider and selectOptions follow the enabled set", () => {
     expect(labelForProvider("chatgpt")).toBe("ChatGPT")
     expect(labelForProvider("claude")).toBe("Claude")
     expect(labelForProvider("gemini")).toBe("Gemini")
-    const options = selectOptions(providerIds)
-    expect(options.map((option) => option.label)).toEqual([
-      "ChatGPT",
-      "Claude",
-      "Gemini",
-    ])
-    expect(options.map((option) => option.id)).toEqual(providerIds)
+    expect(labelForProvider("grok")).toBe("Grok")
+    expect(
+      selectOptions(["chatgpt", "claude", "gemini"]).map((option) => option.id),
+    ).toEqual(["chatgpt", "claude", "gemini"])
+    expect(
+      selectOptions(["chatgpt", "claude", "gemini", "grok"]).map(
+        (option) => option.id,
+      ),
+    ).toEqual(["chatgpt", "claude", "gemini", "grok"])
+    expect(
+      selectOptions(["chatgpt", "claude", "gemini", "grok"]).map(
+        (option) => option.label,
+      ),
+    ).toEqual(["ChatGPT", "Claude", "Gemini", "Grok"])
+    expect(selectOptions(providerIds).map((option) => option.id)).toEqual(
+      providerIds,
+    )
     expect(
       selectOptions(["gemini", "chatgpt"]).map((option) => option.id),
     ).toEqual(["chatgpt", "gemini"])

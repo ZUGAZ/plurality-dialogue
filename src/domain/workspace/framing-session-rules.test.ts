@@ -7,6 +7,7 @@ import {
 } from "./framing-policy"
 import {
   collectWorkspaceTabIds,
+  framingRuleId,
   framingRuleIdsForTab,
   framingSessionRulesForTab,
   nonEmptyDocumentUrls,
@@ -15,14 +16,20 @@ import {
 } from "./framing-session-rules"
 
 describe("framing session rules", () => {
-  it("maps three host specs for a tab without Grok", () => {
+  it("maps one sub_frame spec per embeddable host", () => {
     const specs = framingSessionRulesForTab(1)
-    expect(specs).toHaveLength(3)
+    expect(specs).toHaveLength(4)
     expect(specs.map((spec) => spec.condition.urlFilter)).toEqual(
       dnrUrlFilters,
     )
+    expect(specs.map((spec) => spec.id)).toEqual([6, 7, 8, 9])
+    expect(
+      specs.some((spec) => spec.condition.urlFilter === "||grok.com/"),
+    ).toBe(true)
+    expect(framingRuleId(1, 0)).toBe(6)
+    expect(framingRuleId(1, 3)).toBe(9)
+    expect(framingRuleId(2, 0)).toBe(11)
     for (const spec of specs) {
-      expect(spec.condition.urlFilter.includes("grok.com")).toBe(false)
       expect(spec.condition.tabIds).toEqual([1])
       expect(spec.condition.resourceTypes).toEqual(framingResourceTypes)
       expect(spec.condition.resourceTypes).toEqual(["sub_frame"])
@@ -39,7 +46,7 @@ describe("framing session rules", () => {
 
   it("keeps rule ids inside signed 32-bit for a large tab id", () => {
     const ids = framingRuleIdsForTab(1_173_892_741)
-    expect(new Set(ids).size).toBe(3)
+    expect(new Set(ids).size).toBe(4)
     for (const id of ids) {
       expect(Number.isInteger(id)).toBe(true)
       expect(id).toBeGreaterThanOrEqual(1)
@@ -50,9 +57,13 @@ describe("framing session rules", () => {
   it("assigns disjoint rule ids for different tabs", () => {
     const first = framingRuleIdsForTab(1)
     const second = framingRuleIdsForTab(2)
-    expect(first).toHaveLength(3)
-    expect(second).toHaveLength(3)
-    expect(new Set([...first, ...second]).size).toBe(6)
+    expect(first).toHaveLength(4)
+    expect(second).toHaveLength(4)
+    const ids = [...first, ...second]
+    expect(new Set(ids).size).toBe(8)
+    for (const id of ids) {
+      expect(id % 5).not.toBe(0)
+    }
   })
 
   it("parses only integer tab ids of 1 or more", () => {
