@@ -98,8 +98,8 @@ describe("panel grid model", () => {
     ).toEqual(["chatgpt", "gemini"])
   })
 
-  it("panel count limits are 1..4", () => {
+  it("panel count limits are 1..6", () => {
     expect(WORKSPACE_MIN_PANEL_COUNT).toBe(1)
-    expect(WORKSPACE_MAX_PANEL_COUNT).toBe(4)
+    expect(WORKSPACE_MAX_PANEL_COUNT).toBe(6)
   })
 })

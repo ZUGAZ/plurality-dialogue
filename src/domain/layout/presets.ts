@@ -7,6 +7,9 @@ export const LayoutId = Schema.Union(
   Schema.Literal("1x3"),
   Schema.Literal("2x2"),
   Schema.Literal("1x4"),
+  Schema.Literal("1x5"),
+  Schema.Literal("1x6"),
+  Schema.Literal("2x3"),
 )
 
 export type LayoutId = typeof LayoutId.Type
@@ -39,6 +42,9 @@ const layout1x2: LayoutGrid = { id: "1x2", columnCount: 2, rowCount: 1 }
 const layout1x3: LayoutGrid = { id: "1x3", columnCount: 3, rowCount: 1 }
 const layout2x2: LayoutGrid = { id: "2x2", columnCount: 2, rowCount: 2 }
 const layout1x4: LayoutGrid = { id: "1x4", columnCount: 4, rowCount: 1 }
+const layout1x5: LayoutGrid = { id: "1x5", columnCount: 5, rowCount: 1 }
+const layout1x6: LayoutGrid = { id: "1x6", columnCount: 6, rowCount: 1 }
+const layout2x3: LayoutGrid = { id: "2x3", columnCount: 3, rowCount: 2 }
 
 export const layoutPresets: readonly [
   LayoutGrid,
@@ -46,7 +52,19 @@ export const layoutPresets: readonly [
   LayoutGrid,
   LayoutGrid,
   LayoutGrid,
-] = [layout1x1, layout1x2, layout1x3, layout2x2, layout1x4]
+  LayoutGrid,
+  LayoutGrid,
+  LayoutGrid,
+] = [
+  layout1x1,
+  layout1x2,
+  layout1x3,
+  layout2x2,
+  layout1x4,
+  layout1x5,
+  layout1x6,
+  layout2x3,
+]
 
 const gridById: { readonly [Id in LayoutId]: LayoutGrid } = {
   "1x1": layout1x1,
@@ -54,6 +72,9 @@ const gridById: { readonly [Id in LayoutId]: LayoutGrid } = {
   "1x3": layout1x3,
   "2x2": layout2x2,
   "1x4": layout1x4,
+  "1x5": layout1x5,
+  "1x6": layout1x6,
+  "2x3": layout2x3,
 }
 
 export const presetById = (id: LayoutId): LayoutGrid => gridById[id]

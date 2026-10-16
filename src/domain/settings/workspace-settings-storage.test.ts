@@ -95,7 +95,7 @@ describe("workspace settings storage", () => {
     inMemoryStorageLayer({
       [workspaceSettingsStorageKey]: {
         enabledProviders: ["chatgpt"],
-        layout: "1x5",
+        layout: "1x7",
       },
     }),
   )("unknown layout", (it) => {
@@ -148,6 +148,18 @@ describe("workspace settings storage", () => {
           sourceUrlPlacement: "omit",
           enterKeyPreset: "default",
           enterKeyCustom: defaultEnterKeyCustom,
+        }
+        yield* persistWorkspaceSettings(written)
+        expect(yield* loadWorkspaceSettings()).toEqual(written)
+      }),
+    )
+
+    it.effect("persist then load keeps six providers on 1x6", () =>
+      Effect.gen(function* () {
+        const written: WorkspaceSettings = {
+          ...defaultWorkspaceSettings,
+          layout: "1x6",
+          panelProviders: ["chatgpt", "claude", "gemini", "chatgpt", "claude", "gemini"],
         }
         yield* persistWorkspaceSettings(written)
         expect(yield* loadWorkspaceSettings()).toEqual(written)

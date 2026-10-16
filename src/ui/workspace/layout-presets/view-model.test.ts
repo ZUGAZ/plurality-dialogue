@@ -167,6 +167,76 @@ describe("selectLayout", () => {
         )
       }),
     )
+
+    it.effect("selectLayout 1x6 writes layout and updates the signal", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        })
+        yield* vm.selectLayout("1x6")
+        expect(vm.layoutId()).toBe("1x6")
+        expect(vm.panels()).toHaveLength(6)
+        expect(vm.layoutColumns()).toBe(6)
+        expect(vm.layoutRows()).toBe(1)
+        const storage = yield* Storage
+        const stored = yield* storage.get(workspaceSettingsStorageKey)
+        expect(stored).toEqual(
+          Option.some({
+            enabledProviders: ["chatgpt", "claude", "gemini"],
+            layout: "1x6",
+            panelProviders: [
+              "chatgpt",
+              "claude",
+              "gemini",
+              "chatgpt",
+              "claude",
+              "gemini",
+            ],
+            toolbarCollapsed: false,
+            theme: "system",
+            sourceUrlPlacement: "omit",
+            enterKeyPreset: "default",
+            enterKeyCustom: defaultEnterKeyCustom,
+          }),
+        )
+      }),
+    )
+
+    it.effect("selectLayout 2x3 writes layout and updates the signal", () =>
+      Effect.gen(function* () {
+        const runtime = yield* Effect.runtime<Storage | Tabs | Messaging>()
+        const vm = createPanelGridViewModel((effect) => {
+          Runtime.runSync(runtime)(effect)
+        })
+        yield* vm.selectLayout("2x3")
+        expect(vm.layoutId()).toBe("2x3")
+        expect(vm.panels()).toHaveLength(6)
+        expect(vm.layoutColumns()).toBe(3)
+        expect(vm.layoutRows()).toBe(2)
+        const storage = yield* Storage
+        const stored = yield* storage.get(workspaceSettingsStorageKey)
+        expect(stored).toEqual(
+          Option.some({
+            enabledProviders: ["chatgpt", "claude", "gemini"],
+            layout: "2x3",
+            panelProviders: [
+              "chatgpt",
+              "claude",
+              "gemini",
+              "chatgpt",
+              "claude",
+              "gemini",
+            ],
+            toolbarCollapsed: false,
+            theme: "system",
+            sourceUrlPlacement: "omit",
+            enterKeyPreset: "default",
+            enterKeyCustom: defaultEnterKeyCustom,
+          }),
+        )
+      }),
+    )
   })
 
   it.layer(failingWriteLayer)("failed persist", (it) => {

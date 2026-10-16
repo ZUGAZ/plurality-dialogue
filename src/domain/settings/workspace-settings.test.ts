@@ -46,6 +46,20 @@ describe("workspace settings schema", () => {
     expect(layoutIdOrDefault("1x4")).toBe("1x4")
   })
 
+  it("decodes 1x5, 1x6, and 2x3", () => {
+    for (const layout of ["1x5", "1x6", "2x3"] as const) {
+      expect(
+        Either.isRight(
+          decodeWorkspaceSettings({
+            enabledProviders: ["chatgpt"],
+            layout,
+          }),
+        ),
+      ).toBe(true)
+      expect(layoutIdOrDefault(layout)).toBe(layout)
+    }
+  })
+
   it("ignores an extra unused key when required fields are valid", () => {
     const decoded = decodeWorkspaceSettings({
       enabledProviders: ["chatgpt", "claude", "gemini"],

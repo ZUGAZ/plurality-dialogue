@@ -14,7 +14,10 @@ const layoutLabels: { readonly [Id in LayoutId]: string } = {
   "1x2": "1×2",
   "1x3": "1×3",
   "1x4": "1×4",
+  "1x5": "1×5",
+  "1x6": "1×6",
   "2x2": "2×2",
+  "2x3": "2×3",
 }
 
 const pickerOrder: readonly LayoutId[] = [
@@ -22,7 +25,10 @@ const pickerOrder: readonly LayoutId[] = [
   "1x2",
   "1x3",
   "1x4",
+  "1x5",
+  "1x6",
   "2x2",
+  "2x3",
 ]
 
 export const layoutPickerItems: readonly LayoutPickerItem[] =

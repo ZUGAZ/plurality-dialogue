@@ -3,7 +3,7 @@ import { describe, expect, it } from "@effect/vitest"
 import { decodeWorkspaceSettings } from "./workspace-settings"
 
 describe("workspace settings document", () => {
-  it("decodes panelProviders of length 1..4 including null entries", () => {
+  it("decodes panelProviders of length 1..6 including null entries", () => {
     const decoded = decodeWorkspaceSettings({
       enabledProviders: ["chatgpt", "claude", "gemini"],
       layout: "1x3",
@@ -32,6 +32,47 @@ describe("workspace settings document", () => {
           enabledProviders: ["chatgpt"],
           layout: "2x2",
           panelProviders: ["chatgpt", "chatgpt", "chatgpt", "chatgpt"],
+        }),
+      ),
+    ).toBe(true)
+    expect(
+      Either.isRight(
+        decodeWorkspaceSettings({
+          enabledProviders: ["chatgpt"],
+          layout: "1x5",
+          panelProviders: ["chatgpt", "chatgpt", "chatgpt", "chatgpt", null],
+        }),
+      ),
+    ).toBe(true)
+    expect(
+      Either.isRight(
+        decodeWorkspaceSettings({
+          enabledProviders: ["chatgpt"],
+          layout: "1x6",
+          panelProviders: [
+            "chatgpt",
+            "claude",
+            "gemini",
+            "chatgpt",
+            "claude",
+            null,
+          ],
+        }),
+      ),
+    ).toBe(true)
+    expect(
+      Either.isRight(
+        decodeWorkspaceSettings({
+          enabledProviders: ["chatgpt"],
+          layout: "2x3",
+          panelProviders: [
+            "chatgpt",
+            "claude",
+            "gemini",
+            "chatgpt",
+            "claude",
+            "gemini",
+          ],
         }),
       ),
     ).toBe(true)
@@ -74,7 +115,15 @@ describe("workspace settings document", () => {
       Either.isLeft(
         decodeWorkspaceSettings({
           ...base,
-          panelProviders: ["chatgpt", "chatgpt", "chatgpt", "chatgpt", "chatgpt"],
+          panelProviders: [
+            "chatgpt",
+            "chatgpt",
+            "chatgpt",
+            "chatgpt",
+            "chatgpt",
+            "chatgpt",
+            "chatgpt",
+          ],
         }),
       ),
     ).toBe(true)
@@ -98,7 +147,7 @@ describe("workspace settings document", () => {
       Either.isLeft(
         decodeWorkspaceSettings({
           enabledProviders: [],
-          layout: "1x5",
+          layout: "1x7",
         }),
       ),
     ).toBe(true)

@@ -262,8 +262,16 @@ describe("panel grid slots", () => {
     expect(next[2]).toBe(slots[2])
   })
 
-  it("appendPanelSlot is a no-op at four panels", () => {
+  it("appendPanelSlot grows a four-panel list", () => {
     const slots = createDefaultSlots(providerIds, 4)
+    const next = appendPanelSlot(slots, providerIds)
+    expect(canAddPanel(slots)).toBe(true)
+    expect(next).toHaveLength(5)
+    expect(next.slice(0, 4)).toEqual([...slots])
+  })
+
+  it("appendPanelSlot is a no-op at six panels", () => {
+    const slots = createDefaultSlots(providerIds, 6)
     expect(appendPanelSlot(slots, providerIds)).toBe(slots)
     expect(canAddPanel(slots)).toBe(false)
   })
@@ -346,5 +354,33 @@ describe("panel grid slots", () => {
     const mismatched = initialPanelGrid("1x3", ["gemini", "claude"])
     expect(mismatched.layoutId).toBe("1x2")
     expect(mismatched.slots).toHaveLength(2)
+  })
+
+  it("initialPanelGrid keeps 2x3 when six providers match", () => {
+    const providers = [
+      "chatgpt",
+      "claude",
+      "gemini",
+      "chatgpt",
+      "claude",
+      "gemini",
+    ] as const
+    const grid = initialPanelGrid("2x3", providers)
+    expect(grid.layoutId).toBe("2x3")
+    expect(grid.slots).toHaveLength(6)
+  })
+
+  it("initialPanelGrid repairs six providers under 1x3 to 1x6", () => {
+    const providers = [
+      "chatgpt",
+      "claude",
+      "gemini",
+      "chatgpt",
+      "claude",
+      "gemini",
+    ] as const
+    const grid = initialPanelGrid("1x3", providers)
+    expect(grid.layoutId).toBe("1x6")
+    expect(panelProvidersFromSlots(grid.slots)).toEqual(providers)
   })
 })

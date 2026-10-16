@@ -71,7 +71,7 @@ describe("panel grid view-model panel count", () => {
       expect(vm.layoutId()).toBe("1x4")
       expect(vm.layoutColumns()).toBe(4)
       expect(vm.layoutRows()).toBe(1)
-      expect(vm.canAddPanel()).toBe(false)
+      expect(vm.canAddPanel()).toBe(true)
       expect(yield* storedSettings).toEqual(
         Option.some({
           enabledProviders: ["chatgpt", "claude", "gemini"],
@@ -87,11 +87,12 @@ describe("panel grid view-model panel count", () => {
     }).pipe(Effect.provide(freshLayer)),
   )
 
-  it.effect("addPanel is a no-op at four panels", () =>
+  it.effect("addPanel is a no-op at six panels", () =>
     Effect.gen(function* () {
-      const vm = yield* makeVm({ layoutId: "2x2" })
+      const vm = yield* makeVm({ layoutId: "1x6" })
       yield* vm.addPanel()
-      expect(vm.panels()).toHaveLength(4)
+      expect(vm.panels()).toHaveLength(6)
+      expect(vm.layoutId()).toBe("1x6")
       expect(yield* storedSettings).toEqual(Option.none())
     }).pipe(Effect.provide(freshLayer)),
   )
