@@ -17,6 +17,7 @@ import {
   inMemoryMessagingLayer,
   type InMemoryFrameMessaging,
 } from "@domain/ports/in-memory-messaging"
+import { inMemoryStorageLayer } from "@domain/ports/in-memory-storage"
 import { createUnifiedInputViewModel } from "./view-model"
 
 const quiet = <Success, Error, Requirements>(
@@ -24,7 +25,11 @@ const quiet = <Success, Error, Requirements>(
 ): Layer.Layer<Success, Error, Requirements> =>
   Layer.merge(layer, silentLoggerLayer)
 
-const emptyPlan: BroadcastPlan = { targets: [], notReady: [] }
+const emptyPlan: BroadcastPlan = {
+  targets: [],
+  notReady: [],
+  panelIds: [],
+}
 
 const target = PanelTarget.make({
   panelId: "panel-1",
@@ -114,7 +119,14 @@ describe("pending images", () => {
     }),
   )
 
-  it.layer(quiet(inMemoryMessagingLayer(() => Effect.succeed({}), sendFrames)))(
+  it.layer(
+    quiet(
+      Layer.merge(
+        inMemoryMessagingLayer(() => Effect.succeed({}), sendFrames),
+        inMemoryStorageLayer(),
+      ),
+    ),
+  )(
     "send images",
     (it) => {
       it.effect("sendAll clears text, images, and the preview", () =>
@@ -122,6 +134,7 @@ describe("pending images", () => {
           sendFrames.sent.length = 0
           const session = openSession(() => ({
             targets: [target],
+            panelIds: ["panel-1"],
             notReady: [],
           }))
           const revoke = vi.spyOn(URL, "revokeObjectURL")
@@ -154,6 +167,7 @@ describe("pending images", () => {
           sendFrames.sent.length = 0
           const session = openSession(() => ({
             targets: [target],
+            panelIds: ["panel-1"],
             notReady: [],
           }))
           session.vm.setDraft("  \n")
@@ -177,6 +191,7 @@ describe("pending images", () => {
           fillFrames.sent.length = 0
           const session = openSession(() => ({
             targets: [target],
+            panelIds: ["panel-1"],
             notReady: [],
           }))
           session.vm.setDraft("hi")
@@ -201,6 +216,7 @@ describe("pending images", () => {
         Effect.gen(function* () {
           const session = openSession(() => ({
             targets: [target],
+            panelIds: ["panel-1"],
             notReady: [],
           }))
           session.vm.setDraft("hi")
@@ -219,6 +235,7 @@ describe("pending images", () => {
         Effect.gen(function* () {
           const session = openSession(() => ({
             targets: [target],
+            panelIds: ["panel-1"],
             notReady: [],
           }))
           session.vm.setDraft("hi")

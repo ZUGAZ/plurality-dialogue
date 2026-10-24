@@ -61,6 +61,7 @@ describe("resolveBroadcastTargets", () => {
         { panelId: "panel-2", providerId: "claude" },
       ],
       [hello],
+      ["panel-1", "panel-2"],
     )
     expect(plan.targets).toEqual([hello])
     expect(plan.notReady).toHaveLength(1)
@@ -71,5 +72,17 @@ describe("resolveBroadcastTargets", () => {
         reason: "frame-not-ready",
       }),
     )
+  })
+
+  it("echoes panelIds even when they are not the visible panel ids", () => {
+    const plan = resolveBroadcastTargets(
+      [
+        { panelId: "panel-1", providerId: "chatgpt" },
+        { panelId: "panel-2", providerId: "claude" },
+      ],
+      [],
+      ["panel-1", "panel-3"],
+    )
+    expect(plan.panelIds).toEqual(["panel-1", "panel-3"])
   })
 })

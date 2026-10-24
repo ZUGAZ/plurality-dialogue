@@ -17,6 +17,7 @@ import {
   type InMemoryFrameMessaging,
   type RecordedFrameSend,
 } from "@domain/ports/in-memory-messaging"
+import { inMemoryStorageLayer } from "@domain/ports/in-memory-storage"
 import { createUnifiedInputViewModel } from "./view-model"
 
 const quiet = <Success, Error, Requirements>(
@@ -88,7 +89,9 @@ export const sentIdsSince = (
   start: number,
 ) => frames.sent.slice(start).map((row) => row.target.panelId)
 
-export const openRetrySession = () => {
+export const openRetrySession = (
+  panelIds: ReadonlyArray<string> = ["panel-1", "panel-2", "panel-3"],
+) => {
   const replies = new Map<string, PanelCommandResponse>()
   const sent: RecordedFrameSend[] = []
   const frames: InMemoryFrameMessaging = { replies, sent }
@@ -97,7 +100,12 @@ export const openRetrySession = () => {
     claude.panelId,
     gemini.panelId,
   ])
-  let plan: BroadcastPlan = { targets: [chatgpt, claude], notReady: [] }
+  let slotIds = panelIds
+  let plan: BroadcastPlan = {
+    targets: [chatgpt, claude],
+    notReady: [],
+    panelIds: slotIds,
+  }
   const resolveTargets = (
     panels: ReadonlyArray<VisiblePanel>,
   ): BroadcastPlan => {
@@ -111,7 +119,7 @@ export const openRetrySession = () => {
       }
       targets.push(hello)
     }
-    return { targets, notReady }
+    return { targets, notReady, panelIds: slotIds }
   }
   const root = createRoot((dispose) => ({
     vm: createUnifiedInputViewModel(
@@ -126,9 +134,15 @@ export const openRetrySession = () => {
     frames,
     replies,
     announced,
-    layer: quiet(inMemoryMessagingLayer(() => Effect.succeed({}), frames)),
+    layer: quiet(
+      Layer.mergeAll(
+        inMemoryMessagingLayer(() => Effect.succeed({}), frames),
+        inMemoryStorageLayer(),
+      ),
+    ),
     setPlan: (next: BroadcastPlan) => {
       plan = next
+      slotIds = next.panelIds
     },
   }
 }

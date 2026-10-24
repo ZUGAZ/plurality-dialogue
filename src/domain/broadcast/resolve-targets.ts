@@ -10,6 +10,9 @@ export type VisiblePanel = {
 export type BroadcastPlan = {
   readonly targets: ReadonlyArray<PanelTarget>
   readonly notReady: ReadonlyArray<PanelFailed>
+  // Full live slot order, including slots with no provider. Send All uses it
+  // to map a panelId to a role slot; frame matching does not read it.
+  readonly panelIds: ReadonlyArray<string>
 }
 
 export const toVisiblePanels = (
@@ -41,6 +44,7 @@ export const upsertFrameHello = (
 export const resolveBroadcastTargets = (
   visible: ReadonlyArray<VisiblePanel>,
   hellos: ReadonlyArray<PanelTarget>,
+  panelIds: ReadonlyArray<string>,
 ): BroadcastPlan => {
   const helloByPanelId = new Map<string, PanelTarget>()
   for (const hello of hellos) {
@@ -69,5 +73,5 @@ export const resolveBroadcastTargets = (
       }),
     )
   }
-  return { targets, notReady }
+  return { targets, notReady, panelIds }
 }

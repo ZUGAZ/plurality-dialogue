@@ -12,6 +12,7 @@ import type {
   VisiblePanel,
 } from "@domain/broadcast/resolve-targets"
 import { inMemoryMessagingLayer } from "@domain/ports/in-memory-messaging"
+import { inMemoryStorageLayer } from "@domain/ports/in-memory-storage"
 import { createUnifiedInputViewModel } from "./view-model"
 
 const quiet = <Success, Error, Requirements>(
@@ -19,7 +20,11 @@ const quiet = <Success, Error, Requirements>(
 ): Layer.Layer<Success, Error, Requirements> =>
   Layer.merge(layer, silentLoggerLayer)
 
-const emptyPlan: BroadcastPlan = { targets: [], notReady: [] }
+const emptyPlan: BroadcastPlan = {
+  targets: [],
+  notReady: [],
+  panelIds: [],
+}
 
 const target = PanelTarget.make({
   panelId: "panel-1",
@@ -36,6 +41,7 @@ describe("unified input view-model", () => {
         Effect.gen(function* () {
           const session = openSession(() => ({
             targets: [],
+            panelIds: [],
             notReady: [
               PanelFailed.make({
                 panelId: "panel-1",
@@ -59,6 +65,7 @@ describe("unified input view-model", () => {
         Effect.gen(function* () {
           const session = openSession(() => ({
             targets: [],
+            panelIds: [],
             notReady: [
               PanelFailed.make({
                 panelId: "panel-1",
@@ -83,6 +90,7 @@ describe("unified input view-model", () => {
         Effect.gen(function* () {
           const session = openSession(() => ({
             targets: [],
+            panelIds: [],
             notReady: [
               PanelFailed.make({
                 panelId: "panel-1",
@@ -103,7 +111,7 @@ describe("unified input view-model", () => {
     },
   )
 
-  it.layer(quiet(
+  it.layer(quiet(Layer.merge(
     inMemoryMessagingLayer(() => Effect.succeed({}), {
       replies: new Map([
         [
@@ -117,11 +125,13 @@ describe("unified input view-model", () => {
       ]),
       sent: [],
     }),
-  ))("panel command error", (it) => {
+    inMemoryStorageLayer(),
+  )))("panel command error", (it) => {
     it.effect("maps a composer miss onto the status line", () =>
       Effect.gen(function* () {
         const session = openSession(() => ({
           targets: [target],
+          panelIds: ["panel-1"],
           notReady: [],
         }))
         session.vm.setDraft("hi")
@@ -139,6 +149,7 @@ describe("unified input view-model", () => {
       Effect.gen(function* () {
         const session = openSession(() => ({
           targets: [target],
+          panelIds: ["panel-1"],
           notReady: [],
         }))
         const prompt = watchPrompt(session.vm, "hi")

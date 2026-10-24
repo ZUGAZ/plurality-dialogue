@@ -12,6 +12,7 @@ import type {
   VisiblePanel,
 } from "@domain/broadcast/resolve-targets"
 import type { Messaging } from "@domain/ports/messaging"
+import type { Storage } from "@domain/ports/storage"
 import { getBuiltInProvider } from "@domain/provider/registry"
 import type { RunEffect } from "@ui/common/viewmodel/bind-viewmodel"
 import { holdFocusGuard, releaseFocusGuard } from "./focus-guard"
@@ -41,8 +42,8 @@ export type UnifiedInputViewModel = {
   readonly clear: () => void
   readonly clearStatus: () => void
   readonly fill: () => Effect.Effect<void, never, Messaging>
-  readonly sendAll: () => Effect.Effect<void, never, Messaging>
-  readonly retryFailed: () => Effect.Effect<void, never, Messaging>
+  readonly sendAll: () => Effect.Effect<void, never, Messaging | Storage>
+  readonly retryFailed: () => Effect.Effect<void, never, Messaging | Storage>
   readonly addImageFiles: (
     files: ReadonlyArray<File>,
   ) => Effect.Effect<void, never, never>
@@ -105,8 +106,10 @@ export const createUnifiedInputViewModel = <Requirements>(
     pendingImages: attachments.pendingImages,
     clearImages: attachments.clearImages,
   }
-  const fill = () => runBroadcast("fill", getPlan, sink)
-  const sendAll = () => runBroadcast("send", getPlan, sink)
+  const fill = () =>
+    runBroadcast("fill", (request) => fillProgram(request, getPlan()), sink)
+  const sendAll = () =>
+    runBroadcast("send", (request) => sendProgram(request, getPlan()), sink)
 
   const retryFailed = () => {
     const previous = lastBroadcast()
@@ -177,12 +180,12 @@ type DraftSink = {
   readonly clearImages: () => void
 }
 
-const broadcastProgram = (request: BroadcastRequest, plan: BroadcastPlan) => {
-  const program =
-    request.kind === "fill"
-      ? broadcastFill(request.prompt, plan.targets)
-      : broadcastFillSend(request.prompt, request.images, plan.targets)
-  return Effect.sync(holdFocusGuard).pipe(
+const guardedBroadcast = <Error, Requirements>(
+  request: BroadcastRequest,
+  plan: BroadcastPlan,
+  program: Effect.Effect<ReadonlyArray<PanelResult>, Error, Requirements>,
+) =>
+  Effect.sync(holdFocusGuard).pipe(
     Effect.zipRight(
       Effect.log(request.kind, {
         targets: plan.targets.length,
@@ -194,11 +197,30 @@ const broadcastProgram = (request: BroadcastRequest, plan: BroadcastPlan) => {
     ),
     Effect.ensuring(Effect.sync(releaseFocusGuard)),
   )
-}
 
-const runBroadcast = (
+const fillProgram = (request: BroadcastRequest, plan: BroadcastPlan) =>
+  guardedBroadcast(request, plan, broadcastFill(request.prompt, plan.targets))
+
+const sendProgram = (request: BroadcastRequest, plan: BroadcastPlan) =>
+  guardedBroadcast(
+    request,
+    plan,
+    broadcastFillSend(request.prompt, request.images, {
+      targets: plan.targets,
+      panelIds: plan.panelIds,
+    }),
+  )
+
+const broadcastProgram = (request: BroadcastRequest, plan: BroadcastPlan) =>
+  request.kind === "fill"
+    ? fillProgram(request, plan)
+    : sendProgram(request, plan)
+
+const runBroadcast = <Error, Requirements>(
   kind: "fill" | "send",
-  getPlan: () => BroadcastPlan,
+  program: (
+    request: BroadcastRequest,
+  ) => Effect.Effect<ReadonlyArray<PanelResult>, Error, Requirements>,
   sink: DraftSink,
 ) => {
   const request: BroadcastRequest = {
@@ -206,7 +228,7 @@ const runBroadcast = (
     prompt: sink.draft(),
     images: kind === "send" ? sink.pendingImages() : [],
   }
-  return broadcastProgram(request, getPlan()).pipe(
+  return program(request).pipe(
     Effect.match({
       onFailure: () => {
         sink.setStatus(idleStatus)

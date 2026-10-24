@@ -1,4 +1,4 @@
-import { Effect } from "effect"
+import { Effect, Layer } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import type { PendingImage } from "./pending-image"
 import { broadcastFill, broadcastFillSend } from "./broadcast"
@@ -14,6 +14,7 @@ import {
   inMemoryMessagingLayer,
   type RecordedFrameSend,
 } from "../ports/in-memory-messaging"
+import { inMemoryStorageLayer } from "../ports/in-memory-storage"
 import type { PanelCommandResponse } from "../messaging/panel-command-response"
 
 const targets: readonly PanelTarget[] = [
@@ -36,6 +37,11 @@ const targets: readonly PanelTarget[] = [
     frameId: 12,
   }),
 ]
+
+const sendTargets = {
+  targets,
+  panelIds: targets.map((target) => target.panelId),
+}
 
 describe("broadcastFill", () => {
   it.effect("sends FillComposer to every target and returns three successes", () =>
@@ -137,7 +143,7 @@ describe("broadcastFillSend", () => {
     Effect.gen(function* () {
       const image = png("img-1")
       const session = recordingSession(okReplies("submitted"))
-      const results = yield* broadcastFillSend("hello", [image], targets).pipe(
+      const results = yield* broadcastFillSend("hello", [image], sendTargets).pipe(
         Effect.provide(session.layer),
       )
       const sent = FillAndSubmit.make({ prompt: "hello", images: [image] })
@@ -170,7 +176,7 @@ describe("broadcastFillSend", () => {
         }),
       )
       const session = recordingSession(replies)
-      const results = yield* broadcastFillSend("hello", [image], targets).pipe(
+      const results = yield* broadcastFillSend("hello", [image], sendTargets).pipe(
         Effect.provide(session.layer),
       )
       expect(results).toHaveLength(3)
@@ -216,9 +222,12 @@ const recordingSession = (replies: Map<string, PanelCommandResponse>) => {
   const sent: RecordedFrameSend[] = []
   return {
     sent,
-    layer: inMemoryMessagingLayer(() => Effect.succeed({}), {
-      replies,
-      sent,
-    }),
+    layer: Layer.mergeAll(
+      inMemoryMessagingLayer(() => Effect.succeed({}), {
+        replies,
+        sent,
+      }),
+      inMemoryStorageLayer(),
+    ),
   }
 }

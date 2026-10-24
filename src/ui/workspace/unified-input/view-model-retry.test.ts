@@ -101,7 +101,11 @@ describe("unified input retry", () => {
   it.effect("a partial retry keeps only the panels that still failed", () =>
     Effect.gen(function* () {
       const session = openRetrySession()
-      session.setPlan({ targets: [chatgpt, claude, gemini], notReady: [] })
+      session.setPlan({
+        targets: [chatgpt, claude, gemini],
+        notReady: [],
+        panelIds: ["panel-1", "panel-2", "panel-3"],
+      })
       replyOk(session.replies, chatgpt, "filled")
       replyMiss(session.replies, claude)
       replyMiss(session.replies, gemini)
@@ -166,7 +170,11 @@ describe("unified input retry", () => {
       session.vm.setDraft("first")
       yield* session.vm.fill().pipe(Effect.provide(session.layer))
       expect(session.vm.canRetry()).toBe(true)
-      session.setPlan({ targets: [gemini], notReady: [] })
+      session.setPlan({
+        targets: [gemini],
+        notReady: [],
+        panelIds: ["panel-3"],
+      })
       replyMiss(session.replies, gemini)
       session.vm.setDraft("second")
       yield* session.vm.sendAll().pipe(Effect.provide(session.layer))
@@ -193,6 +201,7 @@ describe("unified input retry", () => {
         session.announced.delete(claude.panelId)
         session.setPlan({
           targets: [chatgpt],
+          panelIds: ["panel-1", "panel-2"],
           notReady: [frameNotReady(claude)],
         })
         replyOk(session.replies, chatgpt, "filled")

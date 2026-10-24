@@ -59,8 +59,14 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
           resolveBroadcastTargets(
             toVisiblePanels(grid.panels()),
             frames.list(),
+            livePanelIds(grid.panels()),
           ),
-        (panels) => resolveBroadcastTargets(panels, frames.list()),
+        (panels) =>
+          resolveBroadcastTargets(
+            panels,
+            frames.list(),
+            livePanelIds(grid.panels()),
+          ),
       ),
     )
     bindWorkspaceContextMenuDraft<
@@ -125,6 +131,10 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
     }
   }).pipe(Effect.withLogSpan("workspace")),
 )
+
+const livePanelIds = (
+  panels: ReadonlyArray<{ readonly id: string }>,
+): ReadonlyArray<string> => panels.map((panel) => panel.id)
 
 const dropContextMenuDraft = (
   input: {

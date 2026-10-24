@@ -12,21 +12,35 @@ import type { PanelResult } from "./panel-result"
 import { PanelSucceeded } from "./panel-succeeded"
 import type { PanelTarget } from "./panel-target"
 
+export type TargetCommand = {
+  readonly target: PanelTarget
+  readonly command: BroadcastCommand
+}
+
+export const executeBroadcastCommands = Effect.fn("executeBroadcastCommands")(
+  function* (rows: ReadonlyArray<TargetCommand>) {
+    const messaging = yield* Messaging
+    return yield* Effect.forEach(
+      rows,
+      ({ target, command }) =>
+        messaging.sendToFrame(target, command).pipe(
+          Effect.match({
+            onFailure: (fault) =>
+              failedPanel(target, panelFailureReason(fault)),
+            onSuccess: (response) => resultFromResponse(response, target),
+          }),
+        ),
+      { concurrency: "unbounded" },
+    )
+  },
+)
+
 export const executeBroadcast = Effect.fn("executeBroadcast")(function* (
   command: BroadcastCommand,
   targets: ReadonlyArray<PanelTarget>,
 ) {
-  const messaging = yield* Messaging
-  return yield* Effect.forEach(
-    targets,
-    (target) =>
-      messaging.sendToFrame(target, command).pipe(
-        Effect.match({
-          onFailure: (fault) => failedPanel(target, panelFailureReason(fault)),
-          onSuccess: (response) => resultFromResponse(response, target),
-        }),
-      ),
-    { concurrency: "unbounded" },
+  return yield* executeBroadcastCommands(
+    targets.map((target) => ({ target, command })),
   )
 })
 
