@@ -1,4 +1,8 @@
 import { For } from "solid-js"
+import {
+  PanelRolePicker,
+} from "@ui/workspace/panel-role/picker"
+import type { RolePickerOption } from "@ui/workspace/panel-role/model"
 import "./view.css"
 
 export type PanelHeaderOption = {
@@ -10,6 +14,12 @@ export const PanelHeaderView = (props: {
   panelIndex: number
   providerId: string | null
   options: readonly PanelHeaderOption[]
+  roleValue: string
+  roleOptions: readonly RolePickerOption[]
+  roleDisabled: boolean
+  onRoleValue: (rawId: string) => void
+  onRoleAdd: () => void
+  onRoleEdit: () => void
   onProviderChange: (rawId: string) => void
   onRefresh: () => void
   isRefreshEnabled: boolean
@@ -29,6 +39,15 @@ export const PanelHeaderView = (props: {
         {(option) => <option value={option.id}>{option.label}</option>}
       </For>
     </select>
+    <PanelRolePicker
+      panelNumber={props.panelIndex}
+      value={props.roleValue}
+      options={props.roleOptions}
+      disabled={props.roleDisabled}
+      onValue={props.onRoleValue}
+      onAdd={props.onRoleAdd}
+      onEdit={props.onRoleEdit}
+    />
     <button
       type="button"
       aria-label={`Refresh panel ${props.panelIndex}`}

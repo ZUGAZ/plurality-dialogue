@@ -9,7 +9,7 @@ let releaseLibraryShortcut: (() => void) | undefined
 const root = document.getElementById("root")
 if (root !== null) {
   void workspaceBindingsReady.then((workspaceBindings) => {
-    render(
+      render(
       () => (
         <WorkspaceContainer
           panels={workspaceBindings.panels}
@@ -33,6 +33,14 @@ if (root !== null) {
           onToggleCollapse={workspaceBindings.onToggleCollapse}
           unifiedInput={workspaceBindings.unifiedInput}
           promptLibrary={workspaceBindings.promptLibrary}
+          panelRoleForm={workspaceBindings.panelRoleForm}
+          roleBannerError={workspaceBindings.roleBannerError}
+          roleOptions={workspaceBindings.roleOptions}
+          roleDisabled={workspaceBindings.roleDisabled}
+          roleIdAt={workspaceBindings.roleIdAt}
+          onRoleValue={workspaceBindings.onRoleValue}
+          onRoleAdd={workspaceBindings.onRoleAdd}
+          onRoleEdit={workspaceBindings.onRoleEdit}
         />
       ),
       root,

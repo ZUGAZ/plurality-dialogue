@@ -23,5 +23,13 @@ export const WorkspaceContainer = (props: WorkspaceViewProps) => (
     onToggleCollapse={props.onToggleCollapse}
     unifiedInput={props.unifiedInput}
     promptLibrary={props.promptLibrary}
+    panelRoleForm={props.panelRoleForm}
+    roleBannerError={props.roleBannerError}
+    roleOptions={props.roleOptions}
+    roleDisabled={props.roleDisabled}
+    roleIdAt={props.roleIdAt}
+    onRoleValue={props.onRoleValue}
+    onRoleAdd={props.onRoleAdd}
+    onRoleEdit={props.onRoleEdit}
   />
 )

@@ -76,6 +76,10 @@ export default tseslint.config(
           category: "view-model",
         },
         {
+          pattern: "src/ui/workspace/panel-role/write-actions.ts",
+          category: "view-model",
+        },
+        {
           pattern: "src/ui/workspace/unified-input/image-attachments.ts",
           category: "view-model",
         },

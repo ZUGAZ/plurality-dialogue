@@ -7,6 +7,9 @@ import {
 } from "@domain/layout/presets"
 import type { Storage } from "@domain/ports/storage"
 import type { ProviderId } from "@domain/provider/provider-id"
+import { persistPanelRoles } from "@domain/role/assign-panel-role"
+import type { PanelRoles } from "@domain/role/panel-roles"
+import { realignPanelRoles } from "@domain/role/panel-roles"
 import { persistLayoutAndPanelProviders } from "@ui/workspace/layout-presets/view-model"
 import { decodeProviderId, type PanelSlot } from "./model"
 import {
@@ -31,6 +34,11 @@ export type PersistedGridActions = {
   ) => Effect.Effect<void, never, Storage>
 }
 
+export type PanelRoleSync = {
+  readonly panelRoles: () => PanelRoles | undefined
+  readonly applyPanelRoles: (next: PanelRoles | undefined) => void
+}
+
 type PersistedGridState = {
   readonly slots: () => readonly PanelSlot[]
   readonly layoutId: () => LayoutId
@@ -39,7 +47,18 @@ type PersistedGridState = {
     layout: LayoutId,
     next: readonly PanelSlot[],
   ) => void
+  readonly panelRoles: () => PanelRoles | undefined
+  readonly applyPanelRoles: (next: PanelRoles | undefined) => void
 }
+
+const slotIds = (slots: readonly PanelSlot[]): readonly string[] =>
+  slots.map((slot) => slot.id)
+
+const idsEqual = (
+  a: readonly string[],
+  b: readonly string[],
+): boolean =>
+  a.length === b.length && a.every((id, i) => id === b[i])
 
 export const createPersistedGridActions = (
   state: PersistedGridState,
@@ -58,15 +77,39 @@ export const createPersistedGridActions = (
     layout: LayoutId,
     next: readonly PanelSlot[],
   ): Effect.Effect<void, never, Storage> =>
-    persistGrid(layout, next).pipe(
-      Effect.flatMap((saved) =>
-        saved
-          ? Effect.sync(() => {
-              state.applySavedGrid(layout, next)
-            })
-          : Effect.void,
-      ),
-    )
+    Effect.gen(function* () {
+      const currentIds = slotIds(state.slots())
+      const nextIds = slotIds(next)
+      const idsChanged = !idsEqual(currentIds, nextIds)
+      const nextRoles = idsChanged
+        ? realignPanelRoles(
+            { panelIds: currentIds, panelRoles: state.panelRoles() },
+            nextIds,
+          )
+        : undefined
+
+      const gridSaved = yield* persistGrid(layout, next)
+      if (!gridSaved) {
+        return
+      }
+
+      if (idsChanged && Array.isArray(nextRoles)) {
+        // Ids are renumbered on the next slotsFromPanelProviders load, so a
+        // missed realign cannot be repaired later.
+        const roleSaved = yield* persistPanelRoles(nextRoles).pipe(
+          Effect.as(true),
+          Effect.catchTag("StorageWriteError", () => Effect.succeed(false)),
+          Effect.catchTag("ParseError", () => Effect.succeed(false)),
+        )
+        if (!roleSaved) {
+          return
+        }
+        state.applySavedGrid(layout, next)
+        state.applyPanelRoles(nextRoles)
+      } else {
+        state.applySavedGrid(layout, next)
+      }
+    })
 
   const setPanelProvider = (
     panelId: string,

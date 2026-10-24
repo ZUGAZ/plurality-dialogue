@@ -23,7 +23,10 @@ import {
   type ProviderOption,
 } from "./model"
 import { openPanelInTab as openPanelInTabEffect } from "./open-panel-in-tab"
-import { createPersistedGridActions } from "./persisted-grid-actions"
+import {
+  createPersistedGridActions,
+  type PanelRoleSync,
+} from "./persisted-grid-actions"
 import {
   bumpAllLoadedPanels,
   bumpPanelGeneration,
@@ -70,10 +73,16 @@ export type PanelGridInitial = {
   readonly panelProviders?: readonly (ProviderId | null)[]
 }
 
+const defaultRoleSync: PanelRoleSync = {
+  panelRoles: () => undefined,
+  applyPanelRoles: () => undefined,
+}
+
 export const createPanelGridViewModel = (
   runEffect: RunEffect<Storage | Tabs | Messaging>,
   initial: PanelGridInitial = { layoutId: defaultLayoutId },
   frames: () => readonly PanelTarget[] = () => [],
+  roleSync: PanelRoleSync = defaultRoleSync,
 ): PanelGridViewModel => {
   const start = initialPanelGrid(initial.layoutId, initial.panelProviders)
   const [providers, setProviders] =
@@ -216,6 +225,8 @@ export const createPanelGridViewModel = (
         commitSlots(next)
       })
     },
+    panelRoles: roleSync.panelRoles,
+    applyPanelRoles: roleSync.applyPanelRoles,
   })
 
   const newChatForAll = (): Effect.Effect<void> =>

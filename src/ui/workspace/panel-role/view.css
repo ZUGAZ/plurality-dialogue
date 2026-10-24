@@ -1,0 +1,103 @@
+.panel-role-dialog {
+  box-sizing: border-box;
+  inline-size: min(32rem, calc(100vw - 2rem));
+  max-block-size: calc(100vh - 2rem);
+  margin: auto;
+  padding: 1rem;
+  overflow: auto;
+  border: 1px solid light-dark(#5c5c5c, #888);
+  background: Canvas;
+  color: CanvasText;
+  font-family: system-ui, sans-serif;
+}
+
+.panel-role-dialog *,
+.panel-role-dialog *::before,
+.panel-role-dialog *::after {
+  box-sizing: border-box;
+}
+
+.panel-role-dialog::backdrop {
+  background: color-mix(in srgb, CanvasText 45%, transparent);
+}
+
+.panel-role-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.panel-role-form h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.panel-role-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.panel-role-form input[type="text"],
+.panel-role-form textarea {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid light-dark(#5c5c5c, #888);
+  background: Field;
+  color: FieldText;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.panel-role-form input[type="text"] {
+  min-block-size: 2.5rem;
+}
+
+.panel-role-form textarea {
+  min-block-size: 6rem;
+  resize: vertical;
+}
+
+.panel-role-form button {
+  min-block-size: 2.5rem;
+  min-inline-size: 2.5rem;
+  padding-inline: 0.85rem;
+  border: 1px solid light-dark(#5c5c5c, #888);
+  background: ButtonFace;
+  color: ButtonText;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.panel-role-form button.panel-role-primary {
+  border-color: CanvasText;
+  background: CanvasText;
+  color: Canvas;
+}
+
+.panel-role-form button:focus-visible,
+.panel-role-form input:focus-visible,
+.panel-role-form textarea:focus-visible {
+  outline: 3px solid AccentColor;
+  outline-offset: 2px;
+}
+
+.panel-role-alert {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.panel-role-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.panel-role-banner {
+  margin: 0;
+  padding: 0.5rem;
+  line-height: 1.5;
+  font-family: system-ui, sans-serif;
+}

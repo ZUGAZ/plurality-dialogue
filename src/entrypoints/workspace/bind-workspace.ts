@@ -18,6 +18,7 @@ import { workspaceLive } from "@infrastructure/layers"
 import { bindViewModel } from "@ui/common/viewmodel/bind-viewmodel"
 import { createPanelGridViewModel } from "@ui/workspace/panel-grid/view-model"
 import { wireTemporaryChat } from "@ui/workspace/panel-grid/wire-temporary-chat"
+import { createPanelRoleViewModel } from "@ui/workspace/panel-role/view-model"
 import { setupLibraryShortcut } from "@ui/workspace/prompt-library/library-shortcut"
 import { createPromptLibraryViewModel } from "@ui/workspace/prompt-library/view-model"
 import { createShellViewModel } from "@ui/workspace/shell/view-model"
@@ -39,6 +40,11 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
     const tabs = yield* Tabs
     const workspaceTabId = yield* tabs.currentTabId().pipe(Effect.option)
     const frames = createFrameList()
+    const panelRole = bindViewModel(runtime, "panelRole", (runEffect) =>
+      createPanelRoleViewModel(runEffect, {
+        panelRoles: settings.panelRoles,
+      }),
+    )
     const grid = bindViewModel(runtime, "panelGrid", (runEffect) =>
       createPanelGridViewModel(
         runEffect,
@@ -47,6 +53,10 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
           panelProviders: settings.panelProviders,
         },
         frames.list,
+        {
+          panelRoles: panelRole.panelRoles,
+          applyPanelRoles: panelRole.replacePanelRoles,
+        },
       ),
     )
     const shell = bindViewModel(runtime, "shell", () =>
@@ -116,6 +126,22 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
         onOpenLibrary: promptLibrary.open,
       },
       promptLibrary,
+      panelRoleForm: {
+        form: panelRole.form,
+        actionError: panelRole.actionError,
+        onName: panelRole.setName,
+        onInstruction: panelRole.setInstruction,
+        onSave: panelRole.save,
+        onClose: panelRole.closeForm,
+        onDelete: panelRole.remove,
+      },
+      roleBannerError: panelRole.bannerError,
+      roleOptions: panelRole.roleOptions,
+      roleDisabled: () => !panelRole.rolesReady(),
+      roleIdAt: panelRole.roleIdAt,
+      onRoleValue: panelRole.assignRole,
+      onRoleAdd: panelRole.openCreate,
+      onRoleEdit: panelRole.openEdit,
       newChatForAll: () => {
         unifiedInput.clearStatus()
         grid.newChatForAll()
