@@ -294,6 +294,25 @@ export default tseslint.config(
               },
             },
             {
+              from: {
+                element: { type: "entrypoints" },
+                file: { categories: "test" },
+              },
+              allow: {
+                to: [
+                  { element: { type: "entrypoints" } },
+                  { element: { type: "domain" } },
+                  { module: { origin: "external", source: "effect" } },
+                  {
+                    module: {
+                      origin: "external",
+                      source: "vitest",
+                    },
+                  },
+                ],
+              },
+            },
+            {
               from: { file: { categories: "tsx" } },
               allow: {
                 to: { module: { origin: "external", source: "solid-js" } },

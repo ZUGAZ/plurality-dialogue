@@ -8,6 +8,7 @@ import type { Tabs } from "@domain/ports/tabs"
 import type { Provider } from "@domain/provider/provider"
 import type { ProviderId } from "@domain/provider/provider-id"
 import {
+  enabledProvidersInCatalogOrder,
   getBuiltInProvider,
   listEnabledProviders,
 } from "@domain/provider/registry"
@@ -66,11 +67,13 @@ export type PanelGridViewModel = {
   readonly newChatForAll: () => Effect.Effect<void>
   readonly temporaryChat: () => boolean
   readonly applyTemporaryChat: (enabled: boolean) => readonly string[]
+  readonly applyEnabledProviderIds: (ids: readonly ProviderId[]) => void
 }
 
 export type PanelGridInitial = {
   readonly layoutId: LayoutId
   readonly panelProviders?: readonly (ProviderId | null)[]
+  readonly enabledProviderIds?: readonly ProviderId[]
 }
 
 const defaultRoleSync: PanelRoleSync = {
@@ -126,24 +129,41 @@ export const createPanelGridViewModel = (
   }
 
   const applyEnabledProviders = (list: readonly Provider[]): void => {
+    const current = providers()
+    const unchanged =
+      enabledListReady() &&
+      current.length === list.length &&
+      current.every((provider, index) => provider.id === list[index]?.id)
+    if (unchanged) {
+      return
+    }
     const ids = list.map((provider) => provider.id)
     setProviders(list)
     setEnabledListReady(true)
     commitSlots(reconcileSlotsWithEnabled(slots(), ids))
   }
 
-  runEffect(
-    Effect.log("load enabled providers").pipe(
-      Effect.zipRight(listEnabledProviders()),
-      Effect.withLogSpan("loadEnabledProviders"),
-      Effect.match({
-        onFailure: () => {
-          applyEnabledProviders(emptyProviders)
-        },
-        onSuccess: applyEnabledProviders,
-      }),
-    ),
-  )
+  const applyEnabledProviderIds = (ids: readonly ProviderId[]): void => {
+    applyEnabledProviders(enabledProvidersInCatalogOrder(ids))
+  }
+
+  if (initial.enabledProviderIds === undefined) {
+    runEffect(
+      Effect.log("load enabled providers").pipe(
+        Effect.zipRight(listEnabledProviders()),
+        Effect.withLogSpan("loadEnabledProviders"),
+        Effect.match({
+          onFailure: () => {
+            applyEnabledProviders(emptyProviders)
+          },
+          onSuccess: applyEnabledProviders,
+        }),
+      ),
+    )
+  } else {
+    applyEnabledProviderIds(initial.enabledProviderIds)
+  }
+
   runEffect(
     Effect.log("request framing rules").pipe(
       Effect.zipRight(requestFramingRules()),
@@ -271,6 +291,7 @@ export const createPanelGridViewModel = (
     newChatForAll,
     temporaryChat: session.temporaryChat,
     applyTemporaryChat: session.applyTemporaryChat,
+    applyEnabledProviderIds,
   }
 }
 

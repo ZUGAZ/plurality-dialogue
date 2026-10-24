@@ -11,12 +11,32 @@ import {
 import { providerIds } from "./provider-id"
 import {
   LastProviderDisabled,
+  enabledProvidersInCatalogOrder,
   getBuiltInProvider,
   getProvider,
   listEnabledProviders,
   listProviders,
   setProviderEnabled,
 } from "./registry"
+
+describe("enabledProvidersInCatalogOrder", () => {
+  it("follows catalog order and keeps one row per id", () => {
+    const providers = enabledProvidersInCatalogOrder([
+      "gemini",
+      "chatgpt",
+      "gemini",
+    ])
+    expect(providers.map((provider) => provider.id)).toEqual([
+      "chatgpt",
+      "gemini",
+    ])
+    expect(providers.every((provider) => provider.enabled)).toBe(true)
+  })
+
+  it("returns an empty list when nothing is enabled", () => {
+    expect(enabledProvidersInCatalogOrder([])).toEqual([])
+  })
+})
 
 describe("provider registry", () => {
   it.layer(inMemoryStorageLayer())("missing settings key", (it) => {

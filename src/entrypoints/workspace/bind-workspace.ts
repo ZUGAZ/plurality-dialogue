@@ -10,7 +10,6 @@ import type { Messaging } from "@domain/ports/messaging"
 import type { PromptLibrary } from "@domain/ports/prompt-library"
 import type { Storage } from "@domain/ports/storage"
 import { Tabs } from "@domain/ports/tabs"
-import { themeToColorScheme } from "@domain/settings/theme-preference"
 import { loadWorkspaceSettings } from "@domain/settings/workspace-settings-storage"
 import { subscribeWorkspacePanelHellos } from "@infrastructure/chrome/panel-frame-hello"
 import { bindWorkspaceContextMenuDraft } from "@infrastructure/chrome/workspace-context-menu"
@@ -24,6 +23,10 @@ import { createPromptLibraryViewModel } from "@ui/workspace/prompt-library/view-
 import { createShellViewModel } from "@ui/workspace/shell/view-model"
 import { setupFocusGuard } from "@ui/workspace/unified-input/focus-guard"
 import { createUnifiedInputViewModel } from "@ui/workspace/unified-input/view-model"
+import {
+  applyWorkspaceColorScheme,
+  subscribeOpenWorkspaceSettings,
+} from "./subscribe-open-workspace-settings"
 
 const managedRuntime = ManagedRuntime.make(workspaceLive)
 const runtime = Effect.runSync(managedRuntime)
@@ -33,9 +36,7 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
     yield* Effect.log("runtime initialized")
     const settings = yield* loadWorkspaceSettings()
     yield* Effect.sync(() => {
-      document.documentElement.style.colorScheme = themeToColorScheme(
-        settings.theme,
-      )
+      applyWorkspaceColorScheme(settings.theme)
     })
     const tabs = yield* Tabs
     const workspaceTabId = yield* tabs.currentTabId().pipe(Effect.option)
@@ -51,6 +52,7 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
         {
           layoutId: layoutIdOrDefault(settings.layout),
           panelProviders: settings.panelProviders,
+          enabledProviderIds: settings.enabledProviders,
         },
         frames.list,
         {
@@ -59,6 +61,13 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
         },
       ),
     )
+    const { applyEnabledProviderIds, ...workspaceGrid } = grid
+    yield* Effect.sync(() => {
+      subscribeOpenWorkspaceSettings({
+        theme: applyWorkspaceColorScheme,
+        enabledProviderIds: applyEnabledProviderIds,
+      })
+    })
     const shell = bindViewModel(runtime, "shell", () =>
       createShellViewModel(settings.toolbarCollapsed),
     )
@@ -118,7 +127,7 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
       })
     })
     return {
-      ...grid,
+      ...workspaceGrid,
       collapsed: shell.collapsed,
       onToggleCollapse: shell.toggleCollapse,
       unifiedInput: {

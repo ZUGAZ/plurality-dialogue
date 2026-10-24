@@ -31,6 +31,15 @@ const uniqueCatalogEnabledIds = (
   return providerIds.filter((providerId) => membership.has(providerId))
 }
 
+export const enabledProvidersInCatalogOrder = (
+  enabledProviders: readonly ProviderId[],
+): readonly Provider[] => {
+  const enabledSet = enabledMembership(enabledProviders)
+  return builtInProviders
+    .filter((definition) => enabledSet.has(definition.id))
+    .map((definition) => ({ ...definition, enabled: true }))
+}
+
 export const listProviders = Effect.fn("listProviders")(function* () {
   const settings = yield* loadWorkspaceSettings()
   const enabledSet = enabledMembership(settings.enabledProviders)
@@ -44,8 +53,8 @@ export const listProviders = Effect.fn("listProviders")(function* () {
 
 export const listEnabledProviders = Effect.fn("listEnabledProviders")(
   function* () {
-    const providers = yield* listProviders()
-    return providers.filter((provider) => provider.enabled)
+    const settings = yield* loadWorkspaceSettings()
+    return enabledProvidersInCatalogOrder(settings.enabledProviders)
   },
 )
 
