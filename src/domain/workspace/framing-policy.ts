@@ -38,6 +38,26 @@ export const framingResourceTypes: readonly ["sub_frame"] = ["sub_frame"]
 
 export const framingRuleLifetime = "workspace-tab-session"
 
+// Chrome drops SameSite=Lax/Strict cookies from a WebSocket handshake when
+// the frame sits under a chrome-extension:// page, while plain HTTP from the
+// same frame keeps them. These hosts need that socket to stream, so the
+// workspace copies the user's own cookie line onto it with a session rule.
+export const websocketCookieHosts: readonly ["grok.com"] = ["grok.com"]
+
+export type WebsocketCookieHost = (typeof websocketCookieHosts)[number]
+
+export const websocketResourceTypes: readonly ["websocket"] = ["websocket"]
+
+// A DNR rule only reaches a wss: handshake when the extension holds a wss:
+// host permission; https://host/* does not cover it.
+export const websocketHostPermissionPattern = <Host extends string>(
+  host: Host,
+): `wss://${Host}/*` => `wss://${host}/*`
+
+export const websocketHostPermissionPatterns = websocketCookieHosts.map(
+  websocketHostPermissionPattern,
+)
+
 export const hostPermissionPattern = <Host extends string>(
   host: Host,
 ): `https://${Host}/*` => `https://${host}/*`

@@ -9,7 +9,10 @@ import {
 import { subscribeActionClicked } from "@infrastructure/chrome/action"
 import { subscribeNamedCommand } from "@infrastructure/chrome/commands"
 import { registerSendToPluralityDialogueMenu } from "@infrastructure/chrome/context-menus"
+import { changesWebsocketCookieLine } from "@domain/workspace/websocket-cookie-rule"
+import { subscribeCookieChanged } from "@infrastructure/chrome/cookies"
 import { removeFramingSessionRules } from "@infrastructure/chrome/declarative-net-request"
+import { refreshWebsocketCookieRules } from "@infrastructure/chrome/websocket-cookie-rules"
 import {
   reconcileOptionalContentScripts,
   subscribeOptionalHostPermissionsRemoved,
@@ -39,6 +42,11 @@ export default defineBackground(() => {
   })
 
   const workspaceUrl = extensionPageUrl(workspacePagePath)
+  subscribeCookieChanged((cookie) => {
+    if (changesWebsocketCookieLine(cookie)) {
+      void run(refreshWebsocketCookies(workspaceUrl))
+    }
+  })
   const open = (): void => {
     runtime.runFork(openWorkspaceTab(workspaceUrl))
   }
@@ -74,6 +82,11 @@ const deliverContextMenuToWorkspace = (
 const reconcileOptionalHosts = () =>
   reconcileOptionalContentScripts.pipe(
     Effect.withLogSpan("reconcileOptionalHosts"),
+    Effect.withLogSpan("background"),
+  )
+
+const refreshWebsocketCookies = (workspaceUrl: string) =>
+  refreshWebsocketCookieRules(workspaceUrl).pipe(
     Effect.withLogSpan("background"),
   )
 

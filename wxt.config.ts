@@ -2,6 +2,7 @@ import { defineConfig } from "wxt"
 import {
   hostPermissionPatterns,
   optionalHostPermissionPatterns,
+  websocketHostPermissionPatterns,
 } from "./src/domain/workspace/framing-policy.ts"
 import { openWorkspaceCommandName } from "./src/domain/workspace/workspace-page.ts"
 
@@ -40,9 +41,17 @@ export default defineConfig({
       "declarativeNetRequestWithHostAccess",
       "contextMenus",
       "scripting",
+      // Reads the user's own grok.com cookies so the workspace can put them
+      // back on Grok's WebSocket handshake, which Chrome otherwise strips
+      // inside an extension frame.
+      "cookies",
     ],
     // Host access is for embedding those chats in the workspace tab; session rules are applied at runtime and scoped to the workspace tab; there is no static ruleset.
-    host_permissions: [...hostPermissionPatterns],
+    // The wss: entries let those session rules reach WebSocket handshakes.
+    host_permissions: [
+      ...hostPermissionPatterns,
+      ...websocketHostPermissionPatterns,
+    ],
     optional_host_permissions: [...optionalHostPermissionPatterns],
     action: { default_title: "Open Plurality Dialogue" },
     commands: {

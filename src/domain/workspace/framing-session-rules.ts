@@ -9,12 +9,13 @@ import {
   type OptionalHost,
 } from "./framing-policy"
 import {
+  framingRuleId,
   optionalFramingRuleId,
   ruleIdStride,
-} from "./optional-framing-rule-id"
+} from "./framing-rule-ids"
 import { TabIdUnavailable } from "./tab-id-unavailable"
 
-export { ruleIdStride }
+export { framingRuleId, ruleIdStride }
 
 export type FramingRemovedHeader = {
   readonly header: (typeof framingHeaderNames)[number]
@@ -34,17 +35,6 @@ export type FramingSessionRuleSpec = {
     readonly tabIds: readonly number[]
   }
 }
-
-const signedIntegerMax = 2_147_483_647
-
-// Chrome rule ids are signed 32-bit. tabId * stride overflows once the tab
-// id passes ~4.3e8, and Chrome then rejects the whole updateSessionRules call.
-const maxTabSlot = Math.floor(
-  (signedIntegerMax - (ruleIdStride - 1)) / ruleIdStride,
-)
-
-export const framingRuleId = (tabId: number, hostIndex: number): number =>
-  (tabId % maxTabSlot) * ruleIdStride + hostIndex + 1
 
 const removedHeader = (
   header: (typeof framingHeaderNames)[number],

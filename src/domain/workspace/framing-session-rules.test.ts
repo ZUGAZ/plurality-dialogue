@@ -6,6 +6,7 @@ import {
   framingHeaderNames,
   framingResourceTypes,
   optionalHosts,
+  websocketCookieHosts,
 } from "./framing-policy"
 import {
   collectWorkspaceTabIds,
@@ -27,7 +28,7 @@ describe("framing session rules", () => {
       dnrUrlFilters,
     )
     expect(specs.map((spec) => spec.id)).toEqual([
-      10, 11, 12, 13, 14, 15, 16, 17,
+      11, 12, 13, 14, 15, 16, 17, 18,
     ])
     expect(
       specs.some((spec) => spec.condition.urlFilter === "||grok.com/"),
@@ -35,9 +36,9 @@ describe("framing session rules", () => {
     expect(specs.map((spec) => spec.condition.urlFilter).at(-1)).toBe(
       "||www.google.com/",
     )
-    expect(framingRuleId(1, 0)).toBe(10)
-    expect(framingRuleId(1, 7)).toBe(17)
-    expect(framingRuleId(2, 0)).toBe(19)
+    expect(framingRuleId(1, 0)).toBe(11)
+    expect(framingRuleId(1, 7)).toBe(18)
+    expect(framingRuleId(2, 0)).toBe(21)
     for (const spec of specs) {
       expect(spec.condition.tabIds).toEqual([1])
       expect(spec.condition.resourceTypes).toEqual(framingResourceTypes)
@@ -65,8 +66,10 @@ describe("framing session rules", () => {
   })
 
   it("assigns disjoint static and optional rule ids", () => {
-    expect(ruleIdStride).toBe(embeddableHosts.length + 1)
-    expect(ruleIdStride).toBe(9)
+    expect(ruleIdStride).toBe(
+      embeddableHosts.length + websocketCookieHosts.length + 1,
+    )
+    expect(ruleIdStride).toBe(10)
     const first = framingRuleIdsForTab(1)
     const second = framingRuleIdsForTab(2)
     expect(first).toHaveLength(12)
@@ -75,9 +78,9 @@ describe("framing session rules", () => {
     expect(new Set(ids).size).toBe(24)
     const staticIds = first.slice(0, embeddableHosts.length)
     const optionalIds = first.slice(embeddableHosts.length)
-    expect(optionalIds).toEqual([45, 54, 63, 72])
+    expect(optionalIds).toEqual([50, 60, 70, 80])
     expect(framingRuleIdsForTab(2).slice(embeddableHosts.length)).toEqual([
-      81, 90, 99, 108,
+      90, 100, 110, 120,
     ])
     for (const id of staticIds) {
       expect(id % ruleIdStride).not.toBe(0)
@@ -92,14 +95,14 @@ describe("framing session rules", () => {
     expect(framingSessionRulesForTab(1)).toHaveLength(8)
     const all = framingSessionRulesForTab(1, [...optionalHosts])
     expect(all).toHaveLength(12)
-    expect(all.slice(8).map((spec) => spec.id)).toEqual([45, 54, 63, 72])
+    expect(all.slice(8).map((spec) => spec.id)).toEqual([50, 60, 70, 80])
     const withoutZai = optionalHosts.filter((host) => host !== "chat.z.ai")
     const specs = framingSessionRulesForTab(1, withoutZai)
     expect(specs).toHaveLength(11)
     expect(
       specs.some((spec) => spec.condition.urlFilter === "||chat.z.ai/"),
     ).toBe(false)
-    expect(framingRuleIdsForTab(1)).toContain(72)
+    expect(framingRuleIdsForTab(1)).toContain(80)
     expect(enabledOptionalHosts(["zai", "qwen-china"])).toEqual([
       "www.qianwen.com",
       "chat.z.ai",

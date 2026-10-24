@@ -8,6 +8,10 @@ import {
 } from "../../domain/workspace/framing-session-rules"
 import type { OptionalHost } from "../../domain/workspace/framing-policy"
 import { ChromeStorageLive } from "./storage"
+import {
+  applyWebsocketCookieRules,
+  removeWebsocketCookieRules,
+} from "./websocket-cookie-rules"
 
 export class FramingSessionRulesUpdateFailed extends Data.TaggedError(
   "FramingSessionRulesUpdateFailed",
@@ -91,6 +95,7 @@ export const applyFramingSessionRules = (
 ): Effect.Effect<void, FramingSessionRulesUpdateFailed> =>
   enabledOptionalForTab().pipe(
     Effect.flatMap((hosts) => replaceFramingSessionRules(tabId, hosts)),
+    Effect.zipRight(applyWebsocketCookieRules(tabId)),
   )
 
 export const removeFramingSessionRules = (
@@ -103,4 +108,12 @@ export const removeFramingSessionRules = (
         addRules: [],
       }),
     catch: (cause) => new FramingSessionRulesUpdateFailed({ cause }),
-  })
+  }).pipe(
+    Effect.zipRight(
+      removeWebsocketCookieRules(tabId).pipe(
+        Effect.mapError(
+          (error) => new FramingSessionRulesUpdateFailed({ cause: error }),
+        ),
+      ),
+    ),
+  )
