@@ -1,6 +1,7 @@
 import { Either, Schema } from "effect"
 import { LayoutId, maxCellCount } from "@domain/layout/presets"
 import { ProviderId } from "@domain/provider/provider-id"
+import { lenientPanelRoles } from "../role/panel-roles"
 import {
   defaultEnterKeyCustom,
   lenientEnterKeyCustom,
@@ -38,6 +39,7 @@ export const WorkspaceSettings = Schema.Struct({
       Schema.maxItems(maxCellCount),
     ),
   ),
+  panelRoles: Schema.optional(lenientPanelRoles),
   toolbarCollapsed: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
