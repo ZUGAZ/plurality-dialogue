@@ -1,5 +1,6 @@
 import { Effect } from "effect"
 import { ComposerNotWritable } from "../../domain/ports/provider-page"
+import { composerHoldsText } from "./composer-holds-text"
 
 export const insertComposerText = (
   element: Element,
@@ -46,16 +47,24 @@ const writeContentEditable = (element: HTMLElement, text: string): void => {
   element.focus()
   selectEditableText(element)
   pastePlainText(element, text)
-  if (element.textContent !== text) {
-    const inserted = execInsertText(element.ownerDocument, text)
-    if (!inserted || element.textContent !== text) {
-      dispatchInsertEvents(element, text)
-    }
+  // A blank line becomes paragraphs, so textContent no longer equals the
+  // source after a paste the editor accepted. Another write duplicates it.
+  if (composerHoldsText(element, text)) {
+    return
   }
-  if (element.textContent !== text) {
-    writeEditableText(element, text)
-    element.dispatchEvent(new Event("input", { bubbles: true }))
+  selectEditableText(element)
+  const inserted = execInsertText(element.ownerDocument, text)
+  if (inserted && composerHoldsText(element, text)) {
+    return
   }
+  if (!composerHoldsText(element, text)) {
+    dispatchInsertEvents(element, text)
+  }
+  if (composerHoldsText(element, text)) {
+    return
+  }
+  replaceEditableText(element, text)
+  element.dispatchEvent(new Event("input", { bubbles: true }))
 }
 
 const pastePlainText = (element: HTMLElement, text: string): void => {
@@ -84,8 +93,16 @@ const selectEditableText = (element: HTMLElement): void => {
   selection.addRange(range)
 }
 
-const writeEditableText = (element: HTMLElement, text: string): void => {
-  editableTarget(element).textContent = text
+const replaceEditableText = (element: HTMLElement, text: string): void => {
+  const target = editableTarget(element)
+  if (target !== element) {
+    for (const child of [...element.childNodes]) {
+      if (child !== target) {
+        child.remove()
+      }
+    }
+  }
+  target.textContent = text
 }
 
 const editableTarget = (element: HTMLElement): HTMLElement => {
