@@ -18,6 +18,8 @@ import { workspaceLive } from "@infrastructure/layers"
 import { bindViewModel } from "@ui/common/viewmodel/bind-viewmodel"
 import { createDialogueModeViewModel } from "@ui/workspace/dialogue-mode/view-model"
 import { dialogueViewProps } from "@ui/workspace/dialogue-mode/view-props"
+import { dialogueFloorProps } from "@ui/workspace/dialogue-floor/model"
+import { createDialogueFloorViewModel } from "@ui/workspace/dialogue-floor/view-model"
 import { createPanelGridViewModel } from "@ui/workspace/panel-grid/view-model"
 import { wireTemporaryChat } from "@ui/workspace/panel-grid/wire-temporary-chat"
 import { createPanelRoleViewModel } from "@ui/workspace/panel-role/view-model"
@@ -115,20 +117,48 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
       clearStatus: unifiedInput.clearStatus,
       run: (effect) => managedRuntime.runPromise(effect),
     })
-    const dialogueMode = bindViewModel(runtime, "dialogueMode", (runEffect) =>
-      createDialogueModeViewModel(runEffect, {
+    // The mode method is an Effect; the floor host waits on a Promise.
+    let reloadDialogueTranscript:
+      | (() => Effect.Effect<void, never, Storage>)
+      | undefined
+    const dialogueMode = bindViewModel(runtime, "dialogueMode", (runEffect) => {
+      const mode = createDialogueModeViewModel(runEffect, {
         framingReady: grid.framingReady,
         engineFrames: engineFrames.list,
         forgetEngineFrames: engineFrames.forgetAll,
         enabledProviderIds: () => grid.options().map((option) => option.id),
         catalog: () => ({ roles: panelRole.catalog() ?? [] }),
-      }),
-    )
-    const dialogue = dialogueViewProps(dialogueMode, {
-      providerOptions: grid.options,
-      roleOptions: panelRole.roleOptions,
-      roleDisabled: () => !panelRole.rolesReady(),
+      })
+      reloadDialogueTranscript = mode.reloadTranscript
+      return mode
     })
+    const dialogueFloor = bindViewModel(
+      runtime,
+      "dialogueFloor",
+      (runEffect) =>
+        createDialogueFloorViewModel(runEffect, {
+          phase: dialogueMode.phase,
+          setup: dialogueMode.setup,
+          transcript: dialogueMode.transcript,
+          resolvedCast: dialogueMode.resolvedCast,
+          resolveTargetForCastIndex: dialogueMode.resolveTargetForCastIndex,
+          reloadTranscript: () => {
+            const reload = reloadDialogueTranscript
+            if (reload === undefined) {
+              return Promise.resolve()
+            }
+            return managedRuntime.runPromise(reload())
+          },
+        }),
+    )
+    const dialogue = {
+      ...dialogueViewProps(dialogueMode, {
+        providerOptions: grid.options,
+        roleOptions: panelRole.roleOptions,
+        roleDisabled: () => !panelRole.rolesReady(),
+      }),
+      floor: dialogueFloorProps(dialogueFloor),
+    }
     yield* Effect.sync(() => {
       Option.match(workspaceTabId, {
         onNone: () => undefined,

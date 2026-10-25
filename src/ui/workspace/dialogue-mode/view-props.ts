@@ -26,7 +26,7 @@ export const dialogueViewProps = (
     readonly roleOptions: DialogueModeViewProps["roleOptions"]
     readonly roleDisabled: DialogueModeViewProps["roleDisabled"]
   },
-): DialogueModeViewProps => ({
+): Omit<DialogueModeViewProps, "floor"> => ({
   phase: dialogueMode.phase,
   topic: () => dialogueMode.setup().topic,
   seats: dialogueMode.seatDrafts,

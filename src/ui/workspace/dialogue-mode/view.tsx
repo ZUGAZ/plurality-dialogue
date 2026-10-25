@@ -1,12 +1,16 @@
 import { Show } from "solid-js"
 import type { ProviderOption } from "../panel-grid/model"
 import type { RolePickerOption } from "../panel-role/model"
+import { CastChips } from "../dialogue-floor/cast-chips"
+import type { DialogueFloorProps } from "../dialogue-floor/model"
+import { TurnControls } from "../dialogue-floor/turn-controls"
 import { EngineStrip } from "./engine-strip/view"
 import type { EngineStripItem } from "./engine-strip/model"
 import { DialogueSetupForm } from "./setup-form"
 import { TranscriptColumn } from "./transcript-column"
 import type { DialoguePhase, DialogueSeatDraft, TranscriptRow } from "./model"
 import "./view.css"
+import "../dialogue-floor/view.css"
 
 export type DialogueModeViewProps = {
   readonly phase: () => DialoguePhase
@@ -30,6 +34,7 @@ export type DialogueModeViewProps = {
   readonly onIncludeMe: (include: boolean) => void
   readonly onStart: () => void
   readonly onEngineLoad: (panelId: string) => void
+  readonly floor: DialogueFloorProps
 }
 
 export const DialogueModeView = (props: DialogueModeViewProps) => (
@@ -56,8 +61,27 @@ export const DialogueModeView = (props: DialogueModeViewProps) => (
       />
     </Show>
     <Show when={props.phase() === "running"}>
-      <TranscriptColumn rows={props.transcriptRows} />
-      <footer class="dialogue-footer" />
+      <TranscriptColumn
+        rows={props.transcriptRows}
+        failures={props.floor.failures}
+        speakerAt={props.floor.speakerAt}
+      />
+      <footer class="dialogue-footer">
+        <CastChips
+          chips={props.floor.chips}
+          cursor={props.floor.cursor}
+          busy={props.floor.busy}
+          onPin={props.floor.onPin}
+        />
+        <TurnControls
+          cursorIsYou={props.floor.cursorIsYou}
+          busy={props.floor.busy}
+          draft={props.floor.draft}
+          onDraft={props.floor.onDraft}
+          onNext={props.floor.onNext}
+          onSend={props.floor.onSend}
+        />
+      </footer>
     </Show>
     <Show when={props.engineRows().length > 0}>
       <EngineStrip rows={props.engineRows} onLoad={props.onEngineLoad} />

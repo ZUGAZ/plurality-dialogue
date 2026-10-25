@@ -49,6 +49,10 @@ export default tseslint.config(
           pattern: "src/ui/workspace/prompt-library/view-model-harness.ts",
           category: "test",
         },
+        {
+          pattern: "src/ui/workspace/dialogue-floor/view-model-session.ts",
+          category: "test",
+        },
         { pattern: "src/**/*.tsx", category: "tsx" },
         { pattern: "src/ui/**/view-model.ts", category: "view-model" },
         {
@@ -91,6 +95,10 @@ export default tseslint.config(
         },
         {
           pattern: "src/ui/workspace/dialogue-mode/room-actions.ts",
+          category: "view-model",
+        },
+        {
+          pattern: "src/ui/workspace/dialogue-floor/turn-actions.ts",
           category: "view-model",
         },
       ],
