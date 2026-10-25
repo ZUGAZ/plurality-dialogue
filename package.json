@@ -25,11 +25,12 @@
     "@types/node": "22.20.1",
     "@wxt-dev/module-solid": "1.1.4",
     "eslint": "9.39.5",
-    "happy-dom": "17.6.3",
     "eslint-import-resolver-typescript": "4.4.5",
     "eslint-plugin-boundaries": "7.2.0",
+    "happy-dom": "17.6.3",
     "typescript": "5.9.2",
     "typescript-eslint": "8.68.0",
+    "vite-plugin-solid": "2.11.14",
     "vitest": "3.2.4",
     "wxt": "0.21.4"
   }

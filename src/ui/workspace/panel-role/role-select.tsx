@@ -1,4 +1,4 @@
-import { For } from "solid-js"
+import { Index } from "solid-js"
 import type { RolePickerOption } from "./model"
 
 export const RoleSelect = (props: {
@@ -17,8 +17,8 @@ export const RoleSelect = (props: {
     value={props.value}
     onChange={(event) => props.onValue(event.currentTarget.value)}
   >
-    <For each={props.options}>
-      {(option) => <option value={option.id}>{option.label}</option>}
-    </For>
+    <Index each={props.options}>
+      {(option) => <option value={option().id}>{option().label}</option>}
+    </Index>
   </select>
 )

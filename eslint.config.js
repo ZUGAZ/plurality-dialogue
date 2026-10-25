@@ -41,6 +41,7 @@ export default tseslint.config(
       ],
       "boundaries/files": [
         { pattern: "src/**/*.test.ts", category: "test" },
+        { pattern: "src/**/*.test.tsx", category: "test" },
         {
           pattern: "src/ui/workspace/unified-input/view-model-retry-session.ts",
           category: "test",

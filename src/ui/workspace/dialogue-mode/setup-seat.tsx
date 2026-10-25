@@ -1,4 +1,4 @@
-import { For } from "solid-js"
+import { Index } from "solid-js"
 import { RoleSelect } from "../panel-role/role-select"
 import type { ProviderOption } from "../panel-grid/model"
 import type { RolePickerOption } from "../panel-role/model"
@@ -38,11 +38,11 @@ export const DialogueSetupSeat = (props: {
           value={props.seat.providerId}
           onChange={(event) => props.onProvider(event.currentTarget.value)}
         >
-          <For
+          <Index
             each={providerChoices(props.providerOptions, props.seat.providerId)}
           >
-            {(option) => <option value={option.id}>{option.label}</option>}
-          </For>
+            {(option) => <option value={option().id}>{option().label}</option>}
+          </Index>
         </select>
       </div>
       <div class="dialogue-field">

@@ -1,6 +1,8 @@
 import { List, Logger, LogLevel } from "effect"
 import type { LogSpan } from "effect/LogSpan"
 
+const productPrefix = "[pd]"
+
 const formatSpans = (spans: List.List<LogSpan>): string =>
   List.toArray(spans)
     .reverse()
@@ -9,7 +11,7 @@ const formatSpans = (spans: List.List<LogSpan>): string =>
 
 const spanLogger = Logger.make(
   ({ logLevel, message, spans }: Logger.Logger.Options<unknown>) => {
-    const prefix = formatSpans(spans)
+    const prefix = `${productPrefix}${formatSpans(spans)}`
     const parts: ReadonlyArray<unknown> = Array.isArray(message)
       ? message
       : [message]

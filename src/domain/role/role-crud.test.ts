@@ -252,7 +252,17 @@ describe("deleteRole", () => {
           yield* deleteRole("skeptic")
           yield* seedBuiltInRoles()
           expect(yield* storedCatalog).toEqual(
-            Option.some({ roles: [steelman] }),
+            Option.some({
+              roles: [
+                steelman,
+                ...builtInRoles.filter(
+                  (role) =>
+                    role.id !== "skeptic" &&
+                    role.id !== "steelman" &&
+                    role.id !== "implementer",
+                ),
+              ],
+            }),
           )
         }),
       )

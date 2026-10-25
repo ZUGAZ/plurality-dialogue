@@ -24,15 +24,30 @@ export const isParsedSay = Schema.is(ParsedSay)
 
 export const isFormatFailure = Schema.is(FormatFailure)
 
+const typographicDoubleQuote = /[\u201C\u201D\u201E\u201F]/g
+
 const decodeReplyJson = Schema.decodeUnknownOption(
   Schema.parseJson(DialogueReply),
 )
 
-export const parseDialogueReply = (raw: string): ParsedSay | FormatFailure =>
+const straightenDoubleQuotes = (raw: string): string =>
+  raw.replace(typographicDoubleQuote, '"')
+
+const readSay = (raw: string): Option.Option<ParsedSay> =>
   extractJsonObject(raw).pipe(
     Option.flatMap(decodeReplyJson),
+    Option.map((reply) => ParsedSay.make({ say: reply.say })),
+  )
+
+export const parseDialogueReply = (raw: string): ParsedSay | FormatFailure => {
+  const straightened = straightenDoubleQuotes(raw)
+  return readSay(raw).pipe(
+    Option.orElse(() =>
+      straightened === raw ? Option.none() : readSay(straightened),
+    ),
     Option.match({
       onNone: () => FormatFailure.make({ raw }),
-      onSome: (reply) => ParsedSay.make({ say: reply.say }),
+      onSome: (parsed) => parsed,
     }),
   )
+}

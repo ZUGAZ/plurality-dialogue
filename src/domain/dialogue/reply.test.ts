@@ -25,6 +25,18 @@ describe("parseDialogueReply", () => {
     expect(isParsedSay(parsed) && parsed.say).toBe("Hi")
   })
 
+  it("reads say when the double quotes are typographic", () => {
+    const raw = '{\u201Csay\u201D:\u201DMoscow\u2019s line\u201D}'
+    const parsed = parseDialogueReply(raw)
+    expect(isParsedSay(parsed) && parsed.say).toBe("Moscow\u2019s line")
+  })
+
+  it("keeps the original raw when typographic quotes still are not JSON", () => {
+    const raw = '{\u201Csay\u201D:\u201DHe said \u201Cno\u201D.\u201D}'
+    const parsed = parseDialogueReply(raw)
+    expect(isFormatFailure(parsed) && parsed.raw).toBe(raw)
+  })
+
   it.each([
     ['{"say":""}'],
     ['{"say":"   "}'],

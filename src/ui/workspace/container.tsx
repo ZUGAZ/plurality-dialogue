@@ -17,6 +17,7 @@ export const WorkspaceContainer = (props: WorkspaceViewProps) => (
     refreshPanel={props.refreshPanel}
     openPanelInTab={props.openPanelInTab}
     onNewChat={props.onNewChat}
+    onNewTopic={props.onNewTopic}
     temporaryChat={props.temporaryChat}
     onToggleTemporaryChat={props.onToggleTemporaryChat}
     collapsed={props.collapsed}

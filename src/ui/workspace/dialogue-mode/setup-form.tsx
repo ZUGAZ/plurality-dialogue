@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js"
+import { For, Index, Show } from "solid-js"
 import type { ProviderOption } from "../panel-grid/model"
 import type { RolePickerOption } from "../panel-role/model"
 import { DialogueSetupSeat } from "./setup-seat"
@@ -46,20 +46,22 @@ export const DialogueSetupForm = (props: {
         onInput={(event) => props.onTopic(event.currentTarget.value)}
       />
     </div>
-    <For each={props.seats()}>
+    <Index each={props.seats()}>
       {(seat) => (
         <DialogueSetupSeat
-          seat={seat}
+          seat={seat()}
           providerOptions={props.providerOptions()}
           roleOptions={props.roleOptions()}
           roleDisabled={props.roleDisabled()}
-          onProvider={(providerId) => props.onProvider(seat.castIndex, providerId)}
-          onRole={(roleId) => props.onRole(seat.castIndex, roleId)}
-          onName={(name) => props.onName(seat.castIndex, name)}
-          onRemove={() => props.onRemoveSeat(seat.castIndex)}
+          onProvider={(providerId) =>
+            props.onProvider(seat().castIndex, providerId)
+          }
+          onRole={(roleId) => props.onRole(seat().castIndex, roleId)}
+          onName={(name) => props.onName(seat().castIndex, name)}
+          onRemove={() => props.onRemoveSeat(seat().castIndex)}
         />
       )}
-    </For>
+    </Index>
     <button
       type="button"
       disabled={!props.canAddVendor()}

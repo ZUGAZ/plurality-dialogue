@@ -12,6 +12,7 @@ import {
 } from "./prompt-library/dialog"
 import { AddPanelButton } from "./shell/add-panel-button"
 import { NewChatButton } from "./shell/new-chat-button"
+import { NewTopicButton } from "./shell/new-topic-button"
 import { TemporaryChatToggle } from "./shell/temporary-chat-toggle"
 import { WorkspaceModeSwitch } from "./shell/workspace-mode-switch"
 import { WorkspaceShell } from "./shell/view"
@@ -41,6 +42,7 @@ export type WorkspaceViewProps = {
   readonly refreshPanel: (panelId: string) => void
   readonly openPanelInTab: (panelId: string) => void
   readonly onNewChat: () => void
+  readonly onNewTopic: () => void
   readonly temporaryChat: () => boolean
   readonly onToggleTemporaryChat: () => void
   readonly collapsed: () => boolean
@@ -70,17 +72,26 @@ export const WorkspaceView = (props: WorkspaceViewProps) => (
         mode={props.workspaceMode}
         onMode={props.onWorkspaceMode}
       />
-      <NewChatButton onClick={props.onNewChat} />
-      <TemporaryChatToggle
-        pressed={props.temporaryChat}
-        onToggle={props.onToggleTemporaryChat}
-      />
-      <AddPanelButton canAdd={props.canAddPanel()} onAdd={props.addPanel} />
-      <LayoutPresetsView
-        items={layoutPickerItems}
-        selectedId={props.layoutId()}
-        onSelect={props.onSelectLayout}
-      />
+      <Show when={props.workspaceMode() === "compare"}>
+        <div class="workspace-mode-tools" role="group" aria-label="Compare">
+          <NewChatButton onClick={props.onNewChat} />
+          <TemporaryChatToggle
+            pressed={props.temporaryChat}
+            onToggle={props.onToggleTemporaryChat}
+          />
+          <AddPanelButton canAdd={props.canAddPanel()} onAdd={props.addPanel} />
+          <LayoutPresetsView
+            items={layoutPickerItems}
+            selectedId={props.layoutId()}
+            onSelect={props.onSelectLayout}
+          />
+        </div>
+      </Show>
+      <Show when={props.workspaceMode() === "dialogue"}>
+        <div class="workspace-mode-tools" role="group" aria-label="Dialogue">
+          <NewTopicButton onClick={props.onNewTopic} />
+        </div>
+      </Show>
     </WorkspaceShell>
     <PanelRoleAlert error={props.roleBannerError} />
     <div

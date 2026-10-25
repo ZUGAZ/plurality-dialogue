@@ -176,6 +176,29 @@ describe("dialogue mode view-model", () => {
     ).pipe(Effect.provide(memory)),
   )
 
+  it.effect("New topic clears the transcript and returns to setup", () =>
+    run((vm, deps) =>
+      Effect.gen(function* () {
+        yield* vm.setTopic("Heat")
+        yield* vm.addVendorSeat()
+        yield* vm.setWorkspaceMode("dialogue")
+        seedFrames(deps.frames, 1)
+        yield* TestClock.setTime(Date.parse(openingAt))
+        yield* vm.start()
+        yield* vm.newTopic()
+        expect(vm.workspaceMode()).toBe("dialogue")
+        expect(vm.phase()).toBe("setup")
+        expect(vm.engineRows()).toEqual([])
+        expect(vm.setup().topic).toBe("Heat")
+        expect(vm.setup().cast).toHaveLength(1)
+        expect(yield* loadDialogueTranscript()).toEqual({ entries: [] })
+        yield* vm.setWorkspaceMode("compare")
+        yield* vm.setWorkspaceMode("dialogue")
+        expect(vm.phase()).toBe("setup")
+      }),
+    ).pipe(Effect.provide(memory)),
+  )
+
   it.effect("leave clears engines and return with a transcript is running", () =>
     run((vm, deps) =>
       Effect.gen(function* () {

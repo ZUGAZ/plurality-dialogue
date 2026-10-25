@@ -186,6 +186,7 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
       onToggleCollapse: shell.toggleCollapse,
       workspaceMode: dialogueMode.workspaceMode,
       onWorkspaceMode: dialogueMode.setWorkspaceMode,
+      onNewTopic: dialogueMode.newTopic,
       dialogue,
       unifiedInput: {
         ...unifiedInput,

@@ -4,12 +4,29 @@ import { inMemoryStorageLayer } from "../ports/in-memory-storage"
 import { Storage, StorageReadError } from "../ports/storage"
 import { workspaceSettingsStorageKey } from "../settings/workspace-settings"
 import { builtInRoles } from "./built-in-roles"
-import { roleCatalogStorageKey } from "./role"
-import { seedBuiltInRoles } from "./seed-built-in-roles"
+import { roleCatalogStorageKey, type Role } from "./role"
+import {
+  builtInRoleRevisionKey,
+  seedBuiltInRoles,
+} from "./seed-built-in-roles"
 
 const skeptic = { id: "skeptic", name: "Skeptic", instruction: "Doubt it." }
+const shippedSkeptic = {
+  id: "skeptic",
+  name: "Skeptic",
+  instruction:
+    "Question the claim: name the weakest assumption and what evidence would change the conclusion.",
+}
 const steelman = { id: "steelman", name: "Steelman", instruction: "Defend." }
 const implementer = { id: "implementer", name: "Doer", instruction: "Do." }
+
+const laterBuiltIns = (): readonly Role[] =>
+  builtInRoles.filter(
+    (role) =>
+      role.id !== "skeptic" &&
+      role.id !== "steelman" &&
+      role.id !== "implementer",
+  )
 const settingsValue = { marker: "settings" }
 
 const failingReadStorage = Layer.succeed(Storage, {
@@ -41,10 +58,10 @@ const seedsFactoryRows = (initial: Readonly<Record<string, unknown>>) =>
     )
   })
 
-const leavesStoredValue = (
+const adoptsLaterRoles = (
   name: string,
   stored: unknown,
-  returned: readonly unknown[],
+  returned: readonly Role[],
 ) =>
   it.layer(
     inMemoryStorageLayer({
@@ -52,12 +69,20 @@ const leavesStoredValue = (
       [workspaceSettingsStorageKey]: settingsValue,
     }),
   )(name, (it) => {
-    it.effect("returns the decoded catalog and leaves storage alone", () =>
+    it.effect("adds the new built-ins once and leaves settings alone", () =>
       Effect.gen(function* () {
         const storage = yield* Storage
-        expect(yield* seedBuiltInRoles()).toEqual({ roles: returned })
+        const expected = { roles: returned }
+        expect(yield* seedBuiltInRoles()).toEqual(expected)
         expect(yield* storage.get(roleCatalogStorageKey)).toEqual(
-          Option.some(stored),
+          Option.some(expected),
+        )
+        expect(yield* storage.get(builtInRoleRevisionKey)).toEqual(
+          Option.some(1),
+        )
+        expect(yield* seedBuiltInRoles()).toEqual(expected)
+        expect(yield* storage.get(roleCatalogStorageKey)).toEqual(
+          Option.some(expected),
         )
         expect(yield* storage.get(workspaceSettingsStorageKey)).toEqual(
           Option.some(settingsValue),
@@ -77,26 +102,38 @@ describe("seedBuiltInRoles", () => {
     [workspaceSettingsStorageKey]: settingsValue,
   })
 
-  leavesStoredValue("one custom row", { roles: [skeptic] }, [skeptic])
-  leavesStoredValue(
+  adoptsLaterRoles("one custom row", { roles: [skeptic] }, [
+    skeptic,
+    ...laterBuiltIns(),
+  ])
+  adoptsLaterRoles(
     "edited skeptic",
     { roles: [{ ...skeptic, instruction: "Edited." }] },
-    [{ ...skeptic, instruction: "Edited." }],
+    [{ ...skeptic, instruction: "Edited." }, ...laterBuiltIns()],
   )
-  leavesStoredValue(
+  adoptsLaterRoles(
+    "shipped skeptic sentence",
+    { roles: [shippedSkeptic, steelman] },
+    [
+      builtInRoles.find((role) => role.id === "skeptic") ?? shippedSkeptic,
+      steelman,
+      ...laterBuiltIns(),
+    ],
+  )
+  adoptsLaterRoles(
     "no skeptic",
     { roles: [steelman, implementer] },
-    [steelman, implementer],
+    [steelman, implementer, ...laterBuiltIns()],
   )
-  leavesStoredValue(
+  adoptsLaterRoles(
     "bad element beside a valid row",
     { roles: [skeptic, { id: "" }] },
-    [skeptic],
+    [skeptic, ...laterBuiltIns()],
   )
-  leavesStoredValue(
+  adoptsLaterRoles(
     "two rows sharing an id",
     { roles: [skeptic, { ...skeptic, instruction: "Later." }] },
-    [skeptic],
+    [skeptic, ...laterBuiltIns()],
   )
 
   it.effect("fails StorageReadError when get fails and does not write", () =>

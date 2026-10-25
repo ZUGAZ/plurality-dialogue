@@ -27,6 +27,7 @@ if (root !== null) {
           refreshPanel={workspaceBindings.refreshPanel}
           openPanelInTab={workspaceBindings.openPanelInTab}
           onNewChat={workspaceBindings.newChatForAll}
+          onNewTopic={workspaceBindings.onNewTopic}
           temporaryChat={workspaceBindings.temporaryChat}
           onToggleTemporaryChat={workspaceBindings.onToggleTemporaryChat}
           collapsed={workspaceBindings.collapsed}

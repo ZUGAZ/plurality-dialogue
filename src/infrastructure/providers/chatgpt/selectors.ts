@@ -27,14 +27,21 @@ export const sendSelectors: readonly string[] = [
 export const primaryAssistantReplySelector =
   '[data-message-role="assistant"] [data-assistant-markdown]'
 
+export const assistantMarkdownSelector =
+  '[data-markdown-text-style="assistant-message"]'
+
 export const assistantReplySelectors: readonly string[] = [
+  assistantMarkdownSelector,
   primaryAssistantReplySelector,
 ]
 
 export const primaryStreamingIndicatorSelector = "[data-message-streaming]"
 
+export const turnStreamingSelector = '[data-talvt-turn-state="streaming"]'
+
 export const streamingIndicatorSelectors: readonly string[] = [
   primaryStreamingIndicatorSelector,
   "[data-streaming-dot]",
   "[data-stop-generating]",
+  turnStreamingSelector,
 ]

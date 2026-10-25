@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url"
 import { Effect, Either, Fiber, TestClock } from "effect"
 import { describe, expect, it } from "@effect/vitest"
 import { ReplyNotFound, ReplyStillStreaming } from "../../../domain/ports/provider-page"
+import { silentLoggerLayer } from "../../../test-support/silent-logger"
 import {
   replyCaptureTimeoutMs,
   replyStableMs,
@@ -52,7 +53,7 @@ describe("grok capture reply", () => {
     Effect.gen(function* () {
       loadFixture(finishedPath)
       const fiber = yield* Effect.fork(
-        makeGrokProviderPage(document).captureReply().pipe(Effect.either),
+        makeGrokProviderPage(document).captureReply().pipe(Effect.either, Effect.provide(silentLoggerLayer)),
       )
       yield* TestClock.adjust(`${replyStableMs} millis`)
       const result = yield* Fiber.join(fiber)
@@ -67,7 +68,7 @@ describe("grok capture reply", () => {
     Effect.gen(function* () {
       document.body.replaceChildren()
       const fiber = yield* Effect.fork(
-        makeGrokProviderPage(document).captureReply().pipe(Effect.either),
+        makeGrokProviderPage(document).captureReply().pipe(Effect.either, Effect.provide(silentLoggerLayer)),
       )
       yield* TestClock.adjust(`${replyCaptureTimeoutMs} millis`)
       const result = yield* Fiber.join(fiber)
@@ -83,7 +84,7 @@ describe("grok capture reply", () => {
     Effect.gen(function* () {
       loadFixture(streamingPath)
       const fiber = yield* Effect.fork(
-        makeGrokProviderPage(document).captureReply().pipe(Effect.either),
+        makeGrokProviderPage(document).captureReply().pipe(Effect.either, Effect.provide(silentLoggerLayer)),
       )
       yield* TestClock.adjust(`${replyCaptureTimeoutMs} millis`)
       const result = yield* Fiber.join(fiber)

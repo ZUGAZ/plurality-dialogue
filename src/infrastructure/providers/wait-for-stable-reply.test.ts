@@ -5,8 +5,11 @@ import {
   ReplyNotFound,
   ReplyStillStreaming,
 } from "../../domain/ports/provider-page"
+import { makeCapturingLogger } from "../../test-support/capturing-logger"
+import { silentLoggerLayer } from "../../test-support/silent-logger"
 import {
   replyCaptureTimeoutMs,
+  replyProgressIntervalMs,
   replyStableMs,
   waitForStableReply,
   type StableReplyQueries,
@@ -56,16 +59,50 @@ describe("waitForStableReply", () => {
     }),
   )
 
-  it.effect("fails EmptyReply when the settled text is blank", () =>
+  it.effect("logs each wait and the timeout when no reply appears", () =>
     Effect.gen(function* () {
-      const fiber = yield* fork(queries(() => "  \n  ", () => false))
-      yield* TestClock.adjust(`${replyStableMs} millis`)
+      const logs = makeCapturingLogger()
+      const fiber = yield* Effect.fork(
+        waitForStableReply(
+          queries(() => null, () => false),
+          replyProgressIntervalMs,
+          replyStableMs,
+        ).pipe(Effect.either, Effect.provide(logs.layer)),
+      )
+      yield* TestClock.adjust(`${replyProgressIntervalMs} millis`)
       const result = yield* Fiber.join(fiber)
-      if (Either.isLeft(result)) {
-        expect(result.left).toBeInstanceOf(EmptyReply)
-      } else {
-        expect(Either.isLeft(result)).toBe(true)
-      }
+      expect(Either.isLeft(result)).toBe(true)
+      const lines = logs.messages().map(logText)
+      expect(
+        lines.some((line) => line.startsWith("waiting for assistant reply")),
+      ).toBe(true)
+      expect(
+        lines.some((line) => line.includes("still waiting for assistant reply")),
+      ).toBe(true)
+      expect(lines.some((line) => line.includes("text=none"))).toBe(true)
+      expect(
+        lines.some((line) => line.includes("assistant reply timed out")),
+      ).toBe(true)
+    }),
+  )
+
+  it.effect("keeps waiting while the assistant node is still blank", () =>
+    Effect.gen(function* () {
+      let text: string | null = "  \n  "
+      const fiber = yield* fork(queries(() => text, () => false))
+      yield* TestClock.adjust(`${replyStableMs + 200} millis`)
+      expect(Option.isNone(yield* Fiber.poll(fiber))).toBe(true)
+      text = "the reply"
+      yield* TestClock.adjust(`${replyStableMs + 100} millis`)
+      const result = yield* Fiber.join(fiber)
+      expect(rightText(result)).toBe("the reply")
+    }),
+  )
+
+  it.effect("fails EmptyReply when the node stays blank until timeout", () =>
+    Effect.gen(function* () {
+      const result = yield* run(queries(() => "  \n  ", () => false))
+      expect(result.left).toBeInstanceOf(EmptyReply)
     }),
   )
 })
@@ -81,7 +118,7 @@ const fork = (stableQueries: StableReplyQueries) =>
       stableQueries,
       replyCaptureTimeoutMs,
       replyStableMs,
-    ).pipe(Effect.either),
+    ).pipe(Effect.either, Effect.provide(silentLoggerLayer)),
   )
 
 const probeTimeoutMs = 200
@@ -91,6 +128,7 @@ const run = (stableQueries: StableReplyQueries) =>
     const fiber = yield* Effect.fork(
       waitForStableReply(stableQueries, probeTimeoutMs, replyStableMs).pipe(
         Effect.either,
+        Effect.provide(silentLoggerLayer),
       ),
     )
     yield* TestClock.adjust(`${probeTimeoutMs} millis`)
@@ -100,6 +138,9 @@ const run = (stableQueries: StableReplyQueries) =>
     }
     return { left: result.left }
   })
+
+const logText = (message: unknown): string =>
+  Array.isArray(message) ? message.map(String).join(" ") : String(message)
 
 const rightText = (
   result: Either.Either<

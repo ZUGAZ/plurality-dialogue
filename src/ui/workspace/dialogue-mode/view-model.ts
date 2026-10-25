@@ -17,7 +17,10 @@ import {
 import { resolveEngineTarget } from "@domain/dialogue/engine-target"
 import { loadDialogueSetup } from "@domain/dialogue/load-dialogue-setup"
 import { loadDialogueTranscript } from "@domain/dialogue/load-dialogue-transcript"
-import { persistDialogueSetup } from "@domain/dialogue/persist-dialogue-setup"
+import {
+  describeSetupSaveFailure,
+  persistDialogueSetup,
+} from "@domain/dialogue/persist-dialogue-setup"
 import type { ResolvedCast } from "@domain/dialogue/resolve-cast"
 import type { StartProblems } from "@domain/dialogue/start-dialogue"
 import type { Storage } from "@domain/ports/storage"
@@ -93,6 +96,7 @@ export type DialogueModeViewModel = {
     include: boolean,
   ) => Effect.Effect<void, never, Storage>
   readonly start: () => Effect.Effect<void, never, Storage>
+  readonly newTopic: () => Effect.Effect<void, never, Storage>
   readonly reloadTranscript: () => Effect.Effect<void, never, Storage>
   readonly resolveTargetForCastIndex: (
     castIndex: number,
@@ -141,7 +145,12 @@ export const createDialogueModeViewModel = (
     setSetup(next)
     setStartProblems(undefined)
     return persistDialogueSetup(next).pipe(
-      Effect.catchAll(() => Effect.logWarning("dialogue setup did not save")),
+      Effect.catchAll((error) =>
+        Effect.logWarning(
+          "dialogue setup did not save",
+          describeSetupSaveFailure(error),
+        ),
+      ),
     )
   }
 
@@ -295,6 +304,7 @@ export const createDialogueModeViewModel = (
       commitSetup(renameSeat(setup(), castIndex, name)),
     setIncludeMe: (include) => commitSetup(withIncludeMe(setup(), include)),
     start: room.start,
+    newTopic: room.newTopic,
     reloadTranscript: room.reloadTranscript,
     resolveTargetForCastIndex,
     onEngineLoad,

@@ -269,7 +269,9 @@ describe("panel role view-model", () => {
 
         const storage = yield* Storage
         yield* storage.set(roleCatalogStorageKey, {
-          roles: [builtInRoles[1], builtInRoles[2]],
+          roles: builtInRoles.filter(
+            (role) => role.id === "steelman" || role.id === "implementer",
+          ),
         })
 
         yield* vm.save()

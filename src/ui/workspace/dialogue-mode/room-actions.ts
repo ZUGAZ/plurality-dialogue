@@ -64,6 +64,7 @@ export const createDialogueRoom = (
     reenter: () => enterDialogue(deps, state),
     setWorkspaceMode: (mode: WorkspaceMode) => switchMode(deps, state, mode),
     start: () => beginStart(deps, state),
+    newTopic: () => beginNewTopic(state),
   }
 }
 
@@ -84,6 +85,33 @@ const leaveDialogue = (state: DialogueRoomState): Effect.Effect<void> =>
     state.bumpRoom()
     state.setPhase("setup")
     state.setResolvedCast(undefined)
+    state.setIsStarting(false)
+    state.clearEngines()
+  })
+
+const beginNewTopic = (
+  state: DialogueRoomState,
+): Effect.Effect<void, never, Storage> =>
+  Effect.gen(function* () {
+    if (state.workspaceMode() !== "dialogue") {
+      return
+    }
+    const cleared = yield* clearDialogueTranscript().pipe(
+      Effect.as(true),
+      Effect.catchAll(() =>
+        Effect.logWarning("dialogue transcript did not clear").pipe(
+          Effect.as(false),
+        ),
+      ),
+    )
+    if (!cleared) {
+      return
+    }
+    state.bumpRoom()
+    state.setTranscript(emptyDialogueTranscript)
+    state.setPhase("setup")
+    state.setResolvedCast(undefined)
+    state.setStartProblems(undefined)
     state.setIsStarting(false)
     state.clearEngines()
   })

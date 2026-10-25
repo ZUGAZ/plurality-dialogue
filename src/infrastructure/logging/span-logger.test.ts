@@ -12,7 +12,10 @@ describe("SpanLoggerLive", () => {
         Effect.withLogSpan("background"),
         Effect.provide(SpanLoggerLive),
       )
-      expect(log).toHaveBeenCalledWith("[background][handleMessage]", "ready")
+      expect(log).toHaveBeenCalledWith(
+        "[pd][background][handleMessage]",
+        "ready",
+      )
       log.mockRestore()
     }),
   )
@@ -23,8 +26,8 @@ describe("SpanLoggerLive", () => {
       const error = yield* spyOn("error")
       yield* Effect.logWarning("careful").pipe(Effect.provide(SpanLoggerLive))
       yield* Effect.logError("boom").pipe(Effect.provide(SpanLoggerLive))
-      expect(warn).toHaveBeenCalledWith("", "careful")
-      expect(error).toHaveBeenCalledWith("", "boom")
+      expect(warn).toHaveBeenCalledWith("[pd]", "careful")
+      expect(error).toHaveBeenCalledWith("[pd]", "boom")
       warn.mockRestore()
       error.mockRestore()
     }),
