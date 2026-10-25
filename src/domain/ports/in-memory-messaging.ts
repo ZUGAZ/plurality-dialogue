@@ -1,7 +1,9 @@
 import { Effect, Either, Layer, pipe } from "effect"
 import type { BroadcastCommand } from "../broadcast/commands"
+import { CaptureReply } from "../broadcast/commands/capture-reply"
 import type { PanelTarget } from "../broadcast/panel-target"
 import { FrameLocation } from "../messaging/frame-location"
+import type { PanelCaptureResponse } from "../messaging/panel-capture-response"
 import type { PanelCommandResponse } from "../messaging/panel-command-response"
 import {
   Messaging,
@@ -11,11 +13,12 @@ import {
 
 export type RecordedFrameSend = {
   readonly target: PanelTarget
-  readonly message: BroadcastCommand
+  readonly message: BroadcastCommand | CaptureReply
 }
 
 export type InMemoryFrameMessaging = {
   readonly replies: ReadonlyMap<string, PanelCommandResponse>
+  readonly captureReplies?: ReadonlyMap<string, PanelCaptureResponse>
   readonly sent: RecordedFrameSend[]
   readonly locations?: ReadonlyMap<string, string>
 }
@@ -56,5 +59,18 @@ export const inMemoryMessagingLayer = (
           onRight: (location) => Effect.succeed(location),
         }),
       )
+    },
+    sendCaptureReply: (target) => {
+      if (frames === undefined) {
+        return Effect.fail(
+          new MessagingFault({ cause: "sendCaptureReply not configured" }),
+        )
+      }
+      frames.sent.push({ target, message: CaptureReply.make({}) })
+      const reply = frames.captureReplies?.get(target.panelId)
+      if (reply === undefined) {
+        return Effect.fail(new MessagingFault({ cause: "no capture reply" }))
+      }
+      return Effect.succeed(reply)
     },
   })

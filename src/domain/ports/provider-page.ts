@@ -34,6 +34,26 @@ export class TemporaryChatUnavailable extends Data.TaggedError(
   readonly reason: string
 }> {}
 
+export class ReplyNotFound extends Data.TaggedError("ReplyNotFound")<{
+  readonly reason: string
+}> {}
+
+export class ReplyStillStreaming extends Data.TaggedError(
+  "ReplyStillStreaming",
+)<{
+  readonly reason: string
+}> {}
+
+export class EmptyReply extends Data.TaggedError("EmptyReply")<{
+  readonly reason: string
+}> {}
+
+export class CaptureUnsupported extends Data.TaggedError(
+  "CaptureUnsupported",
+)<{
+  readonly reason: string
+}> {}
+
 export class ProviderPage extends Context.Tag("ProviderPage")<
   ProviderPage,
   {
@@ -48,5 +68,9 @@ export class ProviderPage extends Context.Tag("ProviderPage")<
       images: ReadonlyArray<PendingImage>,
     ) => Effect.Effect<void, ImageAttachFailed>
     readonly openTemporaryChat: () => Effect.Effect<void, TemporaryChatUnavailable>
+    readonly captureReply: () => Effect.Effect<
+      { readonly text: string },
+      ReplyNotFound | ReplyStillStreaming | EmptyReply | CaptureUnsupported
+    >
   }
 >() {}

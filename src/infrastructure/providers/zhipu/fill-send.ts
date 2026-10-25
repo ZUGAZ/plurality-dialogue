@@ -4,6 +4,7 @@ import { firstDisplayed } from "../displayed-element"
 import { makeFillSendPage } from "../make-fill-send-page"
 import { attachZhipuImages } from "./attach-images"
 import { openZhipuTemporaryChat } from "./open-temporary-chat"
+import { unsupportedCaptureReply } from "../unsupported-capture-reply"
 import { composerSelectors, sendSelectors } from "./selectors"
 
 export const queryZhipuComposer = (root: ParentNode): HTMLElement | null =>
@@ -19,6 +20,7 @@ export const makeZhipuProviderPage = (root: ParentNode) => ({
   }),
   attachImages: attachZhipuImages,
   openTemporaryChat: openZhipuTemporaryChat,
+  captureReply: unsupportedCaptureReply,
 })
 
 export const zhipuContentLayer = Layer.sync(ProviderPage, () =>

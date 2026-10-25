@@ -5,6 +5,7 @@ import { makeFillSendPage } from "../make-fill-send-page"
 import { attachDeepseekImages } from "./attach-images"
 import { openDeepseekTemporaryChat } from "./open-temporary-chat"
 import { composerSelectors, sendSelectors } from "./selectors"
+import { unsupportedCaptureReply } from "../unsupported-capture-reply"
 
 export const queryDeepseekComposer = (root: ParentNode): HTMLElement | null =>
   firstDisplayed(root, composerSelectors)
@@ -19,6 +20,7 @@ export const makeDeepseekProviderPage = (root: ParentNode) => ({
   }),
   attachImages: attachDeepseekImages,
   openTemporaryChat: openDeepseekTemporaryChat,
+  captureReply: unsupportedCaptureReply,
 })
 
 export const deepseekContentLayer = Layer.sync(ProviderPage, () =>

@@ -3,6 +3,7 @@ import { ProviderPage } from "../../../domain/ports/provider-page"
 import { firstDisplayed } from "../displayed-element"
 import { makeFillSendPage } from "../make-fill-send-page"
 import { attachGrokImages } from "./attach-images"
+import { makeGrokCaptureReply } from "./capture-reply"
 import { openGrokTemporaryChat } from "./open-temporary-chat"
 import { composerSelectors, sendSelectors } from "./selectors"
 
@@ -19,6 +20,7 @@ export const makeGrokProviderPage = (root: ParentNode) => ({
   }),
   attachImages: attachGrokImages,
   openTemporaryChat: openGrokTemporaryChat,
+  captureReply: makeGrokCaptureReply(root),
 })
 
 export const grokContentLayer = Layer.sync(ProviderPage, () =>

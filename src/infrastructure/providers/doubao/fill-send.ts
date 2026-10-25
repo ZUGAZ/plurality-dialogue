@@ -4,6 +4,7 @@ import { firstDisplayed } from "../displayed-element"
 import { makeFillSendPage } from "../make-fill-send-page"
 import { attachDoubaoImages } from "./attach-images"
 import { openDoubaoTemporaryChat } from "./open-temporary-chat"
+import { unsupportedCaptureReply } from "../unsupported-capture-reply"
 import { composerSelectors, sendSelectors } from "./selectors"
 
 export const queryDoubaoComposer = (root: ParentNode): HTMLElement | null =>
@@ -19,6 +20,7 @@ export const makeDoubaoProviderPage = (root: ParentNode) => ({
   }),
   attachImages: attachDoubaoImages,
   openTemporaryChat: openDoubaoTemporaryChat,
+  captureReply: unsupportedCaptureReply,
 })
 
 export const doubaoContentLayer = Layer.sync(ProviderPage, () =>

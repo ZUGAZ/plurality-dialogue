@@ -10,3 +10,18 @@ export const sendSelectors: readonly string[] = [
   primarySendSelector,
   'button[aria-label="Submit"]',
 ]
+
+export const primaryAssistantReplySelector =
+  '[data-testid="assistant-message"] .response-content-markdown'
+
+export const assistantReplySelectors: readonly string[] = [
+  primaryAssistantReplySelector,
+]
+
+export const primaryStreamingIndicatorSelector =
+  'button[aria-label="Stop model response"]'
+
+export const streamingIndicatorSelectors: readonly string[] = [
+  primaryStreamingIndicatorSelector,
+  '[data-state="working"]',
+]

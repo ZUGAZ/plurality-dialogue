@@ -144,6 +144,8 @@ describe("unified input view-model", () => {
                 },
                 readFrameLocation: () =>
                   Effect.fail(new MessagingFault({ cause: "unused" })),
+                sendCaptureReply: () =>
+                  Effect.fail(new MessagingFault({ cause: "unused" })),
               }),
             ),
           ),

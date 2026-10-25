@@ -4,6 +4,7 @@ import { firstDisplayed } from "../displayed-element"
 import { makeFillSendPage } from "../make-fill-send-page"
 import { attachKimiImages } from "./attach-images"
 import { openKimiTemporaryChat } from "./open-temporary-chat"
+import { unsupportedCaptureReply } from "../unsupported-capture-reply"
 import { composerSelectors, sendSelectors } from "./selectors"
 
 export const queryKimiComposer = (root: ParentNode): HTMLElement | null =>
@@ -19,6 +20,7 @@ export const makeKimiProviderPage = (root: ParentNode) => ({
   }),
   attachImages: attachKimiImages,
   openTemporaryChat: openKimiTemporaryChat,
+  captureReply: unsupportedCaptureReply,
 })
 
 export const kimiContentLayer = Layer.sync(ProviderPage, () =>

@@ -15,3 +15,18 @@ export const sendSelectors: readonly string[] = [
   primarySendSelector,
   'button[aria-label="Send Message"]',
 ]
+
+export const primaryAssistantReplySelector =
+  '[data-testid="assistant-message"] .prose'
+
+export const assistantReplySelectors: readonly string[] = [
+  primaryAssistantReplySelector,
+]
+
+export const primaryStreamingIndicatorSelector =
+  '[data-testid="assistant-message"][data-is-streaming="true"]'
+
+export const streamingIndicatorSelectors: readonly string[] = [
+  primaryStreamingIndicatorSelector,
+  '[data-testid="chat-input-stop"]',
+]

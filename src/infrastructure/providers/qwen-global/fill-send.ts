@@ -4,6 +4,7 @@ import { firstDisplayed } from "../displayed-element"
 import { makeFillSendPage } from "../make-fill-send-page"
 import { attachQwenGlobalImages } from "./attach-images"
 import { openQwenGlobalTemporaryChat } from "./open-temporary-chat"
+import { unsupportedCaptureReply } from "../unsupported-capture-reply"
 import { composerSelectors, sendSelectors } from "./selectors"
 
 export const queryQwenGlobalComposer = (
@@ -20,6 +21,7 @@ export const makeQwenGlobalProviderPage = (root: ParentNode) => ({
   }),
   attachImages: attachQwenGlobalImages,
   openTemporaryChat: openQwenGlobalTemporaryChat,
+  captureReply: unsupportedCaptureReply,
 })
 
 export const qwenGlobalContentLayer = Layer.sync(ProviderPage, () =>

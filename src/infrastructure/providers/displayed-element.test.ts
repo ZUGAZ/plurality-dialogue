@@ -4,7 +4,7 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "@effect/vitest"
 import { composerSelectors } from "./chatgpt/selectors"
-import { composerContaining, firstDisplayed } from "./displayed-element"
+import { composerContaining, firstDisplayed, lastDisplayed } from "./displayed-element"
 
 const fixturePath = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -37,6 +37,19 @@ describe("firstDisplayed", () => {
       markdown,
     )
     expect(composerContaining(document, composerSelectors, fallback)).toBeNull()
+  })
+
+  it("returns the last displayed match of the first selector that hits", () => {
+    const early = document.createElement("div")
+    early.className = "reply"
+    early.textContent = "first"
+    const late = document.createElement("div")
+    late.className = "reply"
+    late.textContent = "last"
+    document.body.append(early, late)
+    expect(lastDisplayed(document, [".reply"])).toBe(late)
+    early.remove()
+    late.remove()
   })
 })
 

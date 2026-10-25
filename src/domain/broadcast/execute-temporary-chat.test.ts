@@ -5,6 +5,7 @@ import { isPanelCommandErr } from "../messaging/panel-command-err"
 import { isPanelCommandOk } from "../messaging/panel-command-ok"
 import { makeInMemoryProviderPage } from "../ports/in-memory-provider-page"
 import {
+  CaptureUnsupported,
   ProviderPage,
   TemporaryChatUnavailable,
 } from "../ports/provider-page"
@@ -42,6 +43,8 @@ describe("executeTemporaryChat", () => {
         attachImages: () => Effect.void,
         openTemporaryChat: () =>
           Effect.fail(new TemporaryChatUnavailable({ reason: "missing" })),
+        captureReply: () =>
+          Effect.fail(new CaptureUnsupported({ reason: "not used" })),
       })
       const response = yield* executeTemporaryChat(identity).pipe(
         Effect.provide(layer),

@@ -1,5 +1,6 @@
 import { Either, Schema, pipe } from "effect"
 import type { ParseError } from "effect/ParseResult"
+import { CaptureReply } from "../broadcast/commands/capture-reply"
 import { FillAndSubmit } from "../broadcast/commands/fill-and-submit"
 import { FillComposer } from "../broadcast/commands/fill-composer"
 import { OpenTemporaryChat } from "../broadcast/commands/open-temporary-chat"
@@ -19,6 +20,7 @@ export const IncomingExtensionMessage = Schema.Union(
   FillComposer,
   FillAndSubmit,
   OpenTemporaryChat,
+  CaptureReply,
   ReadFrameLocation,
   PanelFrameReady,
 )

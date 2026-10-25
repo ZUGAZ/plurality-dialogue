@@ -1,7 +1,9 @@
 import { Effect, Either, Schema, pipe } from "effect"
+import { isCaptureReply } from "../../domain/broadcast/commands/capture-reply"
 import { isFillAndSubmit } from "../../domain/broadcast/commands/fill-and-submit"
 import { isFillComposer } from "../../domain/broadcast/commands/fill-composer"
 import { isOpenTemporaryChat } from "../../domain/broadcast/commands/open-temporary-chat"
+import { executeCaptureReply } from "../../domain/broadcast/execute-capture-reply"
 import { executeTemporaryChat } from "../../domain/broadcast/execute-temporary-chat"
 import {
   executePanelCommand,
@@ -9,6 +11,7 @@ import {
 } from "../../domain/broadcast/execute-panel-command"
 import { FrameLocation } from "../../domain/messaging/frame-location"
 import { decodeIncomingMessage } from "../../domain/messaging/incoming-message"
+import { PanelCaptureResponse } from "../../domain/messaging/panel-capture-response"
 import { PanelCommandResponse } from "../../domain/messaging/panel-command-response"
 import { isReadFrameLocation } from "../../domain/messaging/read-frame-location"
 import type { ProviderPage } from "../../domain/ports/provider-page"
@@ -31,6 +34,9 @@ export const contentCommandEffect = (
   }
   if (isOpenTemporaryChat(incoming)) {
     return answered(incoming._tag, identity, executeTemporaryChat(identity))
+  }
+  if (isCaptureReply(incoming)) {
+    return answeredCapture(identity, executeCaptureReply(identity))
   }
   if (!isFillComposer(incoming) && !isFillAndSubmit(incoming)) {
     return undefined
@@ -82,5 +88,33 @@ const answered = (
       ),
     ),
     Effect.withLogSpan("contentCommand"),
+    Effect.withLogSpan("content"),
+  )
+
+const answeredCapture = (
+  identity: PanelIdentity,
+  command: Effect.Effect<
+    typeof PanelCaptureResponse.Type,
+    never,
+    ProviderPage
+  >,
+) =>
+  Effect.log(
+    "panel command",
+    "CaptureReply",
+    identity.providerId,
+    identity.panelId,
+  ).pipe(
+    Effect.zipRight(command),
+    Effect.map((response) =>
+      pipe(
+        Schema.encodeUnknownEither(PanelCaptureResponse)(response),
+        Either.match({
+          onLeft: () => undefined,
+          onRight: (encoded) => encoded,
+        }),
+      ),
+    ),
+    Effect.withLogSpan("captureReply"),
     Effect.withLogSpan("content"),
   )

@@ -3,6 +3,7 @@ import { ProviderPage } from "../../../domain/ports/provider-page"
 import { firstDisplayed } from "../displayed-element"
 import { makeFillSendPage } from "../make-fill-send-page"
 import { attachGeminiImages } from "./attach-images"
+import { makeGeminiCaptureReply } from "./capture-reply"
 import { openGeminiTemporaryChat } from "./open-temporary-chat"
 import { composerSelectors, sendSelectors } from "./selectors"
 
@@ -19,6 +20,7 @@ export const makeGeminiProviderPage = (root: ParentNode) => ({
   }),
   attachImages: attachGeminiImages,
   openTemporaryChat: openGeminiTemporaryChat,
+  captureReply: makeGeminiCaptureReply(root),
 })
 
 export const geminiContentLayer = Layer.sync(ProviderPage, () =>

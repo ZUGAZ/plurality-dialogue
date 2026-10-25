@@ -1,7 +1,20 @@
 import { Effect, Layer, Ref } from "effect"
-import { ProviderPage } from "./provider-page"
+import {
+  CaptureUnsupported,
+  ProviderPage,
+  type EmptyReply,
+  type ReplyNotFound,
+  type ReplyStillStreaming,
+} from "./provider-page"
 
-export const makeInMemoryProviderPage = (): {
+type CaptureResult = Effect.Effect<
+  { readonly text: string },
+  ReplyNotFound | ReplyStillStreaming | EmptyReply | CaptureUnsupported
+>
+
+export const makeInMemoryProviderPage = (options?: {
+  readonly captureReply: () => CaptureResult
+}): {
   readonly layer: Layer.Layer<ProviderPage>
   readonly fills: Ref.Ref<readonly string[]>
   readonly submitCount: Ref.Ref<number>
@@ -26,6 +39,9 @@ export const makeInMemoryProviderPage = (): {
         ]),
       openTemporaryChat: () =>
         Ref.update(temporaryChatCount, (count) => count + 1),
+      captureReply:
+        options?.captureReply ??
+        (() => Effect.succeed({ text: "captured reply" })),
     }),
     fills,
     submitCount,

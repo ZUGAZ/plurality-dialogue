@@ -23,3 +23,18 @@ export const sendSelectors: readonly string[] = [
   'button[aria-label="Send"]',
   'button[data-testid="fruitjuice-send-button"]',
 ]
+
+export const primaryAssistantReplySelector =
+  '[data-message-role="assistant"] [data-assistant-markdown]'
+
+export const assistantReplySelectors: readonly string[] = [
+  primaryAssistantReplySelector,
+]
+
+export const primaryStreamingIndicatorSelector = "[data-message-streaming]"
+
+export const streamingIndicatorSelectors: readonly string[] = [
+  primaryStreamingIndicatorSelector,
+  "[data-streaming-dot]",
+  "[data-stop-generating]",
+]

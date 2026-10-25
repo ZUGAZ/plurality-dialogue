@@ -58,3 +58,22 @@ export const firstDisplayed = (
   }
   return null
 }
+
+export const lastDisplayed = (
+  root: ParentNode,
+  selectors: readonly string[],
+): HTMLElement | null => {
+  for (const selector of selectors) {
+    const matches = root.querySelectorAll(selector)
+    let last: HTMLElement | null = null
+    for (const match of matches) {
+      if (isDisplayedHtmlElement(match)) {
+        last = match
+      }
+    }
+    if (last !== null) {
+      return last
+    }
+  }
+  return null
+}

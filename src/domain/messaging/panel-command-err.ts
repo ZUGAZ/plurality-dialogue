@@ -9,6 +9,10 @@ export const PanelCommandErrReason = Schema.Literal(
   "image-attach-failed",
   "timeout",
   "temporary-chat-unavailable",
+  "reply-not-found",
+  "reply-still-streaming",
+  "empty-reply",
+  "capture-unsupported",
 )
 
 export type PanelCommandErrReason = typeof PanelCommandErrReason.Type

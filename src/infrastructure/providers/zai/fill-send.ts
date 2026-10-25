@@ -4,6 +4,7 @@ import { firstDisplayed } from "../displayed-element"
 import { makeFillSendPage } from "../make-fill-send-page"
 import { attachZaiImages } from "./attach-images"
 import { openZaiTemporaryChat } from "./open-temporary-chat"
+import { unsupportedCaptureReply } from "../unsupported-capture-reply"
 import { composerSelectors, sendSelectors } from "./selectors"
 
 export const queryZaiComposer = (root: ParentNode): HTMLElement | null =>
@@ -19,6 +20,7 @@ export const makeZaiProviderPage = (root: ParentNode) => ({
   }),
   attachImages: attachZaiImages,
   openTemporaryChat: openZaiTemporaryChat,
+  captureReply: unsupportedCaptureReply,
 })
 
 export const zaiContentLayer = Layer.sync(ProviderPage, () =>

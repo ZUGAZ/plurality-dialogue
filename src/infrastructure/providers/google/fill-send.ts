@@ -4,6 +4,7 @@ import { firstDisplayed } from "../displayed-element"
 import { makeFillSendPage } from "../make-fill-send-page"
 import { attachGoogleImages } from "./attach-images"
 import { openGoogleTemporaryChat } from "./open-temporary-chat"
+import { unsupportedCaptureReply } from "../unsupported-capture-reply"
 import { composerSelectors, sendSelectors } from "./selectors"
 
 export const queryGoogleComposer = (root: ParentNode): HTMLElement | null =>
@@ -19,6 +20,7 @@ export const makeGoogleProviderPage = (root: ParentNode) => ({
   }),
   attachImages: attachGoogleImages,
   openTemporaryChat: openGoogleTemporaryChat,
+  captureReply: unsupportedCaptureReply,
 })
 
 export const googleContentLayer = Layer.sync(ProviderPage, () =>

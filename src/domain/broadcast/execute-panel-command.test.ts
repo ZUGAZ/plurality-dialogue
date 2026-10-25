@@ -8,7 +8,12 @@ import { isPanelCommandErr } from "../messaging/panel-command-err"
 import { isPanelCommandOk } from "../messaging/panel-command-ok"
 import { makeInMemoryProviderPage } from "../ports/in-memory-provider-page"
 import type { PendingImage } from "./pending-image"
-import { ComposerNotFound, ImageAttachFailed, ProviderPage } from "../ports/provider-page"
+import {
+  CaptureUnsupported,
+  ComposerNotFound,
+  ImageAttachFailed,
+  ProviderPage,
+} from "../ports/provider-page"
 
 const identity: PanelIdentity = { providerId: "chatgpt", panelId: "panel-1" }
 
@@ -68,6 +73,8 @@ describe("executePanelCommand", () => {
           ]),
         submit: () => Ref.update(steps, (recorded) => [...recorded, "submit"]),
         openTemporaryChat: () => Effect.void,
+        captureReply: () =>
+          Effect.fail(new CaptureUnsupported({ reason: "not used" })),
       })
       const response = yield* executePanelCommand(
         FillAndSubmit.make({ prompt: "hello", images: [image] }),
@@ -87,6 +94,8 @@ describe("executePanelCommand", () => {
           Effect.fail(new ImageAttachFailed({ reason: "missing" })),
         submit: () => Ref.update(submitCount, (count) => count + 1),
         openTemporaryChat: () => Effect.void,
+        captureReply: () =>
+          Effect.fail(new CaptureUnsupported({ reason: "not used" })),
       })
       const response = yield* executePanelCommand(
         FillAndSubmit.make({ prompt: "hello", images: [png("img-1")] }),
@@ -110,6 +119,8 @@ describe("executePanelCommand", () => {
           Effect.fail(new ImageAttachFailed({ reason: "should not run" })),
         submit: () => Ref.update(submitCount, (count) => count + 1),
         openTemporaryChat: () => Effect.void,
+        captureReply: () =>
+          Effect.fail(new CaptureUnsupported({ reason: "not used" })),
       })
       const response = yield* executePanelCommand(
         FillAndSubmit.make({ prompt: "hello" }),

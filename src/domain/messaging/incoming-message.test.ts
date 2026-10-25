@@ -5,6 +5,7 @@ import { isFillAndSubmit } from "../broadcast/commands/fill-and-submit"
 import { isFillComposer } from "../broadcast/commands/fill-composer"
 import { BroadcastCommand } from "../broadcast/commands"
 import { isOpenTemporaryChat } from "../broadcast/commands/open-temporary-chat"
+import { CaptureReply, isCaptureReply } from "../broadcast/commands/capture-reply"
 import {
   ApplyContextMenuDraft,
   isClaimPendingContextMenu,
@@ -122,6 +123,17 @@ describe("incoming extension messages", () => {
     if (Either.isRight(decoded)) {
       expect(isOpenTemporaryChat(decoded.right)).toBe(true)
     }
+    expect(Either.isLeft(replyToWorkspacePing(payload))).toBe(true)
+  })
+
+  it("decodes CaptureReply and does not treat it as a broadcast command", () => {
+    const payload = { _tag: "CaptureReply" }
+    const decoded = decodeIncomingMessage(payload)
+    expect(Either.isRight(decoded)).toBe(true)
+    if (Either.isRight(decoded)) {
+      expect(isCaptureReply(decoded.right)).toBe(true)
+    }
+    expect(Schema.is(BroadcastCommand)(CaptureReply.make({}))).toBe(false)
     expect(Either.isLeft(replyToWorkspacePing(payload))).toBe(true)
   })
 
