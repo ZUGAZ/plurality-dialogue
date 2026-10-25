@@ -1,0 +1,137 @@
+.dialogue-mode {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+  min-inline-size: 0;
+  font-family: system-ui, sans-serif;
+  font-size: 1rem;
+  color: CanvasText;
+  background: Canvas;
+}
+
+.dialogue-setup {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow: auto;
+  padding: 0.75rem;
+}
+
+.dialogue-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-block-end: 0.75rem;
+}
+
+.dialogue-seat {
+  margin: 0 0 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid light-dark(#d0d0d0, #444);
+}
+
+.dialogue-mode input,
+.dialogue-mode select,
+.dialogue-mode button {
+  font: inherit;
+  font-size: 1rem;
+  color: inherit;
+  background: Field;
+  border: 1px solid light-dark(#d0d0d0, #444);
+}
+
+.dialogue-mode input,
+.dialogue-mode select {
+  padding: 0.4rem 0.5rem;
+  min-block-size: 2.5rem;
+}
+
+.dialogue-mode button {
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+}
+
+.dialogue-mode button:disabled {
+  cursor: default;
+}
+
+.dialogue-mode input:focus-visible,
+.dialogue-mode select:focus-visible,
+.dialogue-mode button:focus-visible {
+  outline: 3px solid AccentColor;
+  outline-offset: 2px;
+}
+
+.dialogue-include {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: 0.75rem;
+}
+
+.dialogue-include input {
+  min-block-size: 1.25rem;
+  accent-color: AccentColor;
+}
+
+.dialogue-problems {
+  margin: 0 0 0.75rem;
+  padding-inline-start: 1.25rem;
+}
+
+.dialogue-transcript {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  margin: 0;
+  padding: 0.75rem;
+  overflow: auto;
+  list-style: none;
+}
+
+.dialogue-entry {
+  margin-block-end: 0.75rem;
+}
+
+.dialogue-entry-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0.25rem;
+  font-size: 0.875rem;
+}
+
+.dialogue-speaker {
+  font-weight: 600;
+}
+
+.dialogue-entry-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.dialogue-footer {
+  flex: 0 0 auto;
+}
+
+.dialogue-engine-strip {
+  display: flex;
+  flex: 0 0 12rem;
+  flex-flow: row nowrap;
+  gap: 0.25rem;
+  block-size: 12rem;
+  min-block-size: 12rem;
+  padding: 0.25rem;
+}
+
+.dialogue-engine {
+  display: flex;
+  flex: 1 1 0;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.dialogue-engine .panel-stage {
+  flex: 1 1 auto;
+  block-size: 100%;
+}

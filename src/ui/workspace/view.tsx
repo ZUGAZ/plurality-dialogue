@@ -1,3 +1,4 @@
+import { Show } from "solid-js"
 import { layoutPickerItems, type LayoutId } from "./layout-presets/model"
 import { LayoutPresetsView } from "./layout-presets/view"
 import type { PanelViewState, ProviderOption } from "./panel-grid/model"
@@ -12,9 +13,15 @@ import {
 import { AddPanelButton } from "./shell/add-panel-button"
 import { NewChatButton } from "./shell/new-chat-button"
 import { TemporaryChatToggle } from "./shell/temporary-chat-toggle"
+import { WorkspaceModeSwitch } from "./shell/workspace-mode-switch"
 import { WorkspaceShell } from "./shell/view"
 import { UnifiedInputContainer } from "./unified-input/container"
 import type { UnifiedInputViewProps } from "./unified-input/view"
+import {
+  DialogueModeView,
+  type DialogueModeViewProps,
+} from "./dialogue-mode/view"
+import type { WorkspaceMode } from "./dialogue-mode/model"
 import "./panel-role/view.css"
 import "./view.css"
 
@@ -48,6 +55,9 @@ export type WorkspaceViewProps = {
   readonly onRoleValue: (slotIndex: number, rawId: string) => void
   readonly onRoleAdd: (slotIndex: number) => void
   readonly onRoleEdit: (slotIndex: number, roleId: string) => void
+  readonly workspaceMode: () => WorkspaceMode
+  readonly onWorkspaceMode: (mode: WorkspaceMode) => void
+  readonly dialogue: DialogueModeViewProps
 }
 
 export const WorkspaceView = (props: WorkspaceViewProps) => (
@@ -56,6 +66,10 @@ export const WorkspaceView = (props: WorkspaceViewProps) => (
       collapsed={props.collapsed}
       onToggleCollapse={props.onToggleCollapse}
     >
+      <WorkspaceModeSwitch
+        mode={props.workspaceMode}
+        onMode={props.onWorkspaceMode}
+      />
       <NewChatButton onClick={props.onNewChat} />
       <TemporaryChatToggle
         pressed={props.temporaryChat}
@@ -69,26 +83,34 @@ export const WorkspaceView = (props: WorkspaceViewProps) => (
       />
     </WorkspaceShell>
     <PanelRoleAlert error={props.roleBannerError} />
-    <PanelGridView
-      panels={props.panels}
-      options={props.options}
-      layoutId={props.layoutId}
-      layoutColumns={props.layoutColumns}
-      layoutRows={props.layoutRows}
-      canRemovePanel={props.canRemovePanel}
-      roleOptions={props.roleOptions}
-      roleDisabled={props.roleDisabled}
-      roleIdAt={props.roleIdAt}
-      onRoleValue={props.onRoleValue}
-      onRoleAdd={props.onRoleAdd}
-      onRoleEdit={props.onRoleEdit}
-      onPanelLoad={props.onPanelLoad}
-      setPanelProvider={props.setPanelProvider}
-      refreshPanel={props.refreshPanel}
-      openPanelInTab={props.openPanelInTab}
-      removePanel={props.removePanel}
-    />
-    <UnifiedInputContainer {...props.unifiedInput} />
+    <div
+      class="compare-room"
+      hidden={props.workspaceMode() === "dialogue"}
+    >
+      <PanelGridView
+        panels={props.panels}
+        options={props.options}
+        layoutId={props.layoutId}
+        layoutColumns={props.layoutColumns}
+        layoutRows={props.layoutRows}
+        canRemovePanel={props.canRemovePanel}
+        roleOptions={props.roleOptions}
+        roleDisabled={props.roleDisabled}
+        roleIdAt={props.roleIdAt}
+        onRoleValue={props.onRoleValue}
+        onRoleAdd={props.onRoleAdd}
+        onRoleEdit={props.onRoleEdit}
+        onPanelLoad={props.onPanelLoad}
+        setPanelProvider={props.setPanelProvider}
+        refreshPanel={props.refreshPanel}
+        openPanelInTab={props.openPanelInTab}
+        removePanel={props.removePanel}
+      />
+      <UnifiedInputContainer {...props.unifiedInput} />
+    </div>
+    <Show when={props.workspaceMode() === "dialogue"}>
+      <DialogueModeView {...props.dialogue} />
+    </Show>
     <PromptLibraryDialog {...props.promptLibrary} />
     <PanelRoleForm {...props.panelRoleForm} />
   </div>

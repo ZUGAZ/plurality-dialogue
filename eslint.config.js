@@ -85,6 +85,14 @@ export default tseslint.config(
         },
         { pattern: "src/ui/**/model.ts", category: "presentation-model" },
         { pattern: "src/ui/**/slots.ts", category: "presentation-model" },
+        {
+          pattern: "src/ui/workspace/dialogue-mode/setup-draft.ts",
+          category: "presentation-model",
+        },
+        {
+          pattern: "src/ui/workspace/dialogue-mode/room-actions.ts",
+          category: "view-model",
+        },
       ],
     },
     rules: {

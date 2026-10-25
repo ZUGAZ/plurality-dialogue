@@ -12,3 +12,15 @@
 .workspace .unified-input {
   flex-shrink: 0;
 }
+
+.compare-room {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.compare-room[hidden] {
+  display: none;
+}

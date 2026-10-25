@@ -41,6 +41,9 @@ if (root !== null) {
           onRoleValue={workspaceBindings.onRoleValue}
           onRoleAdd={workspaceBindings.onRoleAdd}
           onRoleEdit={workspaceBindings.onRoleEdit}
+          workspaceMode={workspaceBindings.workspaceMode}
+          onWorkspaceMode={workspaceBindings.onWorkspaceMode}
+          dialogue={workspaceBindings.dialogue}
         />
       ),
       root,

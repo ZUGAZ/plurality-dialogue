@@ -82,3 +82,28 @@
 .temporary-chat-toggle[aria-pressed="true"] {
   background: light-dark(#cfcfcf, #4a4a4a);
 }
+
+.workspace-mode-switch {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+}
+
+.workspace-mode-switch-button {
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid light-dark(#d0d0d0, #444);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.workspace-mode-switch-button:focus-visible {
+  outline: 3px solid AccentColor;
+  outline-offset: 2px;
+}
+
+.workspace-mode-switch-button[aria-pressed="true"] {
+  background: light-dark(#cfcfcf, #4a4a4a);
+}

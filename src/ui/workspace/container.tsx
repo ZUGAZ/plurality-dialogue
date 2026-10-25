@@ -31,5 +31,8 @@ export const WorkspaceContainer = (props: WorkspaceViewProps) => (
     onRoleValue={props.onRoleValue}
     onRoleAdd={props.onRoleAdd}
     onRoleEdit={props.onRoleEdit}
+    workspaceMode={props.workspaceMode}
+    onWorkspaceMode={props.onWorkspaceMode}
+    dialogue={props.dialogue}
   />
 )

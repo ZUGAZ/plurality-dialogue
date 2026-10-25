@@ -91,6 +91,15 @@ describe("focus guard", () => {
     expect(focusPrompt).toHaveBeenCalledTimes(1)
   })
 
+  it("ignores an iframe outside the compare grid", () => {
+    mountGrid()
+    const outsider = document.createElement("iframe")
+    document.body.append(outsider)
+    const focusPrompt = start()
+    focusIn(outsider)
+    expect(focusPrompt).not.toHaveBeenCalled()
+  })
+
   it("drops listeners on cleanup", () => {
     const { grid, iframe } = mountGrid()
     const focusPrompt = vi.fn()

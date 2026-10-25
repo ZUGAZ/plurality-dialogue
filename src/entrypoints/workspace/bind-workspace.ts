@@ -4,6 +4,7 @@ import {
   toVisiblePanels,
   upsertFrameHello,
 } from "@domain/broadcast/resolve-targets"
+import { isDialogueEnginePanelId } from "@domain/dialogue/engine-panel-id"
 import type { PanelTarget } from "@domain/broadcast/panel-target"
 import { layoutIdOrDefault } from "@domain/layout/presets"
 import type { Messaging } from "@domain/ports/messaging"
@@ -15,6 +16,8 @@ import { subscribeWorkspacePanelHellos } from "@infrastructure/chrome/panel-fram
 import { bindWorkspaceContextMenuDraft } from "@infrastructure/chrome/workspace-context-menu"
 import { workspaceLive } from "@infrastructure/layers"
 import { bindViewModel } from "@ui/common/viewmodel/bind-viewmodel"
+import { createDialogueModeViewModel } from "@ui/workspace/dialogue-mode/view-model"
+import { dialogueViewProps } from "@ui/workspace/dialogue-mode/view-props"
 import { createPanelGridViewModel } from "@ui/workspace/panel-grid/view-model"
 import { wireTemporaryChat } from "@ui/workspace/panel-grid/wire-temporary-chat"
 import { createPanelRoleViewModel } from "@ui/workspace/panel-role/view-model"
@@ -41,6 +44,7 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
     const tabs = yield* Tabs
     const workspaceTabId = yield* tabs.currentTabId().pipe(Effect.option)
     const frames = createFrameList()
+    const engineFrames = createEngineFrameList()
     const panelRole = bindViewModel(runtime, "panelRole", (runEffect) =>
       createPanelRoleViewModel(runEffect, {
         panelRoles: settings.panelRoles,
@@ -111,6 +115,20 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
       clearStatus: unifiedInput.clearStatus,
       run: (effect) => managedRuntime.runPromise(effect),
     })
+    const dialogueMode = bindViewModel(runtime, "dialogueMode", (runEffect) =>
+      createDialogueModeViewModel(runEffect, {
+        framingReady: grid.framingReady,
+        engineFrames: engineFrames.list,
+        forgetEngineFrames: engineFrames.forgetAll,
+        enabledProviderIds: () => grid.options().map((option) => option.id),
+        catalog: () => ({ roles: panelRole.catalog() ?? [] }),
+      }),
+    )
+    const dialogue = dialogueViewProps(dialogueMode, {
+      providerOptions: grid.options,
+      roleOptions: panelRole.roleOptions,
+      roleDisabled: () => !panelRole.rolesReady(),
+    })
     yield* Effect.sync(() => {
       Option.match(workspaceTabId, {
         onNone: () => undefined,
@@ -118,6 +136,12 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
           subscribeWorkspacePanelHellos<Storage | Tabs | Messaging>(
             tabId,
             (hello) => {
+              if (isDialogueEnginePanelId(hello.panelId)) {
+                if (dialogueMode.workspaceMode() === "dialogue") {
+                  engineFrames.upsert(hello)
+                }
+                return
+              }
               frames.upsert(hello)
               temporaryChatWire.onFrameHello(hello)
             },
@@ -130,6 +154,9 @@ export const workspaceBindingsReady = managedRuntime.runPromise(
       ...workspaceGrid,
       collapsed: shell.collapsed,
       onToggleCollapse: shell.toggleCollapse,
+      workspaceMode: dialogueMode.workspaceMode,
+      onWorkspaceMode: dialogueMode.setWorkspaceMode,
+      dialogue,
       unifiedInput: {
         ...unifiedInput,
         onOpenLibrary: promptLibrary.open,
@@ -202,6 +229,17 @@ const createFrameList = () => {
       }
       const dropping = new Set(panelIds)
       rows = rows.filter((row) => !dropping.has(row.panelId))
+    },
+  }
+}
+
+const createEngineFrameList = () => {
+  const frames = createFrameList()
+  return {
+    list: frames.list,
+    upsert: frames.upsert,
+    forgetAll: (): void => {
+      frames.forget(frames.list().map((row) => row.panelId))
     },
   }
 }

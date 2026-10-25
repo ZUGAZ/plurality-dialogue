@@ -67,6 +67,7 @@ export type PanelGridViewModel = {
   readonly newChatForAll: () => Effect.Effect<void>
   readonly temporaryChat: () => boolean
   readonly applyTemporaryChat: (enabled: boolean) => readonly string[]
+  readonly framingReady: () => boolean
   readonly applyEnabledProviderIds: (ids: readonly ProviderId[]) => void
 }
 
@@ -291,6 +292,7 @@ export const createPanelGridViewModel = (
     newChatForAll,
     temporaryChat: session.temporaryChat,
     applyTemporaryChat: session.applyTemporaryChat,
+    framingReady,
     applyEnabledProviderIds,
   }
 }

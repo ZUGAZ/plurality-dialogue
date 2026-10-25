@@ -1,16 +1,7 @@
-import { For, Show } from "solid-js"
 import type { RolePickerOption } from "@ui/workspace/panel-role/model"
-import {
-  isHttpsIframeSrc,
-  isOpenInTabEnabled,
-  isRefreshEnabled,
-  type PanelViewState,
-} from "./model"
-import { LoadingOverlay } from "./loading-overlay"
-import {
-  PanelHeaderView,
-  type PanelHeaderOption,
-} from "./panel-header/view"
+import { isOpenInTabEnabled, isRefreshEnabled, type PanelViewState } from "./model"
+import { PanelIframeStage } from "./panel-iframe-stage"
+import { PanelHeaderView, type PanelHeaderOption } from "./panel-header/view"
 
 export const PanelFrame = (props: {
   panel: PanelViewState
@@ -52,41 +43,16 @@ export const PanelFrame = (props: {
       onRemove={props.onRemove}
       canRemove={props.canRemove}
     />
-    <div data-panel-stage class="panel-stage">
-      <LoadingOverlay
-        title={props.panel.title}
-        iconSrc={props.panel.iconSrc}
-        visible={props.panel.failed || !props.panel.hasLoaded}
-        failed={props.panel.failed}
-        detail={props.panel.errorDetail}
-      />
-      <For each={iframeMountKeys(props.panel)}>
-        {(_mountKey) => (
-          <Show when={httpsSrc(props.panel.src)}>
-            {(src) => (
-              <iframe
-                name={props.panel.id}
-                title={props.panel.title}
-                src={src()}
-                width="100%"
-                height="100%"
-                style={{ border: "0" }}
-                onLoad={() => props.onLoad(props.panel.id)}
-              />
-            )}
-          </Show>
-        )}
-      </For>
-    </div>
+    <PanelIframeStage
+      panelId={props.panel.id}
+      title={props.panel.title}
+      iconSrc={props.panel.iconSrc}
+      src={props.panel.src}
+      hasLoaded={props.panel.hasLoaded}
+      failed={props.panel.failed}
+      errorDetail={props.panel.errorDetail}
+      mountKey={`${props.panel.id}:${props.panel.providerId ?? "none"}:${props.panel.reloadGeneration}`}
+      onLoad={props.onLoad}
+    />
   </section>
 )
-
-const httpsSrc = (src: string | undefined): string | undefined =>
-  isHttpsIframeSrc(src) ? src : undefined
-
-const iframeMountKeys = (panel: PanelViewState): readonly string[] =>
-  isHttpsIframeSrc(panel.src)
-    ? [
-        `${panel.id}:${panel.providerId ?? "none"}:${panel.reloadGeneration}`,
-      ]
-    : []

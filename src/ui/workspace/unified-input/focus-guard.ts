@@ -45,7 +45,13 @@ export const setupFocusGuard = (
     if (focusGuardHeld()) {
       return
     }
-    if (!userClicked && event.target instanceof HTMLIFrameElement) {
+    // Dialogue engines sit outside the compare grid. Only a compare frame
+    // should pull focus back to the unified prompt.
+    if (
+      !userClicked &&
+      event.target instanceof HTMLIFrameElement &&
+      gridContains(gridSelector, event.target)
+    ) {
       focusPrompt()
     }
   }
@@ -61,4 +67,9 @@ export const setupFocusGuard = (
     grid?.removeEventListener("pointerup", onPointerUp)
     clearTimeout(clickResetTimer)
   }
+}
+
+const gridContains = (gridSelector: string, target: Node): boolean => {
+  const grid = document.querySelector(gridSelector)
+  return grid !== null && grid.contains(target)
 }
